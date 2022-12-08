@@ -1,0 +1,154 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: "\u73BB\u7483_\u5047\u5BA4\u5185Example"
+  m_Shader: {fileID: 4800000, guid: 8651808be1038f34a950cf637283dd73, type: 3}
+  m_ValidKeywords:
+  - _F_INTERIORATLAS_ON
+  - _F_INTERIORDECAL_ON
+  - _F_INTERIOR_ON
+  - _F_REFRACTION_ON
+  - _GLOSSYREFLECTIONS_ON
+  - _METALLICGLOSSUSE_VALUE
+  - _SPECULARHIGHLIGHTS_ON
+  - _USENORMALMAP_ON
+  - __RENDERMODE_OPAQUE
+  m_InvalidKeywords:
+  - _CULLMODE_BACK
+  - _FAKEREFTWINKLE_ON
+  - _ZWRITE_ON
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap:
+    RenderType: Opaque
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _BumpMap:
+        m_Texture: {fileID: 2800000, guid: 72deb9d610d7bcb4fae634da13e9c0f1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _FakeRefTex:
+        m_Texture: {fileID: 2800000, guid: febd6505eef6bbc4499651eec3d20566, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteriorBlurTex:
+        m_Texture: {fileID: 2800000, guid: 789fc588aa998284098b6c69bdf3325c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteriorDecalBumpMap:
+        m_Texture: {fileID: 2800000, guid: 619b4c0891125f241abcec8970a7c661, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteriorDecalDepthMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteriorDecalMetalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _InteriorDecalTex:
+        m_Texture: {fileID: 2800000, guid: 3932bcda669a0c44f95102b5b7ae2806, type: 3}
+        m_Scale: {x: 2.43, y: 2.04}
+        m_Offset: {x: -0.64, y: -0.52}
+    - _InteriorTex:
+        m_Texture: {fileID: 2800000, guid: 462f5eb7ae1be724b9e36e4067710d47, type: 3}
+        m_Scale: {x: 0.5, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 2800000, guid: e66606a8169431f4d9c304a0bfb47536, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetallicGlossMap:
+        m_Texture: {fileID: 2800000, guid: 6af1b22efc329f34680829097604f9fa, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _OcclusionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ReflectCubemap:
+        m_Texture: {fileID: 8900000, guid: b32cc477289b6f1409d279166befd21e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BumpScale: 0
+    - _CullMode: 2
+    - _DstBlend: 0
+    - _F_Basic: 1
+    - _F_FakeRef: 0
+    - _F_FakeRef_Out: 1
+    - _F_Glass: 1
+    - _F_Interior: 1
+    - _F_InteriorAtlas: 1
+    - _F_InteriorAtlas_Out: 1
+    - _F_InteriorDecal: 1
+    - _F_InteriorDecal_Out: 1
+    - _F_InteriorSpaceParams: 1
+    - _F_InteriorSpaceParams_Out: 1
+    - _F_Interior_Out: 1
+    - _F_Out: 1
+    - _F_PBR: 1
+    - _F_Refraction: 1
+    - _F_Refraction_Out: 1
+    - _FakeRefIntensity: 0.47
+    - _FakeRefPow: 0.83
+    - _FakeRefRotation: 0
+    - _FakeRefSpeed: 0.3
+    - _FakeRefTwinkle: 1
+    - _FresnelStrength: 4.8
+    - _GlossMapScale: 1
+    - _Glossiness: 0.809
+    - _GlossyReflections: 1
+    - _InteriorDecalBumpScale: 1
+    - _InteriorDecalDepth: 0.041
+    - _InteriorDecalDepthUseMap: 0
+    - _InteriorDecalGlossiness: 0.447
+    - _InteriorDecalMetallic: 0.357
+    - _InteriorDecalUseNormalMap: 0
+    - _InteriorDecalUsePBR: 0
+    - _InteriorDecalUseTilling: 0
+    - _InteriorDepth: 0.212
+    - _InteriorDepthDebug: 0
+    - _InteriorIndex: 0
+    - _InteriorIntensity: 1.01
+    - _InteriorWidthRate: 4
+    - _InteriorXCount: 2
+    - _InteriorXPos: 0
+    - _InteriorXYScale: 1
+    - _InteriorYCount: 6
+    - _InteriorYPos: 1
+    - _Metallic: 0.667
+    - _MetallicGlossUse: 0
+    - _OcclusionStrength: 0.35
+    - _RefractionDistort: 1
+    - _SpecularHighlights: 1
+    - _SrcBlend: 1
+    - _UseEmissionMap: 0
+    - _UseInteriorBlur: 0
+    - _UseNormalMap: 1
+    - _UseReflectCubemap: 0
+    - _ZWrite: 1
+    - __RenderMode: 0
+    m_Colors:
+    - _Color: {r: 0.9056604, g: 0.9056604, b: 0.9056604, a: 0.69803923}
+    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _FakeRefColor: {r: 0.4309808, g: 0.51708996, b: 0.6132076, a: 1}
+    - _FresnelColor: {r: 0.9528302, g: 0.9528302, b: 0.9528302, a: 0.9137255}
+    - _InteriorColor: {r: 0.8773585, g: 0.84011215, b: 0.84011215, a: 1}
+  m_BuildTextureStacks: []

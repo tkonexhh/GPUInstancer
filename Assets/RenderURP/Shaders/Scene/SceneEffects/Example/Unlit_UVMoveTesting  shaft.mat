@@ -1,0 +1,135 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Unlit_UVMoveTesting  shaft
+  m_Shader: {fileID: 4800000, guid: 5d2c1126e624a734ba95d233911686cb, type: 3}
+  m_ValidKeywords:
+  - _BASETEXALPHACHANNELSWITCH_B
+  - _BASETEXCOLORCHANNELSWITCH_A
+  - _F_ALPHADEPTHFADE_ON
+  - _F_ALPHANDOTV_ON
+  - _F_USEMASKTEX_ON
+  - _MASKTEXBLENDMODE_ADD
+  - _MASKTEXCHANNELSWITCH_R
+  m_InvalidKeywords:
+  - _CULLMODE_BOTH
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AlphaCurve:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _BaseTex:
+        m_Texture: {fileID: 2800000, guid: 56ce345a4b3e2f6438d0c9215640dad2, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MaskTex:
+        m_Texture: {fileID: 2800000, guid: 62584c54d1e8d9d4990cbe4761f12f7c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NoiseTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - Emission_Type: 0
+    - _Alpha: 1
+    - _AlphaBrightness: 1
+    - _AlphaFadeByDistanceToggle: 0
+    - _AlphaFadeDepthOffset: 0.25
+    - _AlphaFadeDistance: 70
+    - _AlphaFadeDistanceInvertToggle: 0
+    - _AlphaFadeDistanceTwoWay: 50
+    - _AlphaFadeDistanceTwoWayToggle: 0
+    - _AlphaFadeOffset: 10
+    - _AlphaFadeOffsetTwoWay: 34.1
+    - _AlphaSoftedgePower: -1
+    - _AlphaSoftedgeScale: 1.4
+    - _AlphaSoftedgeToggle: 0
+    - _AlphaSoftedgeTwoSideToggle: 0
+    - _AutoExposure: 0
+    - _BaseTexAlphaBrightness: 1
+    - _BaseTexAlphaChannelSwitch: 3
+    - _BaseTexColorChannelSwitch: 4
+    - _BaseTexURandomToggle: 0
+    - _BaseTexVRandomToggle: 0
+    - _BaseTex_Uspeed: 0.02
+    - _BaseTex_Vspeed: 0
+    - _BlendOP: 0
+    - _CameraFade: 0
+    - _ColorBrightness: 1
+    - _Cull: 2
+    - _CullMode: 0
+    - _DebugShow: 0
+    - _DepthFade: 5
+    - _DepthThresh: 0.001
+    - _DstBlendMode: 0
+    - _EffectedByFog: 0
+    - _F_Advance: 1
+    - _F_Alpha: 1
+    - _F_AlphaDepthFade: 1
+    - _F_AlphaDepthFade_Out: 1
+    - _F_AlphaDistanceFade: 0
+    - _F_AlphaDistanceFade_Out: 1
+    - _F_AlphaNdotV: 1
+    - _F_AlphaNdotV_Out: 1
+    - _F_Base: 1
+    - _F_Debug: 1
+    - _F_UV2Noise: 1
+    - _F_UV2Noise_Out: 1
+    - _F_UVMove: 1
+    - _F_UVMove_Out: 1
+    - _F_UseMaskTex: 1
+    - _F_UseMaskTex_Out: 1
+    - _F_Z: 1
+    - _FaceToCameraMode: 0
+    - _MHYZBias: 0
+    - _MaskTexBlendAddIntensity: 1
+    - _MaskTexBlendMode: 1
+    - _MaskTexBlendModeToggle: 0
+    - _MaskTexBrightness: 1
+    - _MaskTexChannelSwitch: 0
+    - _MaskTexToggle: 0
+    - _MaskTex_Uspeed: -0.02
+    - _MaskTex_Vspeed: 0
+    - _MotionVectorsAlphaCutoff: 0.1
+    - _NoiseIntensityOnMask: 0
+    - _NoiseTexChannelSwitch: 0
+    - _NoiseTexToggle: 0
+    - _NoiseTexUVRandomToggle: 0
+    - _NoiseTex_Uspeed: 1
+    - _NoiseTex_Vspeed: 1
+    - _Noise_Brightness: 1
+    - _Noise_Offset: 0
+    - _PolygonOffsetFactor: 0
+    - _PolygonOffsetUnit: 0
+    - _SOFTPARTICLES: 0
+    - _Scale: 33
+    - _SrcBlendMode: 1
+    - _ZBias: 0
+    - _Ztest: 4
+    - _Zwrite: 1
+    m_Colors:
+    - _DayColor: {r: 1, g: 1, b: 1, a: 1}
+    - _MainColor: {r: 0.83137256, g: 0.51952803, b: 0.27843136, a: 1}
+    - _MeshParticleColorArray: {r: 1, g: 1, b: 1, a: 1}
+    - _Scale: {r: 33.46, g: 32.6, b: 15.42, a: -4.49}
+  m_BuildTextureStacks: []
