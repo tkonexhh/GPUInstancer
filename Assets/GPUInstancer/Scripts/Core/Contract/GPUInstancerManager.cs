@@ -42,9 +42,6 @@ namespace GPUInstancer
 #endif
 
 
-
-
-
         [NonSerialized]
         public bool isInitialized = false;
 
@@ -52,8 +49,6 @@ namespace GPUInstancer
         [NonSerialized]
         public PlayModeStateChange playModeState;
 #endif
-        [NonSerialized]
-        public bool isQuiting = false;
         [NonSerialized]
         public Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData> runtimeDataDictionary;
 
@@ -152,10 +147,6 @@ namespace GPUInstancer
             ClearInstancingData();
         }
 
-        private void OnApplicationQuit()
-        {
-            isQuiting = true;
-        }
         #endregion MonoBehaviour Methods
 
         #region Virtual Methods
@@ -219,32 +210,20 @@ namespace GPUInstancer
             }
         }
 
-        public virtual void DeletePrototype(GPUInstancerPrototype prototype, bool removeSO = true)
-        {
-#if UNITY_EDITOR
-            UnityEditor.Undo.RecordObject(this, "Delete prototype");
-#endif
-            prototypeList.Remove(prototype);
-        }
+
         #endregion Virtual Methods
 
         #region Public Methods
-
-
         public void InitializeCameraData()
         {
             if (autoSelectCamera || cameraData.mainCamera == null)
                 cameraData.SetCamera(Camera.main);
-            else
-                cameraData.CalculateHalfAngle();
         }
 
         public void UpdateBuffers(GPUInstancerCameraData renderingCameraData)
         {
             if (renderingCameraData != null && renderingCameraData.mainCamera != null && SystemInfo.supportsComputeShaders)
             {
-                renderingCameraData.CalculateCameraData();
-
                 instancingBounds.center = renderingCameraData.mainCamera.transform.position;
 
                 GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList, renderingCameraData);

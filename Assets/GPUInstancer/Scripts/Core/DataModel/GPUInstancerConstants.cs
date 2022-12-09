@@ -84,7 +84,6 @@ namespace GPUInstancer
         public static readonly string DEFAULT_PATH_GUID = "954b4ec3db4c00f46a67fcb9b4f72411";
         public static readonly string RESOURCES_PATH = "Resources/";
         public static readonly string SETTINGS_PATH = "Settings/";
-        public static readonly string SHADERS_PATH = "Shaders/";
         public static readonly string EDITOR_TEXTURES_PATH = "Textures/Editor/";
         public static readonly string GPUI_SETTINGS_DEFAULT_NAME = "GPUInstancerSettings";
         public static readonly string SHADER_BINDINGS_DEFAULT_NAME = "GPUInstancerShaderBindings";

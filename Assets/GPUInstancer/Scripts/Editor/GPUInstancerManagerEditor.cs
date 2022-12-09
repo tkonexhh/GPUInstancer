@@ -356,16 +356,16 @@ namespace GPUInstancer
             iconRect.y += iconRect.height;
             iconRect.height = 22;
 
-            GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMulti, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
-                () =>
-                {
-                    GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
-                },
-                true, true,
-                (o) =>
-                {
-                    AddPickerObject(o);
-                });
+            // GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMulti, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
+            //     () =>
+            //     {
+            //         GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
+            //     },
+            //     true, true,
+            //     (o) =>
+            //     {
+            //         AddPickerObject(o);
+            //     });
         }
 
         public void DrawGPUInstancerPrototypeAddButtonTextMode()
@@ -394,40 +394,19 @@ namespace GPUInstancer
 
             Rect iconRect = new Rect(prototypeRect.position + PROTOTYPE_RECT_PADDING_VECTOR, PROTOTYPE_TEXT_RECT_SIZE_VECTOR);
 
-            GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMultiTextMode, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
-                () =>
-                {
-                    GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
-                },
-                true, true,
-                (o) =>
-                {
-                    AddPickerObject(o);
-                });
+            // GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMultiTextMode, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
+            //     () =>
+            //     {
+            //         GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
+            //     },
+            //     true, true,
+            //     (o) =>
+            //     {
+            //         AddPickerObject(o);
+            //     });
         }
 
-        public virtual void DrawDeleteButton(bool removeSO)
-        {
-            GPUInstancerEditorConstants.DrawColoredButton((removeSO ? GPUInstancerEditorConstants.Contents.delete : GPUInstancerEditorConstants.Contents.removeFromList), removeSO ? Color.red : GPUInstancerEditorConstants.Colors.darkyellow, Color.white, FontStyle.Bold, Rect.zero,
-                () =>
-                {
-                    string selectedPrototypesText = "";
-                    foreach (GPUInstancerPrototype prototype in _manager.selectedPrototypeList)
-                    {
-                        selectedPrototypesText += "\n\"" + prototype.ToString() + "\"";
-                    }
-                    if (EditorUtility.DisplayDialog(GPUInstancerEditorConstants.TEXT_deleteConfirmation, (removeSO ? GPUInstancerEditorConstants.TEXT_deletePrototypeAreYouSure : GPUInstancerEditorConstants.TEXT_deleteAreYouSure) + selectedPrototypesText, (removeSO ? GPUInstancerEditorConstants.TEXT_delete : GPUInstancerEditorConstants.TEXT_removeFromList), GPUInstancerEditorConstants.TEXT_cancel))
-                    {
-                        foreach (GPUInstancerPrototype prototype in _manager.selectedPrototypeList)
-                        {
-                            _manager.DeletePrototype(prototype, removeSO);
-                        }
-                        _manager.selectedPrototypeList.Clear();
-                    }
-                    GUIUtility.ExitGUI();
-                });
-            DrawHelpText(removeSO ? GPUInstancerEditorConstants.HELPTEXT_delete : GPUInstancerEditorConstants.HELPTEXT_removeFromList);
-        }
+
 
         public GPUInstancerManager GetManager()
         {

@@ -308,18 +308,6 @@ namespace GPUInstancer
         }
 
 
-        [MenuItem("Tools/GPU Instancer/Show Scene Prefab Importer", validate = false, priority = 101)]
-        public static void ToolbarShowPrefabImporter()
-        {
-            GameObject[] prefabInstances = (GameObject[])GameObject.FindObjectsOfType(typeof(GameObject));
-            List<GameObject> prefabList = new List<GameObject>();
-            foreach (GameObject go in prefabInstances)
-            {
-                AddPrefabObjectsToList(go, prefabList);
-            }
-            GPUInstancerPrefabImporterWindow.ShowWindow(prefabList);
-        }
-
 
         private static void AddPrefabObjectsToList(GameObject go, List<GameObject> prefabList)
         {
@@ -352,12 +340,6 @@ namespace GPUInstancer
             }
         }
 
-
-        [MenuItem("Tools/GPU Instancer/Show Prefab Replacer", validate = false, priority = 102)]
-        public static void ToolbarShowPrefabReplacer()
-        {
-            GPUInstancerPrefabReplacerWindow.ShowWindow();
-        }
 
         [MenuItem("Tools/GPU Instancer/Shaders/Clear Shader Bindings", validate = false, priority = 201)]
         public static void ClearShaderBindings()
@@ -584,7 +566,7 @@ namespace GPUInstancer
             DrawCustomLabel("Package Definitions", Styles.boldLabel);
 
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.Toggle("URP Loaded", gPUInstancerSettings.isURP);
+
             EditorGUILayout.Toggle("ShaderGraph Loaded", gPUInstancerSettings.isShaderGraphPresent);
             EditorGUI.EndDisabledGroup();
 

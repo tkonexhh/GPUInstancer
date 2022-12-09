@@ -82,27 +82,6 @@ namespace GPUInstancer
 #endif
         }
 
-        public virtual void AddShaderInstance(string name, Shader instancedShader, bool isOriginalInstanced = false, string extensionCode = null)
-        {
-            shaderInstances.Add(new ShaderInstance(name, instancedShader, isOriginalInstanced, extensionCode));
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(this);
-#endif
-        }
-
-        public virtual bool IsShadersInstancedVersionExists(string shaderName, string extensionCode = null)
-        {
-
-            if (_standardUnityShaders.Contains(shaderName) || _standardUnityShadersGPUI.Contains(shaderName))
-                return true;
-
-            foreach (ShaderInstance si in shaderInstances)
-            {
-                if (si.name.Equals(shaderName) && string.IsNullOrEmpty(si.extensionCode))
-                    return true;
-            }
-            return false;
-        }
 
         public virtual bool IsOriginalShaderInstanced(string shaderName)
         {

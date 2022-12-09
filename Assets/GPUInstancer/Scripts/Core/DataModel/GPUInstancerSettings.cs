@@ -13,7 +13,7 @@ namespace GPUInstancer
         public GPUInstancerShaderBindings shaderBindings;
         public ShaderVariantCollection shaderVariantCollection;
         public bool packagesLoaded;
-        public bool isURP;
+
         public bool isShaderGraphPresent;
         public int instancingBoundsSize = 10000;
 

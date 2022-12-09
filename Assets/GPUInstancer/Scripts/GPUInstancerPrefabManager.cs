@@ -19,9 +19,7 @@ namespace GPUInstancer
         [SerializeField]
         public List<GameObject> prefabList = new List<GameObject>();
         public bool enableMROnManagerDisable = true;
-        public bool enableMROnRemoveInstance = true;
         protected Dictionary<GPUInstancerPrototype, List<GPUInstancerPrefab>> _registeredPrefabsRuntimeData;
-        // protected List<IPrefabVariationData> _variationDataList;
 
         #region MonoBehavior Methods
 
@@ -130,23 +128,6 @@ namespace GPUInstancer
             isInitialized = true;
         }
 
-        public override void DeletePrototype(GPUInstancerPrototype prototype, bool removeSO = true)
-        {
-            base.DeletePrototype(prototype, removeSO);
-
-            prefabList.Remove(prototype.prefabObject);
-            if (removeSO)
-            {
-#if   UNITY_EDITOR
-                GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefab>(prototype.prefabObject);
-
-                EditorUtility.SetDirty(prototype.prefabObject);
-                AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(prototype));
-#endif
-            }
-            GeneratePrototypes(false);
-        }
-
         public virtual void InitializeRuntimeDataRegisteredPrefabs(int additionalBufferSize = 0)
         {
             if (runtimeDataList == null)
@@ -229,7 +210,6 @@ namespace GPUInstancer
             // set instanceCount
             runtimeData.instanceCount = instanceCount;
 
-
             return runtimeData;
         }
 
@@ -293,13 +273,6 @@ namespace GPUInstancer
             }
             if (data != null)
                 data.registeredPrefabs.Add(prefabInstance);
-        }
-
-        public virtual int GetEnabledPrefabCount()
-        {
-            int sum = 0;
-
-            return sum;
         }
     }
 

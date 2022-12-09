@@ -18,8 +18,6 @@ namespace GPUInstancer
         {
             base.OnEnable();
 
-            // wikiHash = "#The_Prefab_Manager";
-
             _prefabManager = (target as GPUInstancerPrefabManager);
 
             prop_enableMROnManagerDisable = serializedObject.FindProperty("enableMROnManagerDisable");
@@ -243,20 +241,6 @@ namespace GPUInstancer
 
                     });
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_registerPrefabsInScene);
-
-            // if (!GPUInstancerConstants.gpuiSettings.disableInstanceCountWarning)
-            // {
-            //     bool hasLowInstanceCounts = false;
-            //     if (!Application.isPlaying && _prefabManager.registeredPrefabs.Count > 0)
-            //     {
-            //         foreach (RegisteredPrefabsData rpd in _prefabManager.registeredPrefabs)
-            //         {
-            //             int count = rpd.prefabPrototype.isTransformsSerialized ? rpd.prefabPrototype.serializedTransformDataCount : rpd.registeredPrefabs.Count;
-            //             if (count > 0 && count < 10)
-            //                 hasLowInstanceCounts = true;
-            //         }
-            //     }
-            // }
         }
 
         public override void DrawRegisteredPrefabsBoxList()
@@ -311,26 +295,9 @@ namespace GPUInstancer
             return hasChanged;
         }
 
-        public override void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype)
-        {
-            // DrawGPUInstancerPrototypeInfo(selectedPrototype, (string t) => { DrawHelpText(t); });
-        }
-
-        public override void DrawGPUInstancerPrototypeActions()
-        {
-            if (Application.isPlaying)
-                return;
-            GUILayout.Space(10);
-            //GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_actions, GPUInstancerEditorConstants.Styles.boldLabel, false);
-
-            DrawDeleteButton(false);
-            DrawDeleteButton(true);
-        }
-
-        public override void DrawGPUInstancerPrototypeAdvancedActions()
-        {
-
-        }
+        public override void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype) { }
+        public override void DrawGPUInstancerPrototypeActions() { }
+        public override void DrawGPUInstancerPrototypeAdvancedActions() { }
 
         public override float GetMaxDistance(GPUInstancerPrototype selectedPrototype)
         {

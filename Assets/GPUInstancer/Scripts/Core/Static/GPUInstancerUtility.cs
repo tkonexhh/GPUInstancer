@@ -35,7 +35,6 @@ namespace GPUInstancer
             if (runtimeData == null || runtimeData.bufferSize == 0)
                 return;
 
-
             #region Set Visibility Buffer
             // Setup the visibility compute buffer
             if (runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.transformationMatrixVisibilityBuffer.count != runtimeData.bufferSize)
@@ -87,12 +86,6 @@ namespace GPUInstancer
             }
             #endregion Set Args Buffer
 
-            SetAppendBuffers(runtimeData);
-        }
-
-        #region Set Append Buffers Platform Dependent
-        public static void SetAppendBuffers<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
             foreach (GPUInstancerRenderer renderer in runtimeData.renderers)
             {
                 // Setup instance LOD renderer material property block shader buffers with the append buffer
@@ -100,9 +93,6 @@ namespace GPUInstancer
                 renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
             }
         }
-
-        #endregion Set Append Buffers Platform Dependent
-
 
         public static void UpdateGPUBuffers<T>(List<T> runtimeDataList, GPUInstancerCameraData cameraData) where T : GPUInstancerRuntimeData
         {
@@ -174,8 +164,6 @@ namespace GPUInstancer
                 }
             }
         }
-
-
 
         public static bool IsInLayer(int layerMask, int layer)
         {
@@ -273,11 +261,8 @@ namespace GPUInstancer
                 GPUInstancerPrefab[] prefabInstances = GameObject.FindObjectsOfType<GPUInstancerPrefab>();
                 for (int i = 0; i < prefabInstances.Length; i++)
                 {
-#if UNITY_2018_2_OR_NEWER
                     UnityEngine.Object prefabRoot = PrefabUtility.GetCorrespondingObjectFromSource(prefabInstances[i].gameObject);
-#else
-                    UnityEngine.Object prefabRoot = PrefabUtility.GetPrefabParent(prefabInstances[i].gameObject);
-#endif
+
                     if (prefabRoot != null && ((GameObject)prefabRoot).GetComponent<GPUInstancerPrefab>() != null && prefabInstances[i].prefabPrototype != ((GameObject)prefabRoot).GetComponent<GPUInstancerPrefab>().prefabPrototype)
                     {
                         Undo.RecordObject(prefabInstances[i], "Changed GPUInstancer Prefab Prototype " + prefabInstances[i].gameObject + i);
@@ -292,10 +277,8 @@ namespace GPUInstancer
         {
             GPUInstancerPrefab prefabScript = go.GetComponent<GPUInstancerPrefab>();
             if (attachScript && prefabScript == null)
-#if UNITY_2018_3_OR_NEWER && UNITY_EDITOR
+#if UNITY_EDITOR
                 prefabScript = AddComponentToPrefab<GPUInstancerPrefab>(go);
-#else
-                prefabScript = go.AddComponent<GPUInstancerPrefab>();
 #endif
             if (attachScript && prefabScript == null)
                 return null;
@@ -310,10 +293,6 @@ namespace GPUInstancer
                     prefabScript.prefabPrototype = prototype;
                 prototype.prefabObject = go;
                 prototype.name = go.name + "_" + go.GetInstanceID();
-                // DetermineTreePrototypeType(prototype);
-
-
-                // GenerateInstancedShadersForGameObject(prototype);
 
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -447,28 +426,7 @@ namespace GPUInstancer
             return result;
         }
 
-        public static List<GameObject> GetCorrespondingPrefabAssetsOfGameObjects(GameObject[] gameObjects)
-        {
-            List<GameObject> result = new List<GameObject>();
-            PrefabAssetType prefabType;
-            GameObject prefabRoot;
-            foreach (GameObject go in gameObjects)
-            {
-                prefabRoot = null;
-                if (go != PrefabUtility.GetOutermostPrefabInstanceRoot(go))
-                    continue;
-                prefabType = PrefabUtility.GetPrefabAssetType(go);
-                if (prefabType == PrefabAssetType.Regular)
-                    prefabRoot = PrefabUtility.GetCorrespondingObjectFromSource(go);
-                else if (prefabType == PrefabAssetType.Variant)
-                    prefabRoot = GetCorrespongingPrefabOfVariant(go);
 
-                if (prefabRoot != null)
-                    result.Add(prefabRoot);
-            }
-
-            return result;
-        }
 #endif
         #endregion Prefab System
 

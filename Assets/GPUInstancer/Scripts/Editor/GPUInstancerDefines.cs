@@ -78,7 +78,7 @@ namespace GPUInstancer
                         {
                             if (item.name.Contains("com.unity.render-pipelines.universal"))
                             {
-                                GPUInstancerConstants.gpuiSettings.isURP = true;
+
                                 Debug.Log("GPUI detected Universal Render Pipeline.");
                             }
                             else if (item.name.Contains("com.unity.shadergraph"))
