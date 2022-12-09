@@ -94,18 +94,18 @@ namespace GPUInstancer
             }
         }
 
-        public static void UpdateGPUBuffers<T>(List<T> runtimeDataList, GPUInstancerCameraData cameraData) where T : GPUInstancerRuntimeData
+        public static void UpdateGPUBuffers<T>(List<T> runtimeDataList) where T : GPUInstancerRuntimeData
         {
             if (runtimeDataList == null)
                 return;
 
             for (int i = 0; i < runtimeDataList.Count; i++)
             {
-                UpdateGPUBuffer(runtimeDataList[i], cameraData);
+                UpdateGPUBuffer(runtimeDataList[i]);
             }
         }
 
-        public static void UpdateGPUBuffer<T>(T runtimeData, GPUInstancerCameraData cameraData) where T : GPUInstancerRuntimeData
+        public static void UpdateGPUBuffer<T>(T runtimeData) where T : GPUInstancerRuntimeData
         {
             if (runtimeData == null)
                 return;
@@ -123,12 +123,11 @@ namespace GPUInstancer
             runtimeData.argsBuffer.SetData(runtimeData.args);
         }
 
-        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds, GPUInstancerCameraData cameraData) where T : GPUInstancerRuntimeData
+        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds) where T : GPUInstancerRuntimeData
         {
             if (runtimeDataList == null)
                 return;
 
-            Camera rendereringCamera = cameraData.GetRenderingCamera();
             foreach (T runtimeData in runtimeDataList)
             {
                 if (runtimeData == null || runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0 || runtimeData.instanceCount == 0)

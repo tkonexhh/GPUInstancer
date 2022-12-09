@@ -368,13 +368,13 @@ namespace GPUInstancer
             }
         }
 
-        [MenuItem("Tools/GPU Instancer/Shaders/Edit Shader Variants", validate = false, priority = 301)]
-        public static void EditShaderVariants()
-        {
-            ShaderVariantCollection shaderVariantCollection = GPUInstancerDefines.GetShaderVariantCollection();
-            if (shaderVariantCollection != null)
-                Selection.activeObject = shaderVariantCollection;
-        }
+        // [MenuItem("Tools/GPU Instancer/Shaders/Edit Shader Variants", validate = false, priority = 301)]
+        // public static void EditShaderVariants()
+        // {
+        //     ShaderVariantCollection shaderVariantCollection = GPUInstancerDefines.GetShaderVariantCollection();
+        //     if (shaderVariantCollection != null)
+        //         Selection.activeObject = shaderVariantCollection;
+        // }
 
         [MenuItem("Tools/GPU Instancer/Reimport Packages", validate = false, priority = 401)]
         public static void ReimportPackages()
@@ -382,7 +382,7 @@ namespace GPUInstancer
             GPUInstancerDefines.ImportPackages(true);
         }
 
-#if UNITY_2019_1_OR_NEWER
+
         [SettingsProvider]
         public static SettingsProvider PreferencesGPUInstancerGUI()
         {
@@ -398,21 +398,6 @@ namespace GPUInstancer
 
             return provider;
         }
-#else
-        [PreferenceItem("GPU Instancer")]
-        public static void PreferencesGPUInstancerGUI()
-        {
-            float previousLabelWidth = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = 210;
-
-            DrawGPUISettings();
-
-            EditorGUIUtility.labelWidth = previousLabelWidth;
-        }
-#endif
-
-
-
 
 
         private static bool _loadedSettings;
@@ -449,7 +434,7 @@ namespace GPUInstancer
             GUILayout.Space(5);
             DrawCustomLabel("Behaviour", Styles.boldLabel);
 
-            gPUInstancerSettings.disableAutoGenerateBillboards = !EditorGUILayout.Toggle(Contents.settingAutoGenerateBillboards, !gPUInstancerSettings.disableAutoGenerateBillboards);
+            // gPUInstancerSettings.disableAutoGenerateBillboards = !EditorGUILayout.Toggle(Contents.settingAutoGenerateBillboards, !gPUInstancerSettings.disableAutoGenerateBillboards);
             gPUInstancerSettings.disableAutoShaderConversion = !EditorGUILayout.Toggle(Contents.settingAutoShaderConversion, !gPUInstancerSettings.disableAutoShaderConversion);
             gPUInstancerSettings.useOriginalMaterialWhenInstanced = EditorGUILayout.Toggle(Contents.settingUseOriginalMaterial, gPUInstancerSettings.useOriginalMaterialWhenInstanced);
             gPUInstancerSettings.disableAutoVariantHandling = !EditorGUILayout.Toggle(Contents.settingAutoShaderVariantHandling, !gPUInstancerSettings.disableAutoVariantHandling);
@@ -468,10 +453,10 @@ namespace GPUInstancer
             DrawCustomLabel("Theme", Styles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-            gPUInstancerSettings.useCustomPreviewBackgroundColor = EditorGUILayout.Toggle(Contents.settingCustomPrevBG, gPUInstancerSettings.useCustomPreviewBackgroundColor);
-            EditorGUI.BeginDisabledGroup(!gPUInstancerSettings.useCustomPreviewBackgroundColor);
-            gPUInstancerSettings.previewBackgroundColor = EditorGUILayout.ColorField(Contents.settingPrevBGColor, gPUInstancerSettings.previewBackgroundColor);
-            EditorGUI.EndDisabledGroup();
+            // gPUInstancerSettings.useCustomPreviewBackgroundColor = EditorGUILayout.Toggle(Contents.settingCustomPrevBG, gPUInstancerSettings.useCustomPreviewBackgroundColor);
+            // EditorGUI.BeginDisabledGroup(!gPUInstancerSettings.useCustomPreviewBackgroundColor);
+            // gPUInstancerSettings.previewBackgroundColor = EditorGUILayout.ColorField(Contents.settingPrevBGColor, gPUInstancerSettings.previewBackgroundColor);
+            // EditorGUI.EndDisabledGroup();
             if (EditorGUI.EndChangeCheck())
             {
                 if (Selection.activeGameObject != null && Selection.activeGameObject.GetComponent<GPUInstancerManager>() != null)
@@ -560,15 +545,15 @@ namespace GPUInstancer
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();
 
-#if UNITY_2018_1_OR_NEWER
+
             EditorGUILayout.BeginVertical(Styles.box);
             GUILayout.Space(5);
             DrawCustomLabel("Package Definitions", Styles.boldLabel);
 
-            EditorGUI.BeginDisabledGroup(true);
+            // EditorGUI.BeginDisabledGroup(true);
 
-            EditorGUILayout.Toggle("ShaderGraph Loaded", gPUInstancerSettings.isShaderGraphPresent);
-            EditorGUI.EndDisabledGroup();
+            // EditorGUILayout.Toggle("ShaderGraph Loaded", gPUInstancerSettings.isShaderGraphPresent);
+            // EditorGUI.EndDisabledGroup();
 
             DrawColoredButton(new GUIContent("Reload Packages"), Colors.green, Color.white, FontStyle.Bold, Rect.zero,
             () =>
@@ -579,7 +564,7 @@ namespace GPUInstancer
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();
-#endif
+
 
             EditorGUIUtility.labelWidth = previousLabelWight;
         }

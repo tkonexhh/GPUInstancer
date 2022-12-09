@@ -23,7 +23,6 @@ namespace GPUInstancer
         public Bounds instancingBounds;
 
         public static List<GPUInstancerManager> activeManagerList;
-        public static bool showRenderedAmount;
 
 
 
@@ -67,21 +66,12 @@ namespace GPUInstancer
             if (Application.isPlaying && activeManagerList == null)
                 activeManagerList = new List<GPUInstancerManager>();
 
-
-
-            showRenderedAmount = false;
-
             InitializeCameraData();
 
-#if UNITY_EDITOR && UNITY_2017_2_OR_NEWER
+#if UNITY_EDITOR
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
 #endif
-        }
-
-        public virtual void Start()
-        {
-
         }
 
         public virtual void OnEnable()
@@ -115,19 +105,10 @@ namespace GPUInstancer
 
         public virtual void LateUpdate()
         {
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-                CheckPrototypeChanges();
-            else
+            if (cameraData.mainCamera != null)
             {
-#endif
-                if (cameraData.mainCamera != null)
-                {
-                    UpdateBuffers(cameraData);
-                }
-#if UNITY_EDITOR
+                UpdateBuffers(cameraData);
             }
-#endif
         }
 
 
@@ -222,12 +203,12 @@ namespace GPUInstancer
 
         public void UpdateBuffers(GPUInstancerCameraData renderingCameraData)
         {
-            if (renderingCameraData != null && renderingCameraData.mainCamera != null && SystemInfo.supportsComputeShaders)
+            if (renderingCameraData != null && renderingCameraData.mainCamera != null)
             {
                 instancingBounds.center = renderingCameraData.mainCamera.transform.position;
 
-                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList, renderingCameraData);
-                GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds, renderingCameraData);
+                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList);
+                GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds);
             }
         }
 

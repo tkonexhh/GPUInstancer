@@ -92,9 +92,6 @@ namespace Inutan
 
             InitBuffer();
 
-            if (m_LocationBuffer == null || m_ArgsBuffer == null)
-                return;
-
             GPUInstancerRenderer rdRenderer;
             Material rdMaterial;
             int offset = 0;
@@ -116,7 +113,7 @@ namespace Inutan
                         offset,
                         rdRenderer.mpb,
                         ShadowCastingMode.Off,
-                        false,
+                        rdRenderer.receiveShadows,
                         rdRenderer.layer);
                 }
             }

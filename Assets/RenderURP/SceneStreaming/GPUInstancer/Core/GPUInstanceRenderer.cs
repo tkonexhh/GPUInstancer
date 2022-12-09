@@ -62,7 +62,6 @@ namespace Inutan
             }
             m_SceneGameObjects.Clear();
             m_Locations.Clear();
-            RecreateNativeArray();
         }
 
         public void Init(GameObject renderTarget)
@@ -81,7 +80,6 @@ namespace Inutan
             {
                 if (!m_ShowGameObject)
                     ShowGameObject();
-                Release();
             }
             else
             {
@@ -180,9 +178,6 @@ namespace Inutan
             }
 
             m_InstanceStrategy.Render();
-
-            if (m_ShowGameObject)
-                HideGameObject();
 
         }
 

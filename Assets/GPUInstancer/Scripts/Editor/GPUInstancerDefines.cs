@@ -58,7 +58,7 @@ namespace GPUInstancer
             if (forceNew || !GPUInstancerConstants.gpuiSettings.packagesLoaded)
             {
                 _packageListRequest = UnityEditor.PackageManager.Client.List(true);
-                GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = false;
+                // GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = false;
                 EditorApplication.update -= PackageListRequestHandler;
                 EditorApplication.update += PackageListRequestHandler;
             }
@@ -81,11 +81,11 @@ namespace GPUInstancer
 
                                 Debug.Log("GPUI detected Universal Render Pipeline.");
                             }
-                            else if (item.name.Contains("com.unity.shadergraph"))
-                            {
-                                GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = true;
-                                Debug.Log("GPUI detected ShaderGraph package.");
-                            }
+                            // else if (item.name.Contains("com.unity.shadergraph"))
+                            // {
+                            //     GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = true;
+                            //     Debug.Log("GPUI detected ShaderGraph package.");
+                            // }
                         }
 
                         EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings);
@@ -106,11 +106,11 @@ namespace GPUInstancer
             return GPUInstancerConstants.gpuiSettings.shaderBindings;
         }
 
-        public static ShaderVariantCollection GetShaderVariantCollection()
-        {
-            if (GPUInstancerConstants.gpuiSettings.shaderVariantCollection == null)
-                GPUInstancerConstants.gpuiSettings.shaderVariantCollection = GPUInstancerSettings.GetDefaultShaderVariantCollection();
-            return GPUInstancerConstants.gpuiSettings.shaderVariantCollection;
-        }
+        // public static ShaderVariantCollection GetShaderVariantCollection()
+        // {
+        //     if (GPUInstancerConstants.gpuiSettings.shaderVariantCollection == null)
+        //         GPUInstancerConstants.gpuiSettings.shaderVariantCollection = GPUInstancerSettings.GetDefaultShaderVariantCollection();
+        //     return GPUInstancerConstants.gpuiSettings.shaderVariantCollection;
+        // }
     }
 }

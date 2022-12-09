@@ -11,10 +11,10 @@ namespace GPUInstancer
     {
 
         public GPUInstancerShaderBindings shaderBindings;
-        public ShaderVariantCollection shaderVariantCollection;
+        // public ShaderVariantCollection shaderVariantCollection;
         public bool packagesLoaded;
 
-        public bool isShaderGraphPresent;
+        // public bool isShaderGraphPresent;
         public int instancingBoundsSize = 10000;
 
 
@@ -24,13 +24,9 @@ namespace GPUInstancer
         public int MAX_PREFAB_EXTRA_BUFFER_SIZE = 16384;
         #endregion Editor Constants
 
-        #region Theme
-        public bool useCustomPreviewBackgroundColor = false;
-        public Color previewBackgroundColor = Color.white;
-        #endregion Theme
 
         #region Editor Behaviour
-        public bool disableAutoGenerateBillboards = false;
+        // public bool disableAutoGenerateBillboards = false;
         public bool disableShaderVariantCollection = false;
         public bool disableInstanceCountWarning = false;
         public bool disableAutoShaderConversion = false;
@@ -67,7 +63,7 @@ namespace GPUInstancer
         public virtual void SetDefultBindings()
         {
             SetDefaultGPUInstancerShaderBindings();
-            SetDefaultShaderVariantCollection();
+            // SetDefaultShaderVariantCollection();
         }
 
         #region Shader Bindings
@@ -113,19 +109,19 @@ namespace GPUInstancer
 
 
         #region Shader Variant Collection
-        public virtual void SetDefaultShaderVariantCollection()
-        {
-            if (disableShaderVariantCollection)
-                return;
-            if (shaderVariantCollection == null)
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    Undo.RecordObject(this, "GPUI ShaderVariantCollection instance generated");
-#endif
-                shaderVariantCollection = GetDefaultShaderVariantCollection();
-            }
-        }
+        //         public virtual void SetDefaultShaderVariantCollection()
+        //         {
+        //             if (disableShaderVariantCollection)
+        //                 return;
+        //             if (shaderVariantCollection == null)
+        //             {
+        // #if UNITY_EDITOR
+        //                 if (!Application.isPlaying)
+        //                     Undo.RecordObject(this, "GPUI ShaderVariantCollection instance generated");
+        // #endif
+        //                 shaderVariantCollection = GetDefaultShaderVariantCollection();
+        //             }
+        //         }
 
         public static ShaderVariantCollection GetDefaultShaderVariantCollection()
         {
@@ -152,46 +148,6 @@ namespace GPUInstancer
             return shaderVariantCollection;
         }
 
-
-        public virtual void AddShaderVariantToCollection(string shaderName, string extensionCode = null)
-        {
-            if (disableShaderVariantCollection)
-                return;
-#if UNITY_EDITOR
-            if (!Application.isPlaying && shaderBindings != null && shaderVariantCollection != null && !string.IsNullOrEmpty(shaderName))
-            {
-                Shader instancedShader = shaderBindings.GetInstancedShader(shaderName, extensionCode);
-                if (instancedShader != null)
-                {
-                    ShaderVariantCollection.ShaderVariant shaderVariant = new ShaderVariantCollection.ShaderVariant();
-                    shaderVariant.shader = instancedShader;
-                    //shaderVariant.passType = PassType.Normal;
-                    shaderVariantCollection.Add(shaderVariant);
-                    // To add only the shader without the passtype or keywords, remove the specific variant but the shader remains
-                    shaderVariantCollection.Remove(shaderVariant);
-                }
-            }
-#endif
-        }
-
-        public virtual void AddShaderVariantToCollection(Material material, string extensionCode = null)
-        {
-            if (disableShaderVariantCollection)
-                return;
-#if UNITY_EDITOR
-            if (!Application.isPlaying && shaderBindings != null && shaderVariantCollection != null && material != null && !string.IsNullOrEmpty(material.shader.name))
-            {
-                Shader instancedShader = shaderBindings.GetInstancedShader(material.shader.name, extensionCode);
-                if (instancedShader != null)
-                {
-                    ShaderVariantCollection.ShaderVariant shaderVariant = new ShaderVariantCollection.ShaderVariant();
-                    shaderVariant.shader = instancedShader;
-                    shaderVariant.keywords = material.shaderKeywords;
-                    shaderVariantCollection.Add(shaderVariant);
-                }
-            }
-#endif
-        }
         #endregion Shader Variant Collection
 
     }

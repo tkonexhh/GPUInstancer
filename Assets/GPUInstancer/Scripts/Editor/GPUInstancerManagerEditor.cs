@@ -62,11 +62,6 @@ namespace GPUInstancer
 
         public override void OnInspectorGUI()
         {
-            if (GPUInstancerConstants.gpuiSettings != null)
-            {
-                useCustomPreviewBackgroundColor = GPUInstancerConstants.gpuiSettings.useCustomPreviewBackgroundColor;
-                previewBackgroundColor = GPUInstancerConstants.gpuiSettings.previewBackgroundColor;
-            }
 
             isTextMode = _manager.isPrototypeTextMode;
 

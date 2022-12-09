@@ -12,8 +12,6 @@ namespace Inutan
         public int renderCount => localToWorldMatrixListNativeArray.Length;
         public int maxCount;//最大数量用于一些变量刷新
 
-
-        public virtual void Init() { }
         public abstract void Render();
         public virtual void Release()
         {

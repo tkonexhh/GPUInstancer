@@ -18,7 +18,7 @@ namespace Inutan
 
         #region Shaders
         static readonly string SHADER_INUTAN_FOLIAGE = "Inutan/URP/Scene/Foliage/Foliage 植物"; static readonly string GPUI_SHADER_INUTAN_FOLIAGE = "Hidden/Inutan/URP/Scene/Foliage/Foliage 植物 GPUInstance";
-        static readonly string SHADER_URP_LIT = "Universal Render Pipeline/Lit"; static readonly string GPUI_SHADER_URP_LIT = "Hidden/Universal Render Pipeline/Lit GPUInstance";
+        static readonly string SHADER_URP_LIT = "Universal Render Pipeline/Lit"; static readonly string GPUI_SHADER_URP_LIT = "GPUInstancer/Universal Render Pipeline/Lit";
         static readonly string SHADER_URP_HIDDEN_LIT = "Hidden/Universal Render Pipeline/Lit";
 
         static readonly string SHADER_GPUI_ERROR = "Hidden/Inutan/GPUInstancer/InternalErrorShader";
