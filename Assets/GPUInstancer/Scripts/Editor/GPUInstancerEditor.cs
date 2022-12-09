@@ -41,9 +41,6 @@ namespace GPUInstancer
         protected List<GPUInstancerPrototype> prototypeList;
         protected Dictionary<GPUInstancerPrototype, bool> prototypeSelection;
 
-        protected string wikiHash;
-        protected string versionNo;
-
         protected bool useCustomPreviewBackgroundColor = false;
         protected Color previewBackgroundColor;
 
@@ -89,14 +86,6 @@ namespace GPUInstancer
 
             GPUInstancerEditorConstants.Styles.foldout.fontStyle = FontStyle.Bold;
             GPUInstancerEditorConstants.Styles.richLabel.richText = true;
-
-            EditorGUILayout.BeginHorizontal(GPUInstancerEditorConstants.Styles.box);
-            EditorGUILayout.LabelField(string.IsNullOrEmpty(versionNo) ? GPUInstancerEditorConstants.GPUI_VERSION : versionNo, GPUInstancerEditorConstants.Styles.boldLabel);
-            GUILayout.FlexibleSpace();
-            DrawWikiButton(GUILayoutUtility.GetRect(40, 20), wikiHash);
-            GUILayout.Space(10);
-            DrawHelpButton(GUILayoutUtility.GetRect(20, 20), showHelpText);
-            EditorGUILayout.EndHorizontal();
         }
 
         public virtual void InspectorGUIEnd()
@@ -207,46 +196,6 @@ namespace GPUInstancer
             return null;
         }
 
-        public Texture2D GetPreviewTextureFromTexture2D(Texture2D texture)
-        {
-            if (!texture)
-                return null;
-            try
-            {
-                // Create a temporary RenderTexture of the same size as the texture
-                RenderTexture tempRT = RenderTexture.GetTemporary(
-                                    texture.width,
-                                    texture.height,
-                                    0,
-                                    RenderTextureFormat.Default,
-                                    RenderTextureReadWrite.Linear);
-
-                // Blit the pixels on texture to the RenderTexture
-                Graphics.Blit(texture, tempRT);
-                // Backup the currently set RenderTexture
-                RenderTexture previous = RenderTexture.active;
-                // Set the current RenderTexture to the temporary one we created
-                RenderTexture.active = tempRT;
-                // Create a new readable Texture2D to copy the pixels to it
-#if UNITY_2017_1_OR_NEWER
-                Texture2D myTexture2D = new Texture2D(texture.width, texture.height, TextureFormat.RGBAFloat, true, false);
-#else
-                Texture2D myTexture2D = new Texture2D(texture.width, texture.height);
-#endif
-                // Copy the pixels from the RenderTexture to the new Texture
-                myTexture2D.ReadPixels(new Rect(0, 0, tempRT.width, tempRT.height), 0, 0);
-                myTexture2D.Apply();
-                // Reset the active RenderTexture
-                RenderTexture.active = previous;
-                // Release the temporary RenderTexture
-                RenderTexture.ReleaseTemporary(tempRT);
-
-                return myTexture2D;
-            }
-            catch (Exception) { }
-            return null;
-        }
-
         public void DrawCameraDataFields()
         {
             EditorGUILayout.PropertyField(prop_autoSelectCamera);
@@ -324,11 +273,7 @@ namespace GPUInstancer
             Rect iconRect = new Rect(prototypeRect.position + PROTOTYPE_RECT_PADDING_VECTOR, PROTOTYPE_TEXT_RECT_SIZE_VECTOR);
 
             GUI.SetNextControlName(prototypeContent.tooltip);
-            Color prototypeColor;
-            if (isSelected)
-                prototypeColor = string.IsNullOrEmpty(prototype.warningText) ? GPUInstancerEditorConstants.Colors.lightGreen : GPUInstancerEditorConstants.Colors.lightred;
-            else
-                prototypeColor = string.IsNullOrEmpty(prototype.warningText) ? GUI.backgroundColor : GPUInstancerEditorConstants.Colors.darkred;
+            Color prototypeColor = isSelected ? GPUInstancerEditorConstants.Colors.lightGreen : GUI.backgroundColor;
 
             prototypeContent = new GUIContent(prototypeContent.tooltip);
             GPUInstancerEditorConstants.DrawColoredButton(prototypeContent, prototypeColor, GPUInstancerEditorConstants.Styles.label.normal.textColor, FontStyle.Normal, iconRect,
@@ -339,14 +284,14 @@ namespace GPUInstancer
                     });
         }
 
-        public virtual void DrawGPUInstancerPrototypeBox(List<GPUInstancerPrototype> selectedPrototypeList, bool isManagerFrustumCulling)
+        public virtual void DrawGPUInstancerPrototypeBox(List<GPUInstancerPrototype> selectedPrototypeList)
         {
             if (selectedPrototypeList == null || selectedPrototypeList.Count == 0)
                 return;
 
             if (selectedPrototypeList.Count == 1)
             {
-                DrawGPUInstancerPrototypeBox(selectedPrototypeList[0], isManagerFrustumCulling);
+                DrawGPUInstancerPrototypeBox(selectedPrototypeList[0]);
                 return;
             }
 
@@ -359,46 +304,10 @@ namespace GPUInstancer
             if (showPrototypeBox)
             {
                 GPUInstancerPrototype prototype0 = selectedPrototypeList[0];
-                #region Determine Multiple Values
+
                 bool hasChanged = false;
 
-                bool minDistanceMixed = false;
-                float minDistance = prototype0.minDistance;
-                bool maxDistanceMixed = false;
-                float maxDistance = prototype0.maxDistance;
-                bool boundsOffsetMixed = false;
-                Vector3 boundsOffset = prototype0.boundsOffset;
-                for (int i = 1; i < selectedPrototypeList.Count; i++)
-                {
-
-                    if (!minDistanceMixed && minDistance != selectedPrototypeList[i].minDistance)
-                        minDistanceMixed = true;
-                    if (!maxDistanceMixed && maxDistance != selectedPrototypeList[i].maxDistance)
-                        maxDistanceMixed = true;
-
-                    if (!boundsOffsetMixed && boundsOffset != selectedPrototypeList[i].boundsOffset)
-                        boundsOffsetMixed = true;
-                }
-                #endregion Determine Multiple Values
-
                 hasChanged |= DrawGPUInstancerPrototypeBeginningInfo(selectedPrototypeList);
-
-                #region Culling
-                EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-                GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_culling, GPUInstancerEditorConstants.Styles.boldLabel);
-
-                hasChanged |= MultiMinMaxSlider(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_maxDistance, minDistance, maxDistance, 0.0f, GetMaxDistance(prototype0), minDistanceMixed || maxDistanceMixed, (p, vMin, vMax) => { p.minDistance = vMin; p.maxDistance = vMax; });
-                EditorGUILayout.BeginHorizontal();
-                hasChanged |= MultiFloat(selectedPrototypeList, " ", minDistance, minDistanceMixed, (p, v) => p.minDistance = v);
-                hasChanged |= MultiFloat(selectedPrototypeList, null, maxDistance, minDistanceMixed, (p, v) => p.maxDistance = v);
-                EditorGUILayout.EndHorizontal();
-                DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_maxDistance);
-
-                hasChanged |= MultiVector3(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_boundsOffset, boundsOffset, boundsOffsetMixed, false, (p, v) => p.boundsOffset = v);
-                DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_boundsOffset);
-
-                EditorGUILayout.EndVertical();
-                #endregion Culling
 
                 EditorGUI.BeginDisabledGroup(Application.isPlaying);
                 hasChanged |= DrawGPUInstancerPrototypeInfo(selectedPrototypeList);
@@ -418,7 +327,7 @@ namespace GPUInstancer
             EditorGUILayout.EndVertical();
         }
 
-        public virtual void DrawGPUInstancerPrototypeBox(GPUInstancerPrototype selectedPrototype, bool isFrustumCulling)
+        public virtual void DrawGPUInstancerPrototypeBox(GPUInstancerPrototype selectedPrototype)
         {
             if (selectedPrototype == null)
                 return;
@@ -435,31 +344,6 @@ namespace GPUInstancer
                 return;
             }
 
-            if (!string.IsNullOrEmpty(selectedPrototype.warningText))
-            {
-                EditorGUILayout.HelpBox(selectedPrototype.warningText, MessageType.Error);
-                if (selectedPrototype.warningText.StartsWith("Can not create instanced version for shader"))
-                {
-                    GPUInstancerEditorConstants.DrawColoredButton(new GUIContent("Go to Unity Archive"),
-                        GPUInstancerEditorConstants.Colors.darkred, Color.white, FontStyle.Bold, Rect.zero,
-                        () =>
-                        {
-                            Application.OpenURL("https://unity3d.com/get-unity/download/archive");
-                        });
-                    GUILayout.Space(10);
-                }
-                else if (selectedPrototype.warningText.StartsWith("ShaderGraph shader does not contain"))
-                {
-                    GPUInstancerEditorConstants.DrawColoredButton(new GUIContent("Go to Shader Setup Documentation"),
-                        GPUInstancerEditorConstants.Colors.darkred, Color.white, FontStyle.Bold, Rect.zero,
-                        () =>
-                        {
-                            Application.OpenURL("https://wiki.gurbu.com/index.php?title=GPU_Instancer:FAQ#ShaderGraph_Setup");
-                        });
-                    GUILayout.Space(10);
-                }
-            }
-
 
             DrawPrefabField(selectedPrototype);
             EditorGUI.BeginDisabledGroup(true);
@@ -470,33 +354,6 @@ namespace GPUInstancer
 
             DrawGPUInstancerPrototypeBeginningInfo(selectedPrototype);
 
-
-
-            #region Culling
-            EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-            GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_culling, GPUInstancerEditorConstants.Styles.boldLabel);
-
-            EditorGUILayout.MinMaxSlider(GPUInstancerEditorConstants.TEXT_maxDistance, ref selectedPrototype.minDistance, ref selectedPrototype.maxDistance, 0.0f, GetMaxDistance(selectedPrototype));
-            EditorGUILayout.BeginHorizontal();
-            selectedPrototype.minDistance = EditorGUILayout.FloatField(" ", selectedPrototype.minDistance);
-            selectedPrototype.maxDistance = EditorGUILayout.FloatField(selectedPrototype.maxDistance);
-            EditorGUILayout.EndHorizontal();
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_maxDistance);
-
-
-            EditorGUI.BeginDisabledGroup(Application.isPlaying);
-            selectedPrototype.boundsOffset = EditorGUILayout.Vector3Field(GPUInstancerEditorConstants.TEXT_boundsOffset, selectedPrototype.boundsOffset);
-            EditorGUI.EndDisabledGroup();
-            if (selectedPrototype.boundsOffset.x < 0)
-                selectedPrototype.boundsOffset.x = 0;
-            if (selectedPrototype.boundsOffset.y < 0)
-                selectedPrototype.boundsOffset.y = 0;
-            if (selectedPrototype.boundsOffset.z < 0)
-                selectedPrototype.boundsOffset.z = 0;
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_boundsOffset);
-
-            EditorGUILayout.EndVertical();
-            #endregion Culling
 
 
             EditorGUI.BeginDisabledGroup(Application.isPlaying);
@@ -521,28 +378,6 @@ namespace GPUInstancer
             if (showHelpText || forceShow)
             {
                 EditorGUILayout.HelpBox(text, MessageType.Info);
-            }
-        }
-
-        public static void DrawWikiButton(Rect buttonRect, string hash)
-        {
-            DrawWikiButton(buttonRect, "GPU_Instancer:GettingStarted", hash, "Wiki", GPUInstancerEditorConstants.Colors.lightBlue);
-        }
-
-        public static void DrawWikiButton(Rect buttonRect, string title, string hash, string buttonText, Color buttonColor)
-        {
-            GPUInstancerEditorConstants.DrawColoredButton(new GUIContent(buttonText),
-                    buttonColor, Color.white, FontStyle.Bold, buttonRect,
-                    () => { Application.OpenURL("https://wiki.gurbu.com/index.php?title=" + title + hash); }
-                    );
-        }
-
-        public void DrawHelpButton(Rect buttonRect, bool showingHelp)
-        {
-            if (GUI.Button(buttonRect, new GUIContent(showHelpText ? helpIconActive : helpIcon,
-                showHelpText ? GPUInstancerEditorConstants.TEXT_hideHelpTooltip : GPUInstancerEditorConstants.TEXT_showHelpTooltip), showHelpText ? GPUInstancerEditorConstants.Styles.helpButtonSelected : GPUInstancerEditorConstants.Styles.helpButton))
-            {
-                showHelpText = !showHelpText;
             }
         }
 

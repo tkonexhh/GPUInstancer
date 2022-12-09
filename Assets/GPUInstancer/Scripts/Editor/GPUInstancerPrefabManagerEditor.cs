@@ -18,7 +18,7 @@ namespace GPUInstancer
         {
             base.OnEnable();
 
-            wikiHash = "#The_Prefab_Manager";
+            // wikiHash = "#The_Prefab_Manager";
 
             _prefabManager = (target as GPUInstancerPrefabManager);
 
@@ -224,120 +224,7 @@ namespace GPUInstancer
             EditorUtility.SetDirty(prefabPrototype);
         }
 
-#if UNITY_2018_1_OR_NEWER
-        public void SerializeTransforms(GPUInstancerPrefabPrototype prefabPrototype)
-        {
-            if (_prefabManager == null || _prefabManager.registeredPrefabs == null)
-                return;
-            RegisteredPrefabsData registeredPrefabsData = _prefabManager.registeredPrefabs.Find(rpd => rpd.prefabPrototype == prefabPrototype);
-            if (registeredPrefabsData == null || registeredPrefabsData.registeredPrefabs == null || registeredPrefabsData.registeredPrefabs.Count == 0)
-                return;
-            string transformString = "";
-            foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsData.registeredPrefabs)
-            {
-                transformString += GPUInstancerUtility.Matrix4x4ToString(prefabInstance.transform.localToWorldMatrix) + "\n";
-            }
-            transformString = transformString.Substring(0, transformString.Length - 2);
-            TextAsset textAsset = new TextAsset(transformString);
 
-            string assetPath = GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH + prefabPrototype.name + ".asset";
-            if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH))
-            {
-                System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH);
-            }
-            AssetDatabase.CreateAsset(textAsset, assetPath);
-            AssetDatabase.SaveAssets();
-            prefabPrototype.isTransformsSerialized = true;
-            prefabPrototype.serializedTransformData = textAsset;
-            prefabPrototype.serializedTransformDataCount = registeredPrefabsData.registeredPrefabs.Count;
-
-            foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsData.registeredPrefabs)
-            {
-                DestroyImmediate(prefabInstance.gameObject);
-            }
-            registeredPrefabsData.registeredPrefabs.Clear();
-        }
-
-        public void DeserializeTransforms(GPUInstancerPrefabPrototype prefabPrototype)
-        {
-            if (_prefabManager == null || _prefabManager.registeredPrefabs == null)
-                return;
-            RegisteredPrefabsData registeredPrefabsData = _prefabManager.registeredPrefabs.Find(rpd => rpd.prefabPrototype == prefabPrototype);
-            if (registeredPrefabsData == null || registeredPrefabsData.registeredPrefabs == null)
-                return;
-
-            string matrixStr;
-            System.IO.StringReader strReader = new System.IO.StringReader(prefabPrototype.serializedTransformData.text);
-            Matrix4x4 matrix;
-            GameObject parent = new GameObject(prefabPrototype.prefabObject.name + " Instances");
-            parent.transform.position = Vector3.zero;
-            parent.transform.rotation = Quaternion.identity;
-            parent.transform.localScale = Vector3.one;
-            while (true)
-            {
-                matrixStr = strReader.ReadLine();
-                if (!string.IsNullOrEmpty(matrixStr))
-                {
-                    matrix = GPUInstancerUtility.Matrix4x4FromString(matrixStr);
-                    GameObject prefabInstance = (GameObject)PrefabUtility.InstantiatePrefab(prefabPrototype.prefabObject);
-                    prefabInstance.transform.SetMatrix4x4ToTransform(matrix);
-                    registeredPrefabsData.registeredPrefabs.Add(prefabInstance.GetComponent<GPUInstancerPrefab>());
-                    prefabInstance.transform.parent = parent.transform;
-                }
-                else
-                    break;
-            }
-
-            DestroyImmediate(prefabPrototype.serializedTransformData, true);
-
-            prefabPrototype.isTransformsSerialized = false;
-            prefabPrototype.serializedTransformData = null;
-            prefabPrototype.serializedTransformDataCount = 0;
-
-            AssetDatabase.Refresh();
-        }
-
-
-        public void SerializeAdditionalTransforms()
-        {
-            if (_prefabManager == null || _prefabManager.registeredPrefabs == null)
-                return;
-
-            foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.prototypeList)
-            {
-                if (!prefabPrototype.isTransformsSerialized)
-                    continue;
-
-                RegisteredPrefabsData registeredPrefabsData = _prefabManager.registeredPrefabs.Find(rpd => rpd.prefabPrototype == prefabPrototype);
-                if (registeredPrefabsData == null || registeredPrefabsData.registeredPrefabs == null || registeredPrefabsData.registeredPrefabs.Count == 0)
-                    continue;
-                string transformString = prefabPrototype.serializedTransformData.text + "\n";
-                foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsData.registeredPrefabs)
-                {
-                    transformString += GPUInstancerUtility.Matrix4x4ToString(prefabInstance.transform.localToWorldMatrix) + "\n";
-                }
-                transformString = transformString.Substring(0, transformString.Length - 2);
-                TextAsset textAsset = new TextAsset(transformString);
-
-                string assetPath = GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH + prefabPrototype.name + ".asset";
-                if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH))
-                {
-                    System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_SERIALIZED_PATH);
-                }
-                AssetDatabase.CreateAsset(textAsset, assetPath);
-                AssetDatabase.SaveAssets();
-                prefabPrototype.isTransformsSerialized = true;
-                prefabPrototype.serializedTransformData = textAsset;
-                prefabPrototype.serializedTransformDataCount += registeredPrefabsData.registeredPrefabs.Count;
-
-                foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsData.registeredPrefabs)
-                {
-                    DestroyImmediate(prefabInstance.gameObject);
-                }
-                registeredPrefabsData.registeredPrefabs.Clear();
-            }
-        }
-#endif
 
         public override void DrawAddPrototypeHelpText()
         {
@@ -352,32 +239,24 @@ namespace GPUInstancer
                         Undo.RecordObject(_prefabManager, "Register prefabs in scene");
                         _prefabManager.RegisterPrefabsInScene();
 
-                        SerializeAdditionalTransforms();
+
 
                     });
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_registerPrefabsInScene);
 
-            if (!GPUInstancerConstants.gpuiSettings.disableInstanceCountWarning)
-            {
-                bool hasLowInstanceCounts = false;
-                if (!Application.isPlaying && _prefabManager.registeredPrefabs.Count > 0)
-                {
-                    foreach (RegisteredPrefabsData rpd in _prefabManager.registeredPrefabs)
-                    {
-                        int count = rpd.prefabPrototype.isTransformsSerialized ? rpd.prefabPrototype.serializedTransformDataCount : rpd.registeredPrefabs.Count;
-                        if (count > 0 && count < 10)
-                            hasLowInstanceCounts = true;
-                    }
-                }
-
-                if (hasLowInstanceCounts)
-                {
-                    GUILayout.Space(5);
-                    EditorGUILayout.HelpBox(GPUInstancerEditorConstants.WARNINGTEXT_instanceCounts, MessageType.Warning);
-                    DrawWikiButton(GUILayoutUtility.GetRect(40, 20), "GPU_Instancer:BestPractices", "#Instance_Counts", "More Information on Instance Counts", GPUInstancerEditorConstants.Colors.darkred);
-                    GUILayout.Space(5);
-                }
-            }
+            // if (!GPUInstancerConstants.gpuiSettings.disableInstanceCountWarning)
+            // {
+            //     bool hasLowInstanceCounts = false;
+            //     if (!Application.isPlaying && _prefabManager.registeredPrefabs.Count > 0)
+            //     {
+            //         foreach (RegisteredPrefabsData rpd in _prefabManager.registeredPrefabs)
+            //         {
+            //             int count = rpd.prefabPrototype.isTransformsSerialized ? rpd.prefabPrototype.serializedTransformDataCount : rpd.registeredPrefabs.Count;
+            //             if (count > 0 && count < 10)
+            //                 hasLowInstanceCounts = true;
+            //         }
+            //     }
+            // }
         }
 
         public override void DrawRegisteredPrefabsBoxList()
@@ -387,7 +266,7 @@ namespace GPUInstancer
                 Color defaultColor = GPUInstancerEditorConstants.Styles.label.normal.textColor;
                 foreach (RegisteredPrefabsData rpd in _prefabManager.registeredPrefabs)
                 {
-                    int count = rpd.prefabPrototype.isTransformsSerialized ? rpd.prefabPrototype.serializedTransformDataCount : rpd.registeredPrefabs.Count;
+                    int count = rpd.registeredPrefabs.Count;
                     if (count > 0 && count < 10)
                         GPUInstancerEditorConstants.Styles.label.normal.textColor = Color.red;
                     else
@@ -415,225 +294,26 @@ namespace GPUInstancer
             GPUInstancerPrefabPrototype prototype0 = (GPUInstancerPrefabPrototype)selectedPrototypeList[0];
             #region Determine Multiple Values
             bool hasChanged = false;
-            bool enableRuntimeModificationsMixed = false;
-            bool enableRuntimeModifications = prototype0.enableRuntimeModifications;
 
-            // bool autoUpdateTransformDataMixed = false;
-            // bool autoUpdateTransformData = false;
-            bool startWithRigidBodyMixed = false;
-            bool startWithRigidBody = prototype0.startWithRigidBody;
-            bool addRemoveInstancesAtRuntimeMixed = false;
-            bool addRemoveInstancesAtRuntime = prototype0.addRemoveInstancesAtRuntime;
-            bool extraBufferSizeMixed = false;
-            int extraBufferSize = prototype0.extraBufferSize;
-            bool addRuntimeHandlerScriptMixed = false;
-            bool addRuntimeHandlerScript = prototype0.addRuntimeHandlerScript;
             bool meshRenderersDisabledMixed = false;
             bool meshRenderersDisabled = prototype0.meshRenderersDisabled;
             for (int i = 1; i < selectedPrototypeList.Count; i++)
             {
                 GPUInstancerPrefabPrototype prototypeI = (GPUInstancerPrefabPrototype)selectedPrototypeList[i];
-                if (!enableRuntimeModificationsMixed && enableRuntimeModifications != prototypeI.enableRuntimeModifications)
-                    enableRuntimeModificationsMixed = true;
 
-                // if (!autoUpdateTransformDataMixed && autoUpdateTransformData != prototypeI.autoUpdateTransformData)
-                //     autoUpdateTransformDataMixed = true;
-                if (!startWithRigidBodyMixed && startWithRigidBody != prototypeI.startWithRigidBody)
-                    startWithRigidBodyMixed = true;
-                if (!addRemoveInstancesAtRuntimeMixed && addRemoveInstancesAtRuntime != prototypeI.addRemoveInstancesAtRuntime)
-                    addRemoveInstancesAtRuntimeMixed = true;
-                if (!extraBufferSizeMixed && extraBufferSize != prototypeI.extraBufferSize)
-                    extraBufferSizeMixed = true;
-                if (!addRuntimeHandlerScriptMixed && addRuntimeHandlerScript != prototypeI.addRuntimeHandlerScript)
-                    addRuntimeHandlerScriptMixed = true;
                 if (!meshRenderersDisabledMixed && meshRenderersDisabled != prototypeI.meshRenderersDisabled)
                     meshRenderersDisabledMixed = true;
             }
             #endregion Determine Multiple Values
 
-            EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-            GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabRuntimeSettings, GPUInstancerEditorConstants.Styles.boldLabel);
 
-            hasChanged |= MultiToggle(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_enableRuntimeModifications, enableRuntimeModifications, enableRuntimeModificationsMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).enableRuntimeModifications = v);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_enableRuntimeModifications);
-
-            EditorGUI.BeginDisabledGroup(enableRuntimeModificationsMixed || !enableRuntimeModifications);
-
-
-            hasChanged |= MultiToggle(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_addRemoveInstancesAtRuntime, addRemoveInstancesAtRuntime, addRemoveInstancesAtRuntimeMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).addRemoveInstancesAtRuntime = v);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addRemoveInstancesAtRuntime);
-
-            EditorGUI.BeginDisabledGroup(addRemoveInstancesAtRuntimeMixed || !addRemoveInstancesAtRuntime);
-            hasChanged |= MultiIntSlider(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_extraBufferSize, extraBufferSize, 0, GPUInstancerConstants.gpuiSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE, extraBufferSizeMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).extraBufferSize = v);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_extraBufferSize);
-
-            hasChanged |= MultiToggle(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_addRuntimeHandlerScript, addRuntimeHandlerScript, addRuntimeHandlerScriptMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).addRuntimeHandlerScript = v);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addRuntimeHandlerScript);
-
-            if (!addRemoveInstancesAtRuntimeMixed && addRemoveInstancesAtRuntime && !addRuntimeHandlerScriptMixed && !Application.isPlaying)
-            {
-                if (addRuntimeHandlerScript)
-                {
-                    foreach (GPUInstancerPrefabPrototype prefabPrototype in selectedPrototypeList)
-                    {
-                        GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prefabPrototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
-                        if (prefabRuntimeHandler == null)
-                        {
-
-                            GPUInstancerUtility.AddComponentToPrefab<GPUInstancerPrefabRuntimeHandler>(prefabPrototype.prefabObject);
-
-                            EditorUtility.SetDirty(prefabPrototype.prefabObject);
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (GPUInstancerPrefabPrototype prefabPrototype in selectedPrototypeList)
-                    {
-                        GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prefabPrototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
-                        if (prefabRuntimeHandler != null)
-                        {
-                            GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefabRuntimeHandler>(prefabPrototype.prefabObject);
-                        }
-                    }
-                }
-            }
-            EditorGUI.EndDisabledGroup();
-
-            EditorGUI.EndDisabledGroup();
-
-            if (!enableRuntimeModificationsMixed && !enableRuntimeModifications)
-            {
-                foreach (GPUInstancerPrefabPrototype prefabPrototype in selectedPrototypeList)
-                {
-                    if (prefabPrototype.addRemoveInstancesAtRuntime)
-                        prefabPrototype.addRemoveInstancesAtRuntime = false;
-                    if (prefabPrototype.startWithRigidBody)
-                        prefabPrototype.startWithRigidBody = false;
-                }
-            }
-
-            foreach (GPUInstancerPrefabPrototype prefabPrototype in selectedPrototypeList)
-            {
-                if ((!prefabPrototype.enableRuntimeModifications || !prefabPrototype.addRemoveInstancesAtRuntime) && prefabPrototype.extraBufferSize > 0)
-                    prefabPrototype.extraBufferSize = 0;
-
-                if ((!prefabPrototype.enableRuntimeModifications || !prefabPrototype.addRemoveInstancesAtRuntime) && prefabPrototype.addRuntimeHandlerScript)
-                {
-                    prefabPrototype.addRuntimeHandlerScript = false;
-                    GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prefabPrototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
-                    if (prefabRuntimeHandler != null)
-                    {
-#if UNITY_2018_3_OR_NEWER
-                        GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefabRuntimeHandler>(prefabPrototype.prefabObject);
-#else
-                        DestroyImmediate(prefabRuntimeHandler, true);
-#endif
-                        EditorUtility.SetDirty(prefabPrototype.prefabObject);
-                    }
-                }
-            }
-
-            EditorGUILayout.EndVertical();
 
             return hasChanged;
         }
 
         public override void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype)
         {
-            DrawGPUInstancerPrototypeInfo(selectedPrototype, (string t) => { DrawHelpText(t); });
-        }
-
-        public static void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype, UnityAction<string> DrawHelpText)
-        {
-            EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-            GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabRuntimeSettings, GPUInstancerEditorConstants.Styles.boldLabel);
-
-            GPUInstancerPrefabPrototype prototype = (GPUInstancerPrefabPrototype)selectedPrototype;
-            prototype.enableRuntimeModifications = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_enableRuntimeModifications, prototype.enableRuntimeModifications);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_enableRuntimeModifications);
-
-            EditorGUI.BeginDisabledGroup(!prototype.enableRuntimeModifications);
-
-
-            prototype.addRemoveInstancesAtRuntime = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_addRemoveInstancesAtRuntime, prototype.addRemoveInstancesAtRuntime);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addRemoveInstancesAtRuntime);
-
-            EditorGUI.BeginDisabledGroup(!prototype.addRemoveInstancesAtRuntime);
-            prototype.extraBufferSize = EditorGUILayout.IntSlider(GPUInstancerEditorConstants.TEXT_extraBufferSize, prototype.extraBufferSize, 0, GPUInstancerConstants.gpuiSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_extraBufferSize);
-
-            prototype.addRuntimeHandlerScript = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_addRuntimeHandlerScript, prototype.addRuntimeHandlerScript);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addRuntimeHandlerScript);
-
-            if (prototype.addRemoveInstancesAtRuntime && !Application.isPlaying)
-            {
-                GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
-                if (prototype.addRuntimeHandlerScript && prefabRuntimeHandler == null)
-                {
-#if UNITY_2018_3_OR_NEWER
-                    GPUInstancerUtility.AddComponentToPrefab<GPUInstancerPrefabRuntimeHandler>(prototype.prefabObject);
-#else
-                    prototype.prefabObject.AddComponent<GPUInstancerPrefabRuntimeHandler>();
-#endif
-                    EditorUtility.SetDirty(prototype.prefabObject);
-                }
-                else if (!prototype.addRuntimeHandlerScript && prefabRuntimeHandler != null)
-                {
-#if UNITY_2018_3_OR_NEWER
-                    GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefabRuntimeHandler>(prototype.prefabObject);
-#else
-                    DestroyImmediate(prefabRuntimeHandler, true);
-#endif
-                    EditorUtility.SetDirty(prototype.prefabObject);
-                }
-            }
-            EditorGUI.EndDisabledGroup();
-
-            // bool autoUpdateTransformData = prototype.autoUpdateTransformData;
-            // prototype.autoUpdateTransformData = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_autoUpdateTransformData, prototype.autoUpdateTransformData);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_autoUpdateTransformData);
-#if !GPUI_BURST
-            if (prototype.autoUpdateTransformData)
-                EditorGUILayout.HelpBox("It is recommended to use the Burst Compiler with Auto Update Transform Data feature. You can download it from the Package Manager Window.", MessageType.Warning);
-#endif
-            // if (autoUpdateTransformData != prototype.autoUpdateTransformData && prototype.meshRenderersDisabled)
-            //     SetRenderersEnabled(prototype, !prototype.meshRenderersDisabled);
-            EditorGUI.EndDisabledGroup();
-
-            if (!prototype.enableRuntimeModifications)
-            {
-                if (prototype.addRemoveInstancesAtRuntime)
-                    prototype.addRemoveInstancesAtRuntime = false;
-                if (prototype.startWithRigidBody)
-                    prototype.startWithRigidBody = false;
-                // if (prototype.autoUpdateTransformData)
-                // {
-                //     prototype.autoUpdateTransformData = false;
-                //     if (prototype.meshRenderersDisabled)
-                //         SetRenderersEnabled(prototype, !prototype.meshRenderersDisabled);
-                // }
-            }
-
-            if ((!prototype.enableRuntimeModifications || !prototype.addRemoveInstancesAtRuntime) && prototype.extraBufferSize > 0)
-                prototype.extraBufferSize = 0;
-
-            if ((!prototype.enableRuntimeModifications || !prototype.addRemoveInstancesAtRuntime) && prototype.addRuntimeHandlerScript)
-            {
-                prototype.addRuntimeHandlerScript = false;
-                GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
-                if (prefabRuntimeHandler != null)
-                {
-#if UNITY_2018_3_OR_NEWER
-                    GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefabRuntimeHandler>(prototype.prefabObject);
-#else
-                    DestroyImmediate(prefabRuntimeHandler, true);
-#endif
-                    EditorUtility.SetDirty(prototype.prefabObject);
-                }
-            }
-
-            EditorGUILayout.EndVertical();
+            // DrawGPUInstancerPrototypeInfo(selectedPrototype, (string t) => { DrawHelpText(t); });
         }
 
         public override void DrawGPUInstancerPrototypeActions()
@@ -649,180 +329,7 @@ namespace GPUInstancer
 
         public override void DrawGPUInstancerPrototypeAdvancedActions()
         {
-            if (Application.isPlaying)
-                return;
 
-            GUILayout.Space(10);
-
-            EditorGUILayout.BeginVertical();
-            // title
-            Rect foldoutRect = GUILayoutUtility.GetRect(0, 20, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
-            foldoutRect.x += 12;
-            showAdvancedBox = EditorGUI.Foldout(foldoutRect, showAdvancedBox, GPUInstancerEditorConstants.TEXT_advancedActions, true, GPUInstancerEditorConstants.Styles.foldout);
-
-            //GUILayout.Space(10);
-
-            if (showAdvancedBox)
-            {
-                bool showSimulator = false;
-                foreach (GPUInstancerPrefabPrototype prototype in _prefabManager.prototypeList)
-                {
-                    if (prototype == null)
-                        continue;
-
-                    if (prototype.isTransformsSerialized || prototype.meshRenderersDisabled)
-                        showSimulator = true;
-                }
-
-                EditorGUILayout.HelpBox(GPUInstancerEditorConstants.HELPTEXT_advancedActions, MessageType.Warning);
-
-                if (_prefabManager.selectedPrototypeList != null && _prefabManager.selectedPrototypeList.Count > 0)
-                {
-                    GPUInstancerPrefabPrototype prototype0 = (GPUInstancerPrefabPrototype)_prefabManager.selectedPrototypeList[0];
-
-                    foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.selectedPrototypeList)
-                    {
-                        if (prefabPrototype.isTransformsSerialized && prefabPrototype.serializedTransformData == null)
-                        {
-                            prefabPrototype.isTransformsSerialized = false;
-                        }
-                    }
-
-                    #region Determine Multiple Values
-                    bool meshRenderersDisabledMixed = false;
-                    bool meshRenderersDisabled = prototype0.meshRenderersDisabled;
-                    //bool meshRenderersDisabledSimulationMixed = false;
-                    //bool meshRenderersDisabledSimulation = prototype0.meshRenderersDisabledSimulation;
-                    bool isTransformsSerializedMixed = false;
-                    bool isTransformsSerialized = prototype0.isTransformsSerialized;
-                    for (int i = 1; i < _prefabManager.selectedPrototypeList.Count; i++)
-                    {
-                        GPUInstancerPrefabPrototype prototypeI = (GPUInstancerPrefabPrototype)_prefabManager.selectedPrototypeList[i];
-                        if (!meshRenderersDisabledMixed && meshRenderersDisabled != prototypeI.meshRenderersDisabled)
-                            meshRenderersDisabledMixed = true;
-                        if (!isTransformsSerializedMixed && isTransformsSerialized != prototypeI.isTransformsSerialized)
-                            isTransformsSerializedMixed = true;
-                    }
-                    #endregion Determine Multiple Values
-
-                    if (!meshRenderersDisabledMixed && meshRenderersDisabled)
-                    {
-                        GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.enableMeshRenderers, GPUInstancerEditorConstants.Colors.green, Color.white, FontStyle.Bold, Rect.zero,
-                            () =>
-                            {
-                                foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.selectedPrototypeList)
-                                {
-                                    SetRenderersEnabled(prefabPrototype, true);
-                                }
-                                GUIUtility.ExitGUI();
-                            });
-                        //MultiToggle(_prefabManager.selectedPrototypeList, GPUInstancerEditorConstants.TEXT_disableMeshRenderersSimulation, meshRenderersDisabledSimulation, meshRenderersDisabledSimulationMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).meshRenderersDisabledSimulation = v);
-                    }
-                    else if (!meshRenderersDisabledMixed && !meshRenderersDisabled)
-                    {
-                        GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.disableMeshRenderers, GPUInstancerEditorConstants.Colors.lightBlue, Color.white, FontStyle.Bold, Rect.zero,
-                        () =>
-                        {
-                            if (EditorUtility.DisplayDialog(GPUInstancerEditorConstants.TEXT_disableMeshRenderers, GPUInstancerEditorConstants.TEXT_disableMeshRenderersAreYouSure, "Yes", "No"))
-                            {
-                                foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.selectedPrototypeList)
-                                {
-                                    SetRenderersEnabled(prefabPrototype, false);
-                                }
-                            }
-                            GUIUtility.ExitGUI();
-                        });
-                    }
-                    DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_disableMeshRenderers);
-
-#if UNITY_2018_1_OR_NEWER
-                    if (!isTransformsSerializedMixed && isTransformsSerialized)
-                    {
-                        GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.deserializeRegisteredInstances, GPUInstancerEditorConstants.Colors.green, Color.white, FontStyle.Bold, Rect.zero,
-                                () =>
-                                {
-                                    Undo.RecordObject(_prefabManager, "DeserializeTransforms");
-                                    EditorUtility.DisplayProgressBar(GPUInstancerEditorConstants.TEXT_prefabInstanceSerialization, "Deserializing instances...", 0.1f);
-                                    try
-                                    {
-                                        foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.selectedPrototypeList)
-                                        {
-                                            DeserializeTransforms(prefabPrototype);
-                                        }
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Debug.LogError(e);
-                                    }
-                                    EditorUtility.ClearProgressBar();
-                                    GUIUtility.ExitGUI();
-                                });
-                    }
-                    else if (!isTransformsSerializedMixed && !isTransformsSerialized)
-                    {
-                        GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.serializeRegisteredInstances, GPUInstancerEditorConstants.Colors.lightBlue, Color.white, FontStyle.Bold, Rect.zero,
-                                () =>
-                                {
-                                    if (EditorUtility.DisplayDialog(GPUInstancerEditorConstants.TEXT_prefabInstanceSerialization, GPUInstancerEditorConstants.TEXT_prefabInstanceSerializationAreYouSure, GPUInstancerEditorConstants.TEXT_prefabInstanceSerializationYes, "No"))
-                                    {
-                                        Undo.RecordObject(_prefabManager, "SerializeTransforms");
-                                        EditorUtility.DisplayProgressBar(GPUInstancerEditorConstants.TEXT_prefabInstanceSerialization, "Serializing instances... This might take a while.", 0.1f);
-                                        try
-                                        {
-                                            foreach (GPUInstancerPrefabPrototype prefabPrototype in _prefabManager.selectedPrototypeList)
-                                            {
-                                                SerializeTransforms(prefabPrototype);
-                                            }
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Debug.LogError(e);
-                                        }
-                                        EditorUtility.ClearProgressBar();
-                                        GUIUtility.ExitGUI();
-                                    }
-                                });
-                    }
-                    DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_prefabInstanceSerialization);
-#endif
-
-                    if (showSimulator)
-                    {
-                        if (_prefabManager.gpuiSimulator != null)
-                        {
-                            if (_prefabManager.gpuiSimulator.simulateAtEditor)
-                            {
-                                if (_prefabManager.gpuiSimulator.initializingInstances)
-                                {
-                                    EditorGUI.BeginDisabledGroup(true);
-                                    GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.simulateAtEditorPrep, GPUInstancerEditorConstants.Colors.darkBlue, Color.white,
-                                        FontStyle.Bold, Rect.zero, null);
-                                    EditorGUI.EndDisabledGroup();
-                                }
-                                else
-                                {
-                                    GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.simulateAtEditorStop, Color.red, Color.white,
-                                        FontStyle.Bold, Rect.zero, () =>
-                                        {
-                                            _prefabManager.gpuiSimulator.StopSimulation();
-                                        });
-                                }
-                            }
-                            else
-                            {
-                                GPUInstancerEditorConstants.DrawColoredButton(new GUIContent("Simulate at Scene Camera [Experimental]"), GPUInstancerEditorConstants.Colors.green, Color.white,
-                                    FontStyle.Bold, Rect.zero, () =>
-                                    {
-                                        _prefabManager.gpuiSimulator.StartSimulation();
-                                    });
-                            }
-                        }
-                        DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_simulator);
-                    }
-                }
-            }
-
-            EditorGUILayout.EndVertical();
         }
 
         public override float GetMaxDistance(GPUInstancerPrototype selectedPrototype)

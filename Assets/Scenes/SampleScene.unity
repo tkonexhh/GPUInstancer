@@ -491,10 +491,6 @@ MonoBehaviour:
   cameraData:
     mainCamera: {fileID: 1687258584}
     renderOnlySelectedCamera: 0
-  useFloatingOriginHandler: 0
-  applyFloatingOriginRotationAndScale: 0
-  floatingOriginTransform: {fileID: 0}
-  isFrustumCulling: 0
   selectedPrototypeList:
   - {fileID: 11400000, guid: 4fa535a419f04344991d5e63f71a2c58, type: 2}
   isPrototypeTextMode: 0
@@ -506,11 +502,9 @@ MonoBehaviour:
   showGlobalValuesBox: 1
   showRegisteredPrefabsBox: 1
   showPrototypesBox: 1
-  keepSimulationLive: 0
   layerMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  lightProbeDisabled: 0
   registeredPrefabs:
   - prefabPrototype: {fileID: 11400000, guid: 1657ee8b8d1d99f45962c69b5b5776e1, type: 2}
     registeredPrefabs: []

@@ -64,14 +64,6 @@ namespace GPUInstancer
         public static readonly string SHADER_GPUI_STANDARD_ROUGHNESS = "GPUInstancer/Standard (Roughness setup)";
         public static readonly string SHADER_GPUI_VERTEXLIT = "GPUInstancer/VertexLit";
 
-#if UNITY_2020_2_OR_NEWER
-        public static readonly string SHADER_GPUI_FOLIAGE_URP = "GPUInstancer/FoliageURP_GPUI_SG";
-#else
-        public static readonly string SHADER_GPUI_FOLIAGE_URP = "GPUInstancer/FoliageURP";
-#endif
-        public static readonly string SHADER_GPUI_SHADOWS_ONLY = "Hidden/GPUInstancer/ShadowsOnly";
-
-
         public static readonly string SHADER_GPUI_SPEED_TREE = "GPUInstancer/Nature/SPDTree";
         public static readonly string SHADER_GPUI_SPEED_TREE_8 = "GPUInstancer/Nature/SPDTree8";
         public static readonly string SHADER_GPUI_TREE_CREATOR_BARK = "GPUInstancer/Nature/Tree Creator Bark";
@@ -99,7 +91,6 @@ namespace GPUInstancer
         public static readonly string SHADER_VARIANT_COLLECTION_DEFAULT_NAME = "GPUIShaderVariantCollection";
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
         public static readonly string PROTOTYPES_SHADERS_PATH = "PrototypeData/Shaders/";
-        public static readonly string PROTOTYPES_SERIALIZED_PATH = "PrototypeData/SerializedTransforms/";
 
 
 
@@ -129,10 +120,6 @@ namespace GPUInstancer
         public static readonly string TEXT_OK = "OK";
 
         public static readonly string ERRORTEXT_cameraNotFound = "Main Camera cannot be found. GPU Instancer needs either an existing camera with the \"Main Camera\" tag on the scene to autoselect it, or a manually specified camera. If you add your camera at runtime, please use the \"GPUInstancerAPI.SetCamera\" API function.";
-
-        // Debug
-        public static readonly int DEBUG_INFO_SIZE = 105;
-
         public static readonly string ERRORTEXT_shaderGraph = "ShaderGraph shader does not contain GPU Instacer Setup: {0}. Please add GPUInstacer Setup from the ShaderGraph window.";
 
         #endregion Texts

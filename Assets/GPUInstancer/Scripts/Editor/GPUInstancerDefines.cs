@@ -58,8 +58,6 @@ namespace GPUInstancer
             if (forceNew || !GPUInstancerConstants.gpuiSettings.packagesLoaded)
             {
                 _packageListRequest = UnityEditor.PackageManager.Client.List(true);
-                GPUInstancerConstants.gpuiSettings.isHDRP = false;
-                GPUInstancerConstants.gpuiSettings.isLWRP = false;
                 GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = false;
                 EditorApplication.update -= PackageListRequestHandler;
                 EditorApplication.update += PackageListRequestHandler;
@@ -78,17 +76,7 @@ namespace GPUInstancer
                     {
                         foreach (var item in _packageListRequest.Result)
                         {
-                            if (item.name.Contains("com.unity.render-pipelines.high-definition"))
-                            {
-                                GPUInstancerConstants.gpuiSettings.isHDRP = true;
-                                Debug.Log("GPUI detected HD Render Pipeline.");
-                            }
-                            else if (item.name.Contains("com.unity.render-pipelines.lightweight"))
-                            {
-                                GPUInstancerConstants.gpuiSettings.isLWRP = true;
-                                Debug.Log("GPUI detected LW Render Pipeline.");
-                            }
-                            else if (item.name.Contains("com.unity.render-pipelines.universal"))
+                            if (item.name.Contains("com.unity.render-pipelines.universal"))
                             {
                                 GPUInstancerConstants.gpuiSettings.isURP = true;
                                 Debug.Log("GPUI detected Universal Render Pipeline.");

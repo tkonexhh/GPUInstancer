@@ -13,8 +13,6 @@ namespace GPUInstancer
         public GPUInstancerShaderBindings shaderBindings;
         public ShaderVariantCollection shaderVariantCollection;
         public bool packagesLoaded;
-        public bool isHDRP;
-        public bool isLWRP;
         public bool isURP;
         public bool isShaderGraphPresent;
         public int instancingBoundsSize = 10000;
@@ -22,8 +20,6 @@ namespace GPUInstancer
 
 
         #region Editor Constants
-        public float MAX_DETAIL_DISTANCE = 2500;
-        public float MAX_TREE_DISTANCE = 2500;
         public float MAX_PREFAB_DISTANCE = 10000;
         public int MAX_PREFAB_EXTRA_BUFFER_SIZE = 16384;
         #endregion Editor Constants
@@ -42,13 +38,6 @@ namespace GPUInstancer
         public bool useOriginalMaterialWhenInstanced = true;
         #endregion Editor Behaviour
 
-
-        #region Core Settings
-        // public List<GPUIRenderingSettings> renderingSettingPresets;
-
-        // public bool hasCustomRenderingSettings;
-        // public GPUIRenderingSettings customRenderingSettings;
-        #endregion Core Settings
 
         public static GPUInstancerSettings GetDefaultGPUInstancerSettings()
         {
@@ -79,19 +68,6 @@ namespace GPUInstancer
         {
             SetDefaultGPUInstancerShaderBindings();
             SetDefaultShaderVariantCollection();
-
-            // renderingSettingPresets = new List<GPUIRenderingSettings>
-            // {
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Default, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.OpenGLCore, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Metal, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.GLES31, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Vulkan, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.PS4, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
-            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.XBoxOne, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 }
-            // };
-
-
         }
 
         #region Shader Bindings
@@ -149,7 +125,6 @@ namespace GPUInstancer
 #endif
                 shaderVariantCollection = GetDefaultShaderVariantCollection();
             }
-            SetDefaultShaderVariants();
         }
 
         public static ShaderVariantCollection GetDefaultShaderVariantCollection()
@@ -177,10 +152,6 @@ namespace GPUInstancer
             return shaderVariantCollection;
         }
 
-        public virtual void SetDefaultShaderVariants()
-        {
-
-        }
 
         public virtual void AddShaderVariantToCollection(string shaderName, string extensionCode = null)
         {

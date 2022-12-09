@@ -38,68 +38,20 @@ namespace GPUInstancer
         public static readonly string TEXT_enableRuntimeModifications = "Enable Runtime Modifications";
         public static readonly string TEXT_addRemoveInstancesAtRuntime = "Add/Remove Instances At Runtime";
         public static readonly string TEXT_extraBufferSize = "Extra Buffer Size";
-        public static readonly string TEXT_addRuntimeHandlerScript = "Auto. Add/Remove Instances";
         public static readonly string TEXT_registerPrefabsInScene = "Register Instances in Scene";
         public static readonly string TEXT_registeredPrefabs = "Registered Instances";
-        public static readonly string TEXT_applyChangesToTerrain = "Apply Changes To Terrain";
-        public static readonly string TEXT_generatePrototypesConfirmation = "Generate Prototypes Confirmation";
-        public static readonly string TEXT_generatePrototypeAreYouSure = "Are you sure you want to generate prototypes from terrain?";
-        public static readonly string TEXT_debug = "Debug";
-        public static readonly string TEXT_detailGlobal = "Global Detail Values";
-        public static readonly string TEXT_treeGlobal = "Global Tree Values";
-        public static readonly string TEXT_prefabGlobal = "Global Prefab Values";
+
         public static readonly string TEXT_sceneSettings = "Scene Settings";
         public static readonly string TEXT_autoSelectCamera = "Auto Select Camera";
         public static readonly string TEXT_useCamera = "Use Camera";
         public static readonly string TEXT_renderOnlySelectedCamera = "Use Selected Camera Only";
         public static readonly string TEXT_useManagerFrustumCulling = "Use Frustum Culling";
-        public static readonly string TEXT_useManagerOcclusionCulling = "Use Occlusion Culling";
-        public static readonly string TEXT_useOriginalShaderForShadow = "Shadow with Original Shader";
-        public static readonly string TEXT_isLODCrossFade = "LOD Cross Fade";
-        public static readonly string TEXT_isLODCrossFadeAnimate = "Animate Cross-Fading";
-        public static readonly string TEXT_lodFadeTransitionWidth = "LOD Fade Transition Width";
-        public static readonly string TEXT_lodBiasAdjustment = "LOD Bias Adjustment";
         public static readonly string TEXT_info = "Info";
         public static readonly string TEXT_noPrefabInstanceFound = "There are no prefab instances found in the scene.";
         public static readonly string TEXT_noPrefabInstanceSelected = "Please select at least one prefab instance to import to Prefab Manager.";
-        public static readonly string TEXT_continue = "Continue";
-        public static readonly string TEXT_confirmBillboardGeneration = "Unsupported Billboard Warning";
-        public static readonly string TEXT_regenerateBillboardsConfirmation = "Regenerate Billboards Confirmation";
-        public static readonly string TEXT_regenerateBillboardsAreYouSure = "Are you sure you want to regenerate all of the billboard textures for the prototypes defined on this manager?";
 
-        public static readonly string TEXT_terrain = "Terrain";
         public static readonly string TEXT_prefabObject = "Prefab Object";
-        public static readonly string TEXT_prototypeTexture = "Prototype Texture";
         public static readonly string TEXT_prototypeSO = "Prototype SO";
-        public static readonly string TEXT_terrainSettingsSO = "Terrain Settings SO";
-        public static readonly string TEXT_setTerrain = "Set Terrain\n<size=8>Click / Drop</size>";
-        public static readonly string TEXT_removeTerrain = "Unset Terrain";
-        public static readonly string TEXT_removeTerrainConfirmation = "Unset Terrain";
-        public static readonly string TEXT_removeTerrainAreYouSure = "Are you sure you want to unset Terrain Instancing Data?";
-        public static readonly string TEXT_unset = "Unset";
-        public static readonly string TEXT_goToGPUInstancerDetail = "Go To GPUI Detail Manager";
-        public static readonly string TEXT_goToGPUInstancerTree = "Go To GPUI Tree Manager";
-        public static readonly string TEXT_showHelpTooltip = "Show Help";
-        public static readonly string TEXT_hideHelpTooltip = "Hide Help";
-        public static readonly string TEXT_foliageShaderProperties = "Foliage Shader Properties";
-        public static readonly string TEXT_windSettings = "Wind Settings";
-        public static readonly string TEXT_renderSettings = "Render Settings";
-        public static readonly string TEXT_detailProperties = "Detail Properties";
-        public static readonly string TEXT_prefabRuntimeSettings = "Runtime Settings";
-
-        public static readonly string[] TEXT_BillboardQualityOptions = { "Low (1024)", "Mid (2048)", "High (4096)", "Very High (8192)" };
-
-
-        public static readonly string TEXT_mapMagicSet = "Set Map Magic";
-        public static readonly string TEXT_mapMagicImporter = "Map Magic Importer";
-        public static readonly string TEXT_mapMagicImportDetails = "Import Grass";
-        public static readonly string TEXT_mapMagicImportTrees = "Import Trees";
-        public static readonly string TEXT_mapMagicImportObjects = "Import Objects";
-        public static readonly string TEXT_mapMagicObjectsList = "Map Magic Objects List";
-        public static readonly string TEXT_mapMagicImport = "Import";
-        public static readonly string TEXT_mapMagicDetailPrototypes = "Detail Prototypes";
-        public static readonly string TEXT_mapMagicTreePrototypes = "Tree Prototypes";
-        public static readonly string TEXT_mapMagicPrefabPrototypes = "Prefab Prototypes";
 
         public static readonly string TEXT_prefabInstancingActive = "Instancing active with ID: ";
         public static readonly string TEXT_prefabInstancingDisabled = "Instancing disabled for ID: ";
@@ -107,20 +59,6 @@ namespace GPUInstancer
 
         public static readonly string TEXT_importSelectedPrefabs = "Import Selected Prefabs";
 
-        public static readonly string TEXT_shadows = "Shadows";
-        public static readonly string TEXT_useCustomShadowDistance = "Use Custom Shadow Distance";
-        public static readonly string TEXT_shadowDistance = "Shadow Distance";
-        public static readonly string TEXT_culling = "Culling";
-        public static readonly string TEXT_LOD = "LOD";
-        public static readonly string TEXT_cullShadows = "Use Culling For Shadows";
-
-        public static readonly string TEXT_disableMeshRenderers = "Disable Mesh Renderers";
-        public static readonly string TEXT_disableMeshRenderersSimulation = "Simulate Disabled Mesh Renderers";
-        public static readonly string TEXT_disableMeshRenderersAreYouSure = "This action will disable all the Mesh Renderers / LOD Groups / Rigidbodies in this prefab.\n\nThis will speed up initialization operations on the Prefab Manager, since GPUI will not loop through prefab instances to disable these components at runtime.\n\nHowever, these objects will be visible only during play mode and while the Prefab Manager is active and running. You will be able to use this button again to enable the Mesh Renderers, but it is recommended to do this after you finished your scene design.\n\nAfter you do this, you should not manually enable/disable these components on the prefab or its instances.\n\nAre you sure you wish to Disable Mesh Renderers?";
-
-        public static readonly string TEXT_prefabInstanceSerialization = "Prefab Instance Serialization";
-        public static readonly string TEXT_prefabInstanceSerializationAreYouSure = "WARNING: Make sure to backup your scene before using this method.\n\nThis action will remove the registered prefab instances from the scene and save their transform data into a TextAsset.\n\nThis is helpfull to save memory and speed up initialization by getting rid of unnecessary GameObjects.\n\nHowever, these objects will be visible only during play mode or editor simulation and while the Prefab Manager is active and running. You will be able to use this button again to recreate the GameObjects with the same transform data, but it is recommended to do this after you finished your scene design.\n\n Are you sure you wish to Serialize Registered Instances?";
-        public static readonly string TEXT_prefabInstanceSerializationYes = "Yes, I made a backup.";
 
         public static readonly string TEXT_settingAutoGenerateBillboards = "Auto Generate Billboards";
         public static readonly string TEXT_settingAutoShaderConversion = "Auto Shader Conversion";
@@ -135,7 +73,6 @@ namespace GPUInstancer
         public static readonly string TEXT_settingCustomPrevBG = "Custom Preview BG Color";
         public static readonly string TEXT_settingPrevBGColor = "Preview BG Color";
         public static readonly string TEXT_settingInstancingBoundsSize = "Instancing Bounds Size";
-        public static readonly string TEXT_settingVRRenderingMode = "VR Rendering Mode";
 
         public static readonly string TEXT_settingHasCustomRenderingSettings = "Use Custom Rendering Settings";
         public static readonly string TEXT_settingComputeThread = "Max. Compute Thread Count";
@@ -145,51 +82,16 @@ namespace GPUInstancer
         // Editor HelpText
         public static readonly string HELPTEXT_camera = "The camera to use for GPU Instancing. When \"Auto Select Camera\" checkbox is active, GPU Instancer will use the first camera with the \"MainCamera\" tag at startup. If the checkbox is inactive, the desired camera can be set manually. GPU Instancer uses this camera for various calculations including culling operations.";
         public static readonly string HELPTEXT_renderOnlySelectedCamera = "If \"Use Selected Camera Only\" is enabled, instances will only be rendered with the selected camera. They will not be rendered in other active cameras (including the Scene View camera). This may improve performance if there are other cameras in the scene that are mainly used for camera effects, weather/water effects, reflections, etc. Using this option will make them ignore GPUI, increasing performance. Please note that the scene view during play mode will no longer show GPUI instances if this is selected.";
-        public static readonly string HELPTEXT_managerFrustumCulling = "\"Use Frustum Culling\" toggles frustum culling globally for all the prototypes in this manager. By turning frustum culling off, you can view GPUI prototypes in all active cameras since they will not be culled. However, please note that turning frustum culling off may result in a lower FPS than having it on. If turned on, you can still turn frustum culling off for individual prototypes.";
-        public static readonly string HELPTEXT_managerOcclusionCulling = "\"Use Occlusion Culling\" toggles occlusion culling globally for all the prototypes in this manager. By using occlusion culling, the prototypes that are not actually visible at runtime will not be rendered. This will increase rendering performance depending on the amount of occluded geometry. Please note that occlusion culling may lag if the FPS falls to extremely low levels. If this is a possibility, it could be better to turn it off.";
-        public static readonly string HELPTEXT_terrain = "The \"Paint On Terrain\" button is used to navigate to the Unity terrain component that this manager is referencing. Details should be painted on the terrain using Unity's native tools as usual. Detail data on the terrain will be automatically detected by GPU Instancer.\n\nThe \"Unset Terrain\" button is used to disable GPU Instancing on the terrain. It can later be enabled again by using the \"Set Terrain\" button.";
-        public static readonly string HELPTEXT_simulator = "The \"Simulate At Scene Camera\" button can be used to render the terrain details on the scene camera using the current GPU Instancer setup. This simulation is designed to provide a fast sneak peak of the GPU Instanced terrain details without having to enter play mode.";
         public static readonly string HELPTEXT_maxDetailDistance = "\"Max Detail Distance\" defines the maximum distance from the camera within which the terrain details will be rendered. Details that are farther than the specified distance will not be visible. This setting also provides the upper limit for the maximum view distance of each detail prototype.";
-        public static readonly string HELPTEXT_maxTreeDistance = "\"Max Tree Distance\" defines the maximum distance from the camera within which the terrain trees will be rendered. Trees that are farther than the specified distance will not be visible. This setting also provides the upper limit for the maximum view distance of each tree prototype.";
-        public static readonly string HELPTEXT_detailDensity = "\"Detail Density\" goes from 0.0 to 1.0, with 1.0 being the original density, and lower numbers resulting in less detail objects being rendered.";
-        public static readonly string HELPTEXT_detailLayer = "\"Detail Texture Layer\" defines the Layer that the Texture Terrain details will be in. The terrain details that use prefabs will get the Layer value from the prefab object.";
-        public static readonly string HELPTEXT_windVector = "The \"Wind Vector\" specifies the [X, Z] vector (world axis) of the wind for all the prototypes (in this terrain) that use the \"GPUInstancer/Foliage\" shader (which is also the default shader for the texture type grass details). This vector supplies both direction and magnitude information for wind.";
-        public static readonly string HELPTEXT_healthyDryNoiseTexture = "The \"Healthy/Dry Noise Texture\" can be used to specify the Healthy Color / Dry Color variation for all the prototypes that use the \"GPUInstancer/Foliage\" shader in this terrain (which is also the default shader for the texture type grass details). Texture type detail prototypes are also scaled by this noise. This image must be a greyscale noise texture.";
-        public static readonly string HELPTEXT_windWaveNormalTexture = "The \"Wind Wave Normal Texture\" can be used to specify the vectors of all wind animations and coloring for all the prototypes that use the \"GPUInstancer/Foliage\" shader in this terrain (which is also the default shader for the texture type grass details). This image must be a normal map noise texture.";
-        public static readonly string HELPTEXT_spatialPartitioningCellSize = "Detail Manager uses spatial partitioning for loading and unloading detail instances from GPU memory according to camera position. Detail instances are grouped in cells with a calculated size. By selecting \"Auto SP Cell Size\", you can let the manager decide which cell size to use. If you deselect \"Auto SP Cell Size\", you can determine a \"Prefered SP Cell Size\".";
-        public static readonly string HELPTEXT_generatePrototypesDetail = "The \"Generate Prototypes\" button can be used to synchronize the detail prototypes on the Unity terrain and GPU Instancer. It will reset the detail prototype properties with those from the Unity terrain, and use default values for properties that don't exist on the Unity terrain.";
-        public static readonly string HELPTEXT_generatePrototypesTree = "The \"Generate Prototypes\" button can be used to synchronize the tree prototypes on the Unity terrain and GPU Instancer. It will reset the tree prototype properties with those from the Unity terrain, and use default values for properties that don't exist on the Unity terrain.";
         public static readonly string HELPTEXT_prototypes = "\"Prototypes\" show the list of objects that will be used in GPU Instancer. To modify a prototype, click on its icon or text. Use the \"Text Mode\" or \"Icon Mode\" button to switch between preview modes.";
         public static readonly string HELPTEXT_addprototypeprefab = "Click on \"Add\" button and select a prefab to add a prefab prototype to the manager. Note that prefab manager only accepts user created prefabs. It will not accept prefabs that are generated when importing your 3D model assets.";
-        public static readonly string HELPTEXT_addprototypedetail = "Click on \"Add\" button and select a texture or prefab to add a detail prototype to the manager.";
-        public static readonly string HELPTEXT_addprototypetree = "Click on \"Add\" button and a prefab to add a tree prototype to the manager.";
         public static readonly string HELPTEXT_registerPrefabsInScene = "The \"Register Prefabs In Scene\" button can be used to register the prefab instances that are currently in the scene, so that they can be used by GPU Instancer. For adding new instances at runtime check API documentation.";
-        public static readonly string HELPTEXT_setTerrain = "Detail Manager requires a Unity terrain to render detail instances. You can specify a Unity terrain to use with GPU Instancer by either clicking on the \"Set Terrain\" button and choosing a Unity terrain, or dragging and dropping a Unity terrain on it.";
-        public static readonly string HELPTEXT_setTerrainTree = "Tree Manager requires a Unity terrain to render tree instances. You can specify a Unity terrain to use with GPU Instancer by either clicking on the \"Set Terrain\" button and choosing a Unity terrain, or dragging and dropping a Unity terrain on it.";
-        public static readonly string HELPTEXT_useOriginalShaderForShadow = "When \"Shadow with Original Shader\" is enabled, GPU Instancer will use the original shader on your prototype's materials for the shadows of the objects that fall outside the camera's view frustum. If this option is turned off, a default shadowcasting shader will be used instead. Use this option if your shader does vertex operations on the mesh or supports alpha transparency. This is not the default behavior since some shaders might have complex operations on them which might be unnecessary to run for objects outside the view frustum.";
 
-        public static readonly string HELPTEXT_isLODCrossFade = "\"LOD Cross-Fade\" enables cross-fade style blending between the LOD levels of this prototype. This can have a minor impact on performance since during cross-fading, both LOD levels will be rendering.";
-        public static readonly string HELPTEXT_isLODCrossFadeAnimate = "\"Animate Cross-Fading\" animates cross-fading instead of it being distance based. The animation starts with the first occurrence of the changed LOD. During the animation, both LOD levels will be rendered.";
-        public static readonly string HELPTEXT_lodFadeTransitionWidth = "You can use the \"LOD Fade Transition Width\" value to define the cross-fading zone between LOD Levels. This zone is the distance in which the prototype LODs are cross faded. Higher numbers result in wider transition zones. In the transition zone, both LOD levels will be rendered.";
-        public static readonly string HELPTEXT_lodBiasAdjustment = "The \"LOD Bias Adjustment\" value effects the LOD level distances per prototype. When it is set to a value less than 1, it favors less detail. A value of more than 1 favors greater detail.";
-
-        public static readonly string HELPTEXT_isShadowCasting = "\"Is Shadow Casting\" specifies whether the object will cast shadows or not. Shadow casting requires extra shadow passes in the shader resulting in additional rendering operations. GPU Instancer uses various techniques that boost the performance of these operations, but turning shadow casting off completely will increase performance.";
-        public static readonly string HELPTEXT_isFrustumCulling = "\"Is Frustum Culling\" specifies whether the objects that are not in the selected camera's view frustum will be rendered or not. If enabled, GPU Instancer will not render the objects that are outside the selected camera's view frustum. This will increase performance. It is recommended to turn frustum culling on unless there are multiple cameras rendering the scene at the same time.";
-        public static readonly string HELPTEXT_isOcclusionCulling = "\"Is Occlusion Culling\" specifies whether the objects that are occluded by other objects will be rendered or not. If enabled, GPU Instancer will not render the objects that are behind others and would normally not be visible. This will increase performance. It is recommended to turn occlusion culling on unless there are multiple cameras rendering the scene at the same time.";
-        public static readonly string HELPTEXT_frustumOffset = "\"Frustum Offset\" defines the size of the area around the camera frustum planes within which objects will be rendered while frustum culling is enabled. GPU Instancer does frustum culling on the GPU which provides a performance boost. However, if there is a performance hit (usually while rendering an extreme amount of objects in the frustum), and if the camera is moving very fast at the same time, rendering can lag behind the camera movement. This could result in some objects not being rendered around the frustum edges. This offset expands the calculated frustum area so that the renderer can keep up with the camera movement in those cases.";
-        public static readonly string HELPTEXT_occlusionOffset = "\"Occlusion Cull Offset\" defines the depth value (ranged between 0 to 1) that the differences will be discarded while calculating culled objects from the depth texture. Higher offset values will result in less culling.";
-        public static readonly string HELPTEXT_occlusionAccuracy = "\"Occlusion Cull Accuracy\" defines the accuracy of the occlusion culling. Higher values will result in more accurate culling with higher number of texture samples. \n1 => 5 samples (middle point and corner points)\n2 => 9 samples (adds 1/4 points)\n3 => 17 samples (adds 1/8 and 3/8 points)";
-        public static readonly string HELPTEXT_minCullingDistance = "\"Min. Culling Distance\" defines the minimum distance that any kind of culling will occur. If it is a value higher than 0, the instances with a distance less than the specified value to the Camera will not be culled.";
-        public static readonly string HELPTEXT_maxDistanceDetail = "\"Min-Max Distance\" defines the minimum and maximum distance from the selected camera within which this prototype will be rendered. This value is limited by the general \"Max Detail Distance\" above.";
         public static readonly string HELPTEXT_maxDistance = "\"Min-Max Distance\" defines the minimum and maximum distance from the selected camera within which this prototype will be rendered.";
-        public static readonly string HELPTEXT_boundsOffset = "\"Bounds Size Offset\" can be used to increase the bounding box size of the prototype. This will effect the culling and LOD calculations. It is usefull for prototypes with shaders that modify vertex positions.";
 
         public static readonly string HELPTEXT_enableRuntimeModifications = "If \"Enable Runtime Modifications\" is enabled, transform data (position, rotation, scale) for the prefab instances can be modified at runtime with API calls.";
         public static readonly string HELPTEXT_addRemoveInstancesAtRuntime = "If \"Add/Remove Instances At Runtime\" is enabled, new prefab instances can be added or existing ones can be removed at runtime with API calls or by enabling \"Automatically Add/Remove Instances\"";
         public static readonly string HELPTEXT_extraBufferSize = "\"Extra Buffer Size\" specifies the amount of prefab instances that can be added without reinitializing compute buffers at runtime. Instances can be added at runtime with API calls or by enabling \"Automatically Add/Remove Instances\".";
-        public static readonly string HELPTEXT_addRuntimeHandlerScript = "If \"Auto. Add/Remove Instances\" is enabled, new prefab instances will be added or existing ones will be removed automatically at runtime without API calls.";
-        public static readonly string HELPTEXT_autoUpdateTransformData = "If \"Auto. Update Transform Data\" is enabled, transform updates on prefab instances will be made automatically at runtime without API calls.";
-        public static readonly string HELPTEXT_startWithRigidBody = "If \"Start With RigidBody\" is enabled, prefab instances that have a RigidBody component will start with an active RigidBody and it will be active until they go to Sleep state (stop moving).";
 
 
         public static readonly string HELPTEXT_prefabImporterIntro = "The Scene Prefab Importer is designed to easily define prefabs from the existing prefab instances in your scenes to the GPUI Prefab Manager as prototypes. Press the \"?\" button on the top right corner to see more information.";
@@ -204,28 +106,8 @@ namespace GPUInstancer
         public static readonly string HELPTEXT_prefabReplacerSelectedObjects = "The \"Selected GameObjects\" section shows the list of selected GameObjects that will be replaced with prefab instances.";
         public static readonly string HELPTEXT_prefabReplacerReplaceNames = "If \"Replace Names\" option is enabled, new instances will use the prefab name. If disabled, instances will have the same names with the GameObjects that are being replaced.";
 
-        public static readonly string HELPTEXT_settingsIntro = "GPU Instancer Settings can be used to personalize the GPUI Manager editors according to your needs. Press the \"?\" button on the top right corner to see more information.";
-
-        public static readonly string HELPTEXT_applyChangesToTerrain = "The \"Apply Changes To Terrain\" button can be used to modify the Unity terrain component with the changes that are made in Detail Manager.";
         public static readonly string HELPTEXT_removeFromList = "The \"Remove From List\" button removes the prototype from this manager but keeps the settings data related to this prototype.";
         public static readonly string HELPTEXT_delete = "The \"Delete\" button deletes this prototype and removes all related data.";
-        public static readonly string HELPTEXT_terrainProxyWarning = "Adding and removing detail and tree prototypes should be done only from the GPU Instancer Managers. Unity terrain component can be used to paint detail and tree prototypes on the terrain.";
-
-        public static readonly string HELPTEXT_setMapMagic = "Click on this button after you set up your Map Magic component in your scene.";
-        public static readonly string HELPTEXT_useCustomShadowDistance = "If enabled, you can set a custom shadow distance for this prototype. By default GPU Instancer does not render shadows of the objects that are farther than the shadow distance value in the Quality settings for performance reasons. You can use this setting to set a higher value to have shadows for far away objects. It can also be used to have a shorter distance than the Quality setting for performance.";
-        public static readonly string HELPTEXT_cullShadows = "If enabled, culling results will also be applied to the prototype shadows. This will result in more performance, but might also lead to less consistency in shadows.";
-
-        public static readonly string HELPTEXT_runInThreads = "If enabled, makes the initialization calculations for spatial partitioning in Threads. Significantly reduces FPS drops caused by initialization, however it might take longer for the initialization to finish.";
-        public static readonly string HELPTEXT_initializeWithCoroutine = "If enabled, makes the initialization calculations for tree instances in a Coroutine. Significantly reduces FPS drops caused by initialization, however it might take longer for the initialization to finish.";
-
-        public static readonly string HELPTEXT_disableMeshRenderers = "The \"Disable Mesh Renderers\" button  will disable all the Mesh Renderers / LOD Groups / Rigidbodies in this prefab.\n\nThis will speed up initialization operations on the Prefab Manager, since GPUI will not loop through prefab instances to disable these components at runtime.\n\nHowever, these objects will be visible only during play mode and while the Prefab Manager is active and running. You will be able to use this button again to enable the Mesh Renderers, but it is recommended to do this after you finished your scene design.\n\nAfter you do this, you should not manually enable/disable these components on the prefab or its instances.";
-        public static readonly string HELPTEXT_advancedActions = "These actions require advanced knowledge of GPU Instancer operations. If you are not experienced with using GPU Instancer or do not understand how it operates, it is not recommended to use these options.";
-        public static readonly string HELPTEXT_prefabInstanceSerialization = "This action will remove the registered prefab instances from the scene and save their transform data into a TextAsset.\n\nThis is helpfull to save memory and speed up initialization by getting rid of unnecessary GameObjects.\n\nHowever, these objects will be visible only during play mode or editor simulation and while the Prefab Manager is active and running. You will be able to use this button again to recreate the GameObjects with the same transform data, but it is recommended to do this after you finished your scene design.";
-
-        public static readonly string HELPTEXT_Version100Update = "With the new GPU Instancer v1.0.0, there has been some changes in the folder structure to decrease the amount of shaders that are included in the builds. These changes will be available in fresh downloads, however when upgrading it is required to move the folders in the existing project and update the generated shaders.";
-
-        public static readonly string HELPTEXT_customRenderingSettingsApply = "Apply changes";
-        public static readonly string HELPTEXT_customRenderingSettingsRevert = "Revert to saved settings";
 
         public static readonly string ERRORTEXT_cameraNotFound = "Main Camera cannot be found. GPU Instancer needs either an existing camera with the \"Main Camera\" tag on the scene to autoselect it, or a manually specified camera. If you add your camera at runtime, please use the \"GPUInstancerAPI.SetCamera(camera)\" API function.";
 
@@ -243,10 +125,6 @@ namespace GPUInstancer
         public static readonly string HELPTEXT_settingMatrixHandlingType = "Max. Compute Buffers";
         public static readonly string HELPTEXT_settingOcclusionCullingType = "Occlusion Culling Type";
 
-        public static readonly string HELPTEXT_floatingOriginTerrain = "If enabled, positions of the instances will automatically change when terrain position is modified.";
-        public static readonly string HELPTEXT_floatingOriginPrefab = "If enabled, positions of the instances will automatically change when the position of the given transform is modified. If \"Apply Rotation and Scale\" option is enabled, rotation and scale changes of the transform will be also applied.";
-
-        public static readonly string HELPTEXT_disableLightProbes = "While using Indirect GPU Instancing by default all the instances share the same probe value. You can disable light probe usage by enabling this option.";
 
         public static readonly string HELPTEXT_layerMask = "Can be used to discard specific Mesh Renderers of the prototypes. When a Layer is not rendered by GPUI, it will be rendered by the Unity Mesh Renderer component. GPUI will also not enable/disable the Mesh Renderers of the discarded Layer when using Prefab Manager. This allows you to disable GPUI for a specific child Mesh Renderer of a prefeb.";
         public static readonly string HELPTEXT_enableMROnManagerDisable = "If enabled, Prefab Manager will automatically re-enable the Mesh Renderers of the instances when the manager is disabled.";
@@ -271,10 +149,6 @@ namespace GPUInstancer
             public static GUIContent addMultiTextMode = new GUIContent(TEXT_addMultiTextMode);
             public static GUIContent useCamera = new GUIContent(TEXT_useCamera);
             public static GUIContent renderOnlySelectedCamera = new GUIContent(TEXT_renderOnlySelectedCamera, TEXT_renderOnlySelectedCamera);
-            public static GUIContent useManagerFrustumCulling = new GUIContent(TEXT_useManagerFrustumCulling);
-
-            public static GUIContent simulateAtEditorStop = new GUIContent(TEXT_simulateAtEditorStop);
-            public static GUIContent simulateAtEditorPrep = new GUIContent(TEXT_simulateAtEditorPrep);
 
 
             public static GUIContent importSelectedPrefabs = new GUIContent(TEXT_importSelectedPrefabs);
@@ -293,7 +167,6 @@ namespace GPUInstancer
             public static GUIContent settingGenerateShaderVariant = new GUIContent(TEXT_settingGenerateShaderVariant, HELPTEXT_generateShaderVariantCollection);
             public static GUIContent settingDisableICWarning = new GUIContent(TEXT_settingDisableICWarning, HELPTEXT_disableInstanceCountWarnings);
             public static GUIContent settingMaxDetailDist = new GUIContent(TEXT_settingMaxDetailDist, HELPTEXT_maxDetailDistance);
-            public static GUIContent settingMaxTreeDist = new GUIContent(TEXT_settingMaxTreeDist, HELPTEXT_maxTreeDistance);
             public static GUIContent settingMaxPrefabDist = new GUIContent(TEXT_settingMaxPrefabDist, HELPTEXT_maxDistance);
             public static GUIContent settingMaxPrefabBuff = new GUIContent(TEXT_settingMaxPrefabBuff, HELPTEXT_extraBufferSize);
             public static GUIContent settingCustomPrevBG = new GUIContent(TEXT_settingCustomPrevBG, HELPTEXT_customPreviewBG);
@@ -556,44 +429,9 @@ namespace GPUInstancer
         }
 #endif
 
-        [MenuItem("Assets/GPU Instancer/Setup Shaders and Materials for GPUI", validate = false, priority = 2001)]
-        public static void SetupShaderForGPUIMenuItem()
-        {
-            Shader[] shaders = Selection.GetFiltered<Shader>(SelectionMode.Assets);
-            if (shaders != null)
-            {
-                for (int i = 0; i < shaders.Length; i++)
-                {
-                    GPUInstancerAPI.SetupShaderForGPUI(shaders[i]);
-                }
-            }
 
-            Material[] materials = Selection.GetFiltered<Material>(SelectionMode.Assets);
-            if (materials != null)
-            {
-                for (int i = 0; i < materials.Length; i++)
-                {
-                    Material mat = materials[i];
-                    if (!GPUInstancerConstants.gpuiSettings.shaderBindings.IsShadersInstancedVersionExists(mat.shader.name))
-                    {
-                        GPUInstancerAPI.SetupShaderForGPUI(mat.shader);
-                    }
-                    if (GPUInstancerConstants.gpuiSettings.shaderBindings.IsShadersInstancedVersionExists(mat.shader.name))
-                    {
-                        GPUInstancerAPI.AddShaderVariantToCollection(mat);
-                        Debug.Log(mat.name + " material has been successfully added to Shader Variant Collection.", mat);
-                    }
-                }
-            }
-        }
 
-        [MenuItem("Assets/GPU Instancer/Setup Shaders and Materials for GPUI", validate = true, priority = 2001)]
-        public static bool SetupShaderForGPUIMenuItemValidate()
-        {
-            Shader[] shaders = Selection.GetFiltered<Shader>(SelectionMode.Assets);
-            Material[] materials = Selection.GetFiltered<Material>(SelectionMode.Assets);
-            return (shaders != null && shaders.Length > 0) || (materials != null && materials.Length > 0);
-        }
+
 
         private static bool _loadedSettings;
         private static bool _hasCustomRenderingSettings;
@@ -607,17 +445,7 @@ namespace GPUInstancer
 
             if (!gPUInstancerSettings)
                 return;
-            // if (!_loadedSettings)
-            // {
-            //     _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
-            //     if (gPUInstancerSettings.customRenderingSettings != null)
-            //     {
-            //         _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
-            //         _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
-            //     }
-            //     _loadedSettings = true;
-            //     _customRenderingSettingsChanged = false;
-            // }
+
 
             float previousLabelWight = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = previousLabelWight + 75f;
@@ -627,8 +455,7 @@ namespace GPUInstancer
             DrawCustomLabel("Constants", Styles.boldLabel);
             GUILayout.Space(5);
 
-            gPUInstancerSettings.MAX_DETAIL_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxDetailDist, (int)gPUInstancerSettings.MAX_DETAIL_DISTANCE);
-            gPUInstancerSettings.MAX_TREE_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxTreeDist, (int)gPUInstancerSettings.MAX_TREE_DISTANCE);
+
             gPUInstancerSettings.MAX_PREFAB_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxPrefabDist, (int)gPUInstancerSettings.MAX_PREFAB_DISTANCE);
             gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE = EditorGUILayout.IntField(Contents.settingMaxPrefabBuff, gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE);
             gPUInstancerSettings.instancingBoundsSize = EditorGUILayout.IntSlider(Contents.settingInstancingBoundsSize, gPUInstancerSettings.instancingBoundsSize, 1, 10000);
@@ -757,8 +584,6 @@ namespace GPUInstancer
             DrawCustomLabel("Package Definitions", Styles.boldLabel);
 
             EditorGUI.BeginDisabledGroup(true);
-            EditorGUILayout.Toggle("HDRP Loaded", gPUInstancerSettings.isHDRP);
-            EditorGUILayout.Toggle("LWRP Loaded", gPUInstancerSettings.isLWRP);
             EditorGUILayout.Toggle("URP Loaded", gPUInstancerSettings.isURP);
             EditorGUILayout.Toggle("ShaderGraph Loaded", gPUInstancerSettings.isShaderGraphPresent);
             EditorGUI.EndDisabledGroup();

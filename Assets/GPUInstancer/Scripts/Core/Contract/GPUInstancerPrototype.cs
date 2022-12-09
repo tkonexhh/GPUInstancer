@@ -8,15 +8,6 @@ namespace GPUInstancer
     {
         public GameObject prefabObject;
 
-        // Culling
-        public float minDistance = 0;
-        public float maxDistance = 500;
-
-        // Bounds
-        public Vector3 boundsOffset;
-
-        // Other
-        public string warningText;
 
         public override string ToString()
         {

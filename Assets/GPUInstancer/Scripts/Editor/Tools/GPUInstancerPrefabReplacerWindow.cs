@@ -31,9 +31,9 @@ namespace GPUInstancer
             EditorGUILayout.BeginHorizontal(GPUInstancerEditorConstants.Styles.box);
             EditorGUILayout.LabelField(GPUInstancerEditorConstants.GPUI_VERSION, GPUInstancerEditorConstants.Styles.boldLabel);
             GUILayout.FlexibleSpace();
-            GPUInstancerEditor.DrawWikiButton(GUILayoutUtility.GetRect(40, 20), "#The_Prefab_Replacer");
+            // GPUInstancerEditor.DrawWikiButton(GUILayoutUtility.GetRect(40, 20), "#The_Prefab_Replacer");
             GUILayout.Space(10);
-            DrawHelpButton(GUILayoutUtility.GetRect(20, 20), showHelpText);
+            // DrawHelpButton(GUILayoutUtility.GetRect(20, 20), showHelpText);
             EditorGUILayout.EndHorizontal();
 
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_prefabReplacerIntro, true);
@@ -61,8 +61,8 @@ namespace GPUInstancer
             selectedPrefab = (GameObject)EditorGUILayout.ObjectField("Prefab", selectedPrefab, typeof(GameObject), false);
 
 #if UNITY_2018_3_OR_NEWER
-            if (selectedPrefab != null && 
-                    PrefabUtility.GetPrefabAssetType(selectedPrefab) != PrefabAssetType.Regular 
+            if (selectedPrefab != null &&
+                    PrefabUtility.GetPrefabAssetType(selectedPrefab) != PrefabAssetType.Regular
                     && PrefabUtility.GetPrefabAssetType(selectedPrefab) != PrefabAssetType.Variant)
 #else
             if (selectedPrefab != null && PrefabUtility.GetPrefabType(selectedPrefab) != PrefabType.Prefab)
@@ -132,15 +132,6 @@ namespace GPUInstancer
             if (showHelpText || forceShow)
             {
                 EditorGUILayout.HelpBox(text, MessageType.Info);
-            }
-        }
-
-        public void DrawHelpButton(Rect buttonRect, bool showingHelp)
-        {
-            if (GUI.Button(buttonRect, new GUIContent(showHelpText ? helpIconActive : helpIcon,
-                showHelpText ? GPUInstancerEditorConstants.TEXT_hideHelpTooltip : GPUInstancerEditorConstants.TEXT_showHelpTooltip), showHelpText ? GPUInstancerEditorConstants.Styles.helpButtonSelected : GPUInstancerEditorConstants.Styles.helpButton))
-            {
-                showHelpText = !showHelpText;
             }
         }
     }

@@ -10,22 +10,11 @@ namespace GPUInstancer
         private GPUInstancerManager _manager;
         protected GPUInstancerPrototype _pickerOverride;
 
-        protected SerializedProperty prop_useFloatingOriginHandler;
-        protected SerializedProperty prop_applyFloatingOriginRotationAndScale;
-        protected SerializedProperty prop_floatingOriginTransform;
 
         protected SerializedProperty prop_layerMask;
-        protected SerializedProperty prop_disableLightProbes;
-        protected SerializedProperty prop_keepSimulationLive;
-        protected SerializedProperty prop_updateSimulation;
 
         protected int pickerControlID = -1;
         protected bool editorDataChanged = false;
-        protected int pickerMode = 0;
-
-#if !UNITY_2017_1_OR_NEWER
-        private PreviewRenderUtility _previewRenderUtility;
-#endif
 
         protected override void OnEnable()
         {
@@ -37,15 +26,7 @@ namespace GPUInstancer
             _manager = (target as GPUInstancerManager);
             FillPrototypeList();
 
-            prop_useFloatingOriginHandler = serializedObject.FindProperty("useFloatingOriginHandler");
-            prop_applyFloatingOriginRotationAndScale = serializedObject.FindProperty("applyFloatingOriginRotationAndScale");
-            prop_floatingOriginTransform = serializedObject.FindProperty("floatingOriginTransform");
-
             prop_layerMask = serializedObject.FindProperty("layerMask");
-            prop_disableLightProbes = serializedObject.FindProperty("lightProbeDisabled");
-
-            prop_keepSimulationLive = serializedObject.FindProperty("keepSimulationLive");
-            prop_updateSimulation = serializedObject.FindProperty("updateSimulation");
 
             showSceneSettingsBox = _manager.showSceneSettingsBox;
             showPrototypeBox = _manager.showPrototypeBox;
@@ -146,55 +127,16 @@ namespace GPUInstancer
             return false;
         }
 
-        public override void DrawFloatingOriginFields()
-        {
-            EditorGUILayout.PropertyField(prop_useFloatingOriginHandler, GPUInstancerEditorConstants.Contents.useFloatingOriginHandler);
-
-            {
-                if (prop_useFloatingOriginHandler.boolValue)
-                {
-                    EditorGUILayout.PropertyField(prop_floatingOriginTransform, GPUInstancerEditorConstants.Contents.floatingOriginTransform);
-                    EditorGUILayout.PropertyField(prop_applyFloatingOriginRotationAndScale, GPUInstancerEditorConstants.Contents.applyFloatingOriginRotationAndScale);
-                }
-                DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_floatingOriginPrefab);
-            }
-        }
 
         public override void DrawLayerMaskFields()
         {
-            EditorGUILayout.PropertyField(prop_disableLightProbes, GPUInstancerEditorConstants.Contents.disableLightProbes);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_disableLightProbes);
+
             EditorGUI.BeginDisabledGroup(Application.isPlaying);
             EditorGUILayout.PropertyField(prop_layerMask, GPUInstancerEditorConstants.Contents.layerMask);
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_layerMask);
             EditorGUI.EndDisabledGroup();
         }
 
-
-
-        public virtual void DrawGlobalValuesBox()
-        {
-            EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-
-            Rect foldoutRect = GUILayoutUtility.GetRect(0, 20, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
-            foldoutRect.x += 12;
-            showGlobalValuesBox = EditorGUI.Foldout(foldoutRect, showGlobalValuesBox, GetGlobalValuesTitle(), true, GPUInstancerEditorConstants.Styles.foldout);
-
-            if (showGlobalValuesBox)
-            {
-                DrawGlobalValuesContents();
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        public virtual void DrawGlobalValuesContents()
-        {
-        }
-
-        public virtual string GetGlobalValuesTitle()
-        {
-            return GPUInstancerEditorConstants.TEXT_prefabGlobal;
-        }
 
         public virtual void DrawRegisteredPrefabsBox()
         {
@@ -345,7 +287,7 @@ namespace GPUInstancer
                 GPUInstancerEditorConstants.DrawCustomLabel("<size=10><i>*Ctrl+Clict to select multiple, Shift+Click to select adjacent items.</i></size>",
                     GPUInstancerEditorConstants.Styles.richLabel, false);
 
-                DrawGPUInstancerPrototypeBox(_manager.selectedPrototypeList, _manager.isFrustumCulling);
+                DrawGPUInstancerPrototypeBox(_manager.selectedPrototypeList);
             }
             EditorGUILayout.EndVertical();
         }
@@ -356,7 +298,7 @@ namespace GPUInstancer
 
         public virtual void DrawAddPrototypeHelpText()
         {
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addprototypedetail);
+
         }
 
         public void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent)

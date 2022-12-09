@@ -43,8 +43,7 @@ namespace GPUInstancer
 
         #region AddLodAndRenderer
 
-        public virtual void AddRenderer(Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows,
-            int layer = 0, Renderer rendererRef = null, bool receiveShadows = true)
+        public virtual void AddRenderer(Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows, int layer = 0, bool receiveShadows = true)
         {
             if (mesh == null)
             {
@@ -70,7 +69,6 @@ namespace GPUInstancer
                 layer = layer,
                 castShadows = castShadows,
                 receiveShadows = receiveShadows,
-
             };
 
             renderers.Add(renderer);
@@ -98,8 +96,6 @@ namespace GPUInstancer
                 }
                 instanceBounds.Encapsulate(rendererBounds);
             }
-
-            instanceBounds.size += prototype.boundsOffset;
         }
 
         #endregion AddLodAndRenderer
@@ -112,26 +108,20 @@ namespace GPUInstancer
         public virtual bool CreateRenderersFromGameObject(GPUInstancerPrototype prototype)
         {
             if (prototype.prefabObject == null)
+            {
+                Debug.LogError("Can't create renderer(s): reference GameObject is null");
                 return false;
-
+            }
 
             return CreateRenderersFromMeshRenderers(prototype);
         }
 
         public virtual bool CreateRenderersFromMeshRenderers(GPUInstancerPrototype prototype)
         {
-
-
-            if (!prototype.prefabObject)
-            {
-                Debug.LogError("Can't create renderer(s): reference GameObject is null");
-                return false;
-            }
-
             List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
             GetMeshRenderersOfTransform(prototype.prefabObject.transform, meshRenderers);
 
-            if (meshRenderers == null || meshRenderers.Count == 0)
+            if (meshRenderers.Count == 0)
             {
                 Debug.LogError("Can't create renderer(s): no MeshRenderers found in the reference GameObject <" + prototype.prefabObject.name +
                         "> or any of its children");
@@ -165,8 +155,13 @@ namespace GPUInstancer
                 MaterialPropertyBlock mpb = new MaterialPropertyBlock();
                 meshRenderer.GetPropertyBlock(mpb);
 
-                AddRenderer(meshRenderer.GetComponent<MeshFilter>().sharedMesh, instanceMaterials, transformOffset, mpb,
-                    meshRenderer.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off, meshRenderer.gameObject.layer, meshRenderer, meshRenderer.receiveShadows);
+                AddRenderer(meshRenderer.GetComponent<MeshFilter>().sharedMesh,
+                    instanceMaterials,
+                    transformOffset,
+                    mpb,
+                    meshRenderer.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off,
+                    meshRenderer.gameObject.layer,
+                    meshRenderer.receiveShadows);
             }
 
             return true;

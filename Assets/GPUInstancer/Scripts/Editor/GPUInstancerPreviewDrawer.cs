@@ -179,11 +179,7 @@ namespace GPUInstancer
                     backgroundColor = backgroundColor.linear;
             }
 
-            if (GPUInstancerConstants.gpuiSettings.isHDRP && gameObject != null)
-            {
-                _camera.backgroundColor = backgroundColor == Color.clear ? _defaultColor.gamma : backgroundColor.gamma;
-            }
-            else if (_defaultBackgroundTexture != null)
+            if (_defaultBackgroundTexture != null)
             {
                 GL.PushMatrix();
                 GL.LoadOrtho();

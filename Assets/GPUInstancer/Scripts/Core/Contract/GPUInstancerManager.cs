@@ -16,18 +16,11 @@ namespace GPUInstancer
         public bool autoSelectCamera = true;
         public GPUInstancerCameraData cameraData = new GPUInstancerCameraData(null);
 
-        public bool useFloatingOriginHandler = false;
-        public bool applyFloatingOriginRotationAndScale = false;
-        public Transform floatingOriginTransform;
-        [NonSerialized]
-        public GPUInstancerFloatingOriginHandler floatingOriginHandler;
 
         [NonSerialized]
         public List<GPUInstancerRuntimeData> runtimeDataList;
         [NonSerialized]
         public Bounds instancingBounds;
-
-        public bool isFrustumCulling = true;
 
         public static List<GPUInstancerManager> activeManagerList;
         public static bool showRenderedAmount;
@@ -36,8 +29,6 @@ namespace GPUInstancer
 
 #if UNITY_EDITOR
         public List<GPUInstancerPrototype> selectedPrototypeList;
-        [NonSerialized]
-        public GPUInstancerEditorSimulator gpuiSimulator;
         public bool isPrototypeTextMode = false;
 
         public bool showSceneSettingsBox = true;
@@ -50,22 +41,14 @@ namespace GPUInstancer
         public bool showPrototypesBox = true;
 #endif
 
-        public class GPUIThreadData
-        {
-            public Thread thread;
-            public object parameter;
-        }
-        public static int maxThreads = 3;
-        public readonly List<Thread> activeThreads = new List<Thread>();
-        public readonly Queue<GPUIThreadData> threadStartQueue = new Queue<GPUIThreadData>();
-        public readonly Queue<Action> threadQueue = new Queue<Action>();
+
 
 
 
         [NonSerialized]
         public bool isInitialized = false;
 
-#if UNITY_EDITOR && UNITY_2017_2_OR_NEWER
+#if UNITY_EDITOR 
         [NonSerialized]
         public PlayModeStateChange playModeState;
 #endif
@@ -75,14 +58,12 @@ namespace GPUInstancer
         public Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData> runtimeDataDictionary;
 
         public LayerMask layerMask = ~0;
-        public bool lightProbeDisabled = false;
 
         #region MonoBehaviour Methods
 
         public virtual void Awake()
         {
             GPUInstancerConstants.gpuiSettings.SetDefultBindings();
-            // GPUInstancerUtility.SetPlatformDependentVariables();
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -110,11 +91,6 @@ namespace GPUInstancer
 
         public virtual void OnEnable()
         {
-#if UNITY_EDITOR
-            if (gpuiSimulator == null)
-                gpuiSimulator = new GPUInstancerEditorSimulator(this);
-#endif
-
             if (!Application.isPlaying)
                 return;
 
@@ -138,38 +114,9 @@ namespace GPUInstancer
 
             }
 
-            if (useFloatingOriginHandler && floatingOriginTransform != null)
-            {
-                if (floatingOriginHandler == null)
-                {
-                    floatingOriginHandler = floatingOriginTransform.gameObject.GetComponent<GPUInstancerFloatingOriginHandler>();
-                    if (floatingOriginHandler == null)
-                        floatingOriginHandler = floatingOriginTransform.gameObject.AddComponent<GPUInstancerFloatingOriginHandler>();
-                }
-                floatingOriginHandler.applyRotationAndScale = applyFloatingOriginRotationAndScale;
-                if (floatingOriginHandler.gPUIManagers == null)
-                    floatingOriginHandler.gPUIManagers = new List<GPUInstancerManager>();
-                if (!floatingOriginHandler.gPUIManagers.Contains(this))
-                    floatingOriginHandler.gPUIManagers.Add(this);
-            }
+
         }
 
-        public virtual void Update()
-        {
-            ClearCompletedThreads();
-            while (threadStartQueue.Count > 0 && activeThreads.Count < maxThreads)
-            {
-                GPUIThreadData threadData = threadStartQueue.Dequeue();
-                threadData.thread.Start(threadData.parameter);
-                activeThreads.Add(threadData.thread);
-            }
-            if (threadQueue.Count > 0)
-            {
-                Action action = threadQueue.Dequeue();
-                if (action != null)
-                    action.Invoke();
-            }
-        }
 
         public virtual void LateUpdate()
         {
@@ -188,9 +135,6 @@ namespace GPUInstancer
 #endif
         }
 
-        public virtual void OnDestroy()
-        {
-        }
 
         public virtual void Reset()
         {
@@ -206,18 +150,6 @@ namespace GPUInstancer
                 activeManagerList.Remove(this);
 
             ClearInstancingData();
-#if UNITY_EDITOR
-            if (gpuiSimulator != null)
-            {
-                gpuiSimulator.ClearEditorUpdates();
-                gpuiSimulator = null;
-            }
-#endif
-
-            if (floatingOriginHandler != null && floatingOriginHandler.gPUIManagers != null && floatingOriginHandler.gPUIManagers.Contains(this))
-            {
-                floatingOriginHandler.gPUIManagers.Remove(this);
-            }
         }
 
         private void OnApplicationQuit()
@@ -231,14 +163,11 @@ namespace GPUInstancer
         public virtual void ClearInstancingData()
         {
             GPUInstancerUtility.ReleaseInstanceBuffers(runtimeDataList);
-            // GPUInstancerUtility.ReleaseSPBuffers(spData);
             if (runtimeDataList != null)
                 runtimeDataList.Clear();
             if (runtimeDataDictionary != null)
                 runtimeDataDictionary.Clear();
-            // spData = null;
-            threadStartQueue.Clear();
-            threadQueue.Clear();
+
             isInitialized = false;
         }
 
@@ -263,27 +192,6 @@ namespace GPUInstancer
                 GeneratePrototypes();
             else
                 prototypeList.RemoveAll(p => p == null);
-
-            if (GPUInstancerConstants.gpuiSettings != null && GPUInstancerConstants.gpuiSettings.shaderBindings != null)
-            {
-                // GPUInstancerConstants.gpuiSettings.shaderBindings.ClearEmptyShaderInstances();
-                foreach (GPUInstancerPrototype prototype in prototypeList)
-                {
-                    if (prototype.prefabObject != null)
-                    {
-
-                    }
-                    else
-                    {
-                        if (GPUInstancerConstants.gpuiSettings.isURP)
-                        {
-                            if (Shader.Find(GPUInstancerConstants.SHADER_GPUI_FOLIAGE_URP) != null)
-                                GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(GPUInstancerConstants.SHADER_GPUI_FOLIAGE_URP);
-                        }
-
-                    }
-                }
-            }
 
         }
 #endif
@@ -322,17 +230,6 @@ namespace GPUInstancer
 
         #region Public Methods
 
-        public void ClearCompletedThreads()
-        {
-            if (activeThreads.Count > 0)
-            {
-                for (int i = activeThreads.Count - 1; i >= 0; i--)
-                {
-                    if (!activeThreads[i].IsAlive)
-                        activeThreads.RemoveAt(i);
-                }
-            }
-        }
 
         public void InitializeCameraData()
         {
@@ -350,7 +247,7 @@ namespace GPUInstancer
 
                 instancingBounds.center = renderingCameraData.mainCamera.transform.position;
 
-                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList, renderingCameraData, isFrustumCulling);
+                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList, renderingCameraData);
                 GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds, renderingCameraData);
             }
         }
