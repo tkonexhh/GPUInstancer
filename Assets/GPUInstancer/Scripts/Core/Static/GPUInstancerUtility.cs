@@ -63,7 +63,6 @@ namespace GPUInstancer
                 runtimeData.args = new uint[5 * totalSubMeshCount];
                 int argsLastIndex = 0;
 
-                // setup LOD renderers:
                 for (int r = 0; r < runtimeData.renderers.Count; r++)
                 {
                     runtimeData.renderers[r].argsBufferOffset = argsLastIndex;
@@ -119,7 +118,6 @@ namespace GPUInstancer
                 return;
             }
             runtimeData.args[1] = (uint)runtimeData.instanceCount;
-            runtimeData.transformationMatrixVisibilityBuffer.SetData(runtimeData.instanceDataNativeArray);
             runtimeData.argsBuffer.SetData(runtimeData.args);
         }
 

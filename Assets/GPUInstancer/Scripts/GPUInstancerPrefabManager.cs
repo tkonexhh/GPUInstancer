@@ -210,12 +210,6 @@ namespace GPUInstancer
                     if (GPUInstancerUtility.IsInLayer(layerMask, meshRenderers[mr].gameObject.layer))
                         meshRenderers[mr].enabled = enabled;
 
-            BillboardRenderer[] billboardRenderers = prefabInstance.GetComponentsInChildren<BillboardRenderer>(true);
-            if (billboardRenderers != null && billboardRenderers.Length > 0)
-                for (int mr = 0; mr < billboardRenderers.Length; mr++)
-                    if (GPUInstancerUtility.IsInLayer(layerMask, billboardRenderers[mr].gameObject.layer))
-                        billboardRenderers[mr].enabled = enabled;
-
             LODGroup lodGroup = prefabInstance.GetComponent<LODGroup>();
             if (lodGroup != null)
                 lodGroup.enabled = enabled;

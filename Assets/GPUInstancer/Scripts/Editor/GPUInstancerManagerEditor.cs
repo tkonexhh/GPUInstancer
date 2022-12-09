@@ -63,12 +63,12 @@ namespace GPUInstancer
         public override void OnInspectorGUI()
         {
 
+
             isTextMode = _manager.isPrototypeTextMode;
 
             base.OnInspectorGUI();
 
-            if (Application.isPlaying && _manager.cameraData != null && _manager.cameraData.mainCamera == null)
-                EditorGUILayout.HelpBox(GPUInstancerEditorConstants.ERRORTEXT_cameraNotFound, MessageType.Error);
+
         }
 
         public override void InspectorGUIEnd()
@@ -120,16 +120,6 @@ namespace GPUInstancer
                 return true;
             }
             return false;
-        }
-
-
-        public override void DrawLayerMaskFields()
-        {
-
-            EditorGUI.BeginDisabledGroup(Application.isPlaying);
-            EditorGUILayout.PropertyField(prop_layerMask, GPUInstancerEditorConstants.Contents.layerMask);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_layerMask);
-            EditorGUI.EndDisabledGroup();
         }
 
 

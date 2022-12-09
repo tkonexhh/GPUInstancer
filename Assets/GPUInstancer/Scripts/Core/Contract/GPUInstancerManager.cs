@@ -14,7 +14,6 @@ namespace GPUInstancer
         public List<GPUInstancerPrototype> prototypeList;
 
         public bool autoSelectCamera = true;
-        public GPUInstancerCameraData cameraData = new GPUInstancerCameraData(null);
 
 
         [NonSerialized]
@@ -66,7 +65,6 @@ namespace GPUInstancer
             if (Application.isPlaying && activeManagerList == null)
                 activeManagerList = new List<GPUInstancerManager>();
 
-            InitializeCameraData();
 
 #if UNITY_EDITOR
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
@@ -78,13 +76,6 @@ namespace GPUInstancer
         {
             if (!Application.isPlaying)
                 return;
-
-            if (cameraData.mainCamera == null)
-            {
-                InitializeCameraData();
-                if (cameraData.mainCamera == null)
-                    Debug.LogWarning(GPUInstancerConstants.ERRORTEXT_cameraNotFound);
-            }
 
             if (activeManagerList != null && !activeManagerList.Contains(this))
                 activeManagerList.Add(this);
@@ -98,19 +89,15 @@ namespace GPUInstancer
                     InitializeRuntimeDataAndBuffers();
 
             }
-
-
         }
-
 
         public virtual void LateUpdate()
         {
-            if (cameraData.mainCamera != null)
-            {
-                UpdateBuffers(cameraData);
-            }
-        }
+            instancingBounds.center = Camera.main.transform.position;
 
+            GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList);
+            GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds);
+        }
 
         public virtual void Reset()
         {
@@ -169,13 +156,11 @@ namespace GPUInstancer
 #endif
         public virtual void InitializeRuntimeDataAndBuffers(bool forceNew = true)
         {
-            // GPUInstancerUtility.SetPlatformDependentVariables();
             if (forceNew || !isInitialized)
             {
                 instancingBounds = new Bounds(Vector3.zero, Vector3.one * GPUInstancerConstants.gpuiSettings.instancingBoundsSize);
 
                 GPUInstancerUtility.ReleaseInstanceBuffers(runtimeDataList);
-                // GPUInstancerUtility.ReleaseSPBuffers(spData);
                 if (runtimeDataList != null)
                     runtimeDataList.Clear();
                 else
@@ -195,30 +180,6 @@ namespace GPUInstancer
         #endregion Virtual Methods
 
         #region Public Methods
-        public void InitializeCameraData()
-        {
-            if (autoSelectCamera || cameraData.mainCamera == null)
-                cameraData.SetCamera(Camera.main);
-        }
-
-        public void UpdateBuffers(GPUInstancerCameraData renderingCameraData)
-        {
-            if (renderingCameraData != null && renderingCameraData.mainCamera != null)
-            {
-                instancingBounds.center = renderingCameraData.mainCamera.transform.position;
-
-                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList);
-                GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds);
-            }
-        }
-
-        public void SetCamera(Camera camera)
-        {
-            if (cameraData == null)
-                cameraData = new GPUInstancerCameraData(camera);
-            else
-                cameraData.SetCamera(camera);
-        }
 
 #if UNITY_EDITOR
         public void HandlePlayModeStateChanged(PlayModeStateChange state)

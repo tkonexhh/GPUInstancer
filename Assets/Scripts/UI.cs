@@ -37,15 +37,6 @@ public class UI : MonoBehaviour
         OnClickChange();
     }
 
-    private void Update()
-    {
-        modeText.text = grassRenderer.mode.ToString();
-        if (gpuInstancerPrefabManager != null && gpuInstancerPrefabManager.gameObject.activeSelf)
-        {
-            modeText.text = "GPUI";
-        }
-    }
-
     void OnClickChange()
     {
         grassRenderer.InitGameobject(targets[index], (int)slider.value);
@@ -54,7 +45,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager.gameObject.SetActive(true);
         gpuInstancerPrefabManager.ClearRegisteredPrefabInstances();
         gpuInstancerPrefabManager.RegisterPrefabsInScene();
-        GPUInstancerAPI.InitializeGPUInstancer(gpuInstancerPrefabManager, true);
+        gpuInstancerPrefabManager.InitializeRuntimeDataAndBuffers(true);
         gpuInstancerPrefabManager.gameObject.SetActive(false);
     }
 
@@ -89,6 +80,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.GameObject);
+        modeText.text = Mode.GameObject.ToString();
     }
 
     public void ToInstance()
@@ -97,6 +89,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.Instance);
+        modeText.text = Mode.Instance.ToString();
     }
 
     public void ToIndirect()
@@ -105,6 +98,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.Indirect);
+        modeText.text = Mode.Indirect.ToString();
     }
 
     public void ToGPUI()
@@ -112,5 +106,6 @@ public class UI : MonoBehaviour
         grassRenderer.SetMode(Mode.GameObject);
         grassRenderer.gameObject.SetActive(false);
         gpuInstancerPrefabManager.gameObject.SetActive(true);
+        modeText.text = "GPUI";
     }
 }

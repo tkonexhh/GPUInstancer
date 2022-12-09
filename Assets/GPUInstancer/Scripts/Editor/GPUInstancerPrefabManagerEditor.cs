@@ -30,8 +30,6 @@ namespace GPUInstancer
 
             base.OnInspectorGUI();
 
-            DrawSceneSettingsBox();
-
             DrawRegisteredPrefabsBox();
             foreach (GPUInstancerPrefabPrototype prototype in _prefabManager.prototypeList)
             {
@@ -173,25 +171,7 @@ namespace GPUInstancer
             return prefabScript.prefabPrototype;
         }
 
-        public override void DrawSettingContents()
-        {
-            EditorGUILayout.Space();
 
-            DrawCameraDataFields();
-
-            DrawFloatingOriginFields();
-
-            DrawLayerMaskFields();
-        }
-
-        public override void DrawLayerMaskFields()
-        {
-            base.DrawLayerMaskFields();
-            EditorGUI.BeginDisabledGroup(Application.isPlaying);
-            EditorGUILayout.PropertyField(prop_enableMROnManagerDisable, GPUInstancerEditorConstants.Contents.enableMROnManagerDisable);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_enableMROnManagerDisable);
-            EditorGUI.EndDisabledGroup();
-        }
 
 
         public static void SetRenderersEnabled(GPUInstancerPrefabPrototype prefabPrototype, bool enabled)
@@ -298,10 +278,5 @@ namespace GPUInstancer
         public override void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype) { }
         public override void DrawGPUInstancerPrototypeActions() { }
         public override void DrawGPUInstancerPrototypeAdvancedActions() { }
-
-        public override float GetMaxDistance(GPUInstancerPrototype selectedPrototype)
-        {
-            return GPUInstancerConstants.gpuiSettings.MAX_PREFAB_DISTANCE;
-        }
     }
 }

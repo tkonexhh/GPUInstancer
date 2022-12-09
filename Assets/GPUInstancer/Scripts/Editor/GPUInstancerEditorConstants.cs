@@ -424,45 +424,8 @@ namespace GPUInstancer
 
 
             gPUInstancerSettings.MAX_PREFAB_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxPrefabDist, (int)gPUInstancerSettings.MAX_PREFAB_DISTANCE);
-            gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE = EditorGUILayout.IntField(Contents.settingMaxPrefabBuff, gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE);
+            // gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE = EditorGUILayout.IntField(Contents.settingMaxPrefabBuff, gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE);
             gPUInstancerSettings.instancingBoundsSize = EditorGUILayout.IntSlider(Contents.settingInstancingBoundsSize, gPUInstancerSettings.instancingBoundsSize, 1, 10000);
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            DrawCustomLabel("Behaviour", Styles.boldLabel);
-
-            // gPUInstancerSettings.disableAutoGenerateBillboards = !EditorGUILayout.Toggle(Contents.settingAutoGenerateBillboards, !gPUInstancerSettings.disableAutoGenerateBillboards);
-            gPUInstancerSettings.disableAutoShaderConversion = !EditorGUILayout.Toggle(Contents.settingAutoShaderConversion, !gPUInstancerSettings.disableAutoShaderConversion);
-            gPUInstancerSettings.useOriginalMaterialWhenInstanced = EditorGUILayout.Toggle(Contents.settingUseOriginalMaterial, gPUInstancerSettings.useOriginalMaterialWhenInstanced);
-            gPUInstancerSettings.disableAutoVariantHandling = !EditorGUILayout.Toggle(Contents.settingAutoShaderVariantHandling, !gPUInstancerSettings.disableAutoVariantHandling);
-            gPUInstancerSettings.disableShaderVariantCollection = !EditorGUILayout.Toggle(Contents.settingGenerateShaderVariant, !gPUInstancerSettings.disableShaderVariantCollection);
-            gPUInstancerSettings.disableInstanceCountWarning = EditorGUILayout.Toggle(Contents.settingDisableICWarning, gPUInstancerSettings.disableInstanceCountWarning);
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            DrawCustomLabel("Theme", Styles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
-            // gPUInstancerSettings.useCustomPreviewBackgroundColor = EditorGUILayout.Toggle(Contents.settingCustomPrevBG, gPUInstancerSettings.useCustomPreviewBackgroundColor);
-            // EditorGUI.BeginDisabledGroup(!gPUInstancerSettings.useCustomPreviewBackgroundColor);
-            // gPUInstancerSettings.previewBackgroundColor = EditorGUILayout.ColorField(Contents.settingPrevBGColor, gPUInstancerSettings.previewBackgroundColor);
-            // EditorGUI.EndDisabledGroup();
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (Selection.activeGameObject != null && Selection.activeGameObject.GetComponent<GPUInstancerManager>() != null)
-                    Selection.activeGameObject = null;
-                GPUInstancerDefines.previewCache.ClearPreviews();
-            }
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();
@@ -482,46 +445,6 @@ namespace GPUInstancer
             {
                 _customRenderingSettingsChanged = true;
             }
-
-            // if (_customRenderingSettingsChanged)
-            // {
-            //     EditorGUILayout.BeginHorizontal();
-            //     DrawColoredButton(new GUIContent("Apply", HELPTEXT_customRenderingSettingsApply), Colors.green, Color.white, FontStyle.Bold, Rect.zero,
-            //     () =>
-            //     {
-            //         if (_hasCustomRenderingSettings)
-            //         {
-            //             gPUInstancerSettings.hasCustomRenderingSettings = true;
-            //             gPUInstancerSettings.customRenderingSettings = new GPUInstancerSettings.GPUIRenderingSettings();
-            //             gPUInstancerSettings.customRenderingSettings.platform = GPUIPlatform.Default;
-            //             gPUInstancerSettings.customRenderingSettings.computeThreadCount = (GPUIComputeThreadCount)_threadCountSelection;
-            //             gPUInstancerSettings.customRenderingSettings.matrixHandlingType = (GPUIMatrixHandlingType)_matrixHandlingTypeSelection;
-            //         }
-            //         else
-            //         {
-            //             gPUInstancerSettings.hasCustomRenderingSettings = false;
-            //             gPUInstancerSettings.customRenderingSettings = null;
-            //         }
-            //         _customRenderingSettingsChanged = false;
-
-            //         // GPUInstancerUtility.UpdatePlatformDependentFiles();
-            //     });
-
-            //     DrawColoredButton(new GUIContent("Revert", HELPTEXT_customRenderingSettingsRevert), Colors.lightred, Color.white, FontStyle.Bold, Rect.zero,
-            //     () =>
-            //     {
-            //         _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
-            //         if (gPUInstancerSettings.customRenderingSettings != null)
-            //         {
-            //             _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
-            //             _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
-            //         }
-            //         _customRenderingSettingsChanged = false;
-            //     });
-            //     EditorGUILayout.EndHorizontal();
-
-            //     EditorGUILayout.Space();
-            // }
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();

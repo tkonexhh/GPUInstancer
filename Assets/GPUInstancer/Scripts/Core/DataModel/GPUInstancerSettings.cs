@@ -11,29 +11,15 @@ namespace GPUInstancer
     {
 
         public GPUInstancerShaderBindings shaderBindings;
-        // public ShaderVariantCollection shaderVariantCollection;
         public bool packagesLoaded;
 
-        // public bool isShaderGraphPresent;
         public int instancingBoundsSize = 10000;
 
 
 
         #region Editor Constants
         public float MAX_PREFAB_DISTANCE = 10000;
-        public int MAX_PREFAB_EXTRA_BUFFER_SIZE = 16384;
         #endregion Editor Constants
-
-
-        #region Editor Behaviour
-        // public bool disableAutoGenerateBillboards = false;
-        public bool disableShaderVariantCollection = false;
-        public bool disableInstanceCountWarning = false;
-        public bool disableAutoShaderConversion = false;
-        public bool disableAutoVariantHandling = false;
-        public bool useOriginalMaterialWhenInstanced = true;
-        #endregion Editor Behaviour
-
 
         public static GPUInstancerSettings GetDefaultGPUInstancerSettings()
         {
@@ -63,7 +49,6 @@ namespace GPUInstancer
         public virtual void SetDefultBindings()
         {
             SetDefaultGPUInstancerShaderBindings();
-            // SetDefaultShaderVariantCollection();
         }
 
         #region Shader Bindings
@@ -105,50 +90,6 @@ namespace GPUInstancer
             return shaderBindings;
         }
         #endregion Shader Bindings
-
-
-
-        #region Shader Variant Collection
-        //         public virtual void SetDefaultShaderVariantCollection()
-        //         {
-        //             if (disableShaderVariantCollection)
-        //                 return;
-        //             if (shaderVariantCollection == null)
-        //             {
-        // #if UNITY_EDITOR
-        //                 if (!Application.isPlaying)
-        //                     Undo.RecordObject(this, "GPUI ShaderVariantCollection instance generated");
-        // #endif
-        //                 shaderVariantCollection = GetDefaultShaderVariantCollection();
-        //             }
-        //         }
-
-        public static ShaderVariantCollection GetDefaultShaderVariantCollection()
-        {
-            ShaderVariantCollection shaderVariantCollection = Resources.Load<ShaderVariantCollection>(GPUInstancerConstants.SETTINGS_PATH + GPUInstancerConstants.SHADER_VARIANT_COLLECTION_DEFAULT_NAME);
-
-            if (shaderVariantCollection == null)
-            {
-                shaderVariantCollection = new ShaderVariantCollection();
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH))
-                    {
-                        System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH);
-                    }
-
-                    AssetDatabase.CreateAsset(shaderVariantCollection, GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH + GPUInstancerConstants.SHADER_VARIANT_COLLECTION_DEFAULT_NAME + ".shadervariants");
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                }
-#endif
-            }
-
-            return shaderVariantCollection;
-        }
-
-        #endregion Shader Variant Collection
 
     }
 

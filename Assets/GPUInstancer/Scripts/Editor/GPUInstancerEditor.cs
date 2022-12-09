@@ -18,10 +18,6 @@ namespace GPUInstancer
         public static readonly float PROTOTYPE_TEXT_RECT_SIZE_Y = 30;
         public static readonly Vector2 PROTOTYPE_TEXT_RECT_SIZE_VECTOR = new Vector2(PROTOTYPE_TEXT_RECT_SIZE_X - PROTOTYPE_RECT_PADDING * 2, PROTOTYPE_TEXT_RECT_SIZE_Y - PROTOTYPE_RECT_PADDING * 2);
 
-        //protected SerializedProperty prop_settings;
-        protected SerializedProperty prop_autoSelectCamera;
-        protected SerializedProperty prop_mainCamera;
-        protected SerializedProperty prop_renderOnlySelectedCamera;
 
         protected bool showSceneSettingsBox = true;
         protected bool showPrototypeBox = true;
@@ -60,10 +56,6 @@ namespace GPUInstancer
             helpIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON);
             helpIconActive = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON_ACTIVE);
             previewBoxIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.PREVIEW_BOX_ICON);
-
-            prop_autoSelectCamera = serializedObject.FindProperty("autoSelectCamera");
-            prop_mainCamera = serializedObject.FindProperty("cameraData").FindPropertyRelative("mainCamera");
-            prop_renderOnlySelectedCamera = serializedObject.FindProperty("cameraData").FindPropertyRelative("renderOnlySelectedCamera");
 
 
             GPUInstancerDefines.previewCache.ClearEmptyPreviews();
@@ -185,44 +177,6 @@ namespace GPUInstancer
             }
             return null;
         }
-
-        public void DrawCameraDataFields()
-        {
-            EditorGUILayout.PropertyField(prop_autoSelectCamera);
-            if (!prop_autoSelectCamera.boolValue)
-                EditorGUILayout.PropertyField(prop_mainCamera, GPUInstancerEditorConstants.Contents.useCamera);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_camera);
-            EditorGUILayout.PropertyField(prop_renderOnlySelectedCamera, GPUInstancerEditorConstants.Contents.renderOnlySelectedCamera);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_renderOnlySelectedCamera);
-        }
-
-        public virtual void DrawFloatingOriginFields()
-        {
-
-        }
-
-        public virtual void DrawLayerMaskFields()
-        {
-
-        }
-
-
-        public void DrawSceneSettingsBox()
-        {
-            EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-
-            Rect foldoutRect = GUILayoutUtility.GetRect(0, 20, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(false));
-            foldoutRect.x += 12;
-            showSceneSettingsBox = EditorGUI.Foldout(foldoutRect, showSceneSettingsBox, GPUInstancerEditorConstants.TEXT_sceneSettings, true, GPUInstancerEditorConstants.Styles.foldout);
-
-            if (showSceneSettingsBox)
-            {
-                DrawSettingContents();
-            }
-            EditorGUILayout.EndVertical();
-        }
-
-        public abstract void DrawSettingContents();
 
         public virtual void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent, bool isSelected, UnityAction handleSelect, bool isTextMode = false)
         {
@@ -377,7 +331,6 @@ namespace GPUInstancer
         public virtual void DrawGPUInstancerPrototypeBeginningInfo(GPUInstancerPrototype selectedPrototype) { }
         public abstract void DrawGPUInstancerPrototypeActions();
         public virtual void DrawGPUInstancerPrototypeAdvancedActions() { }
-        public abstract float GetMaxDistance(GPUInstancerPrototype selectedPrototype);
 
 
         public virtual void DrawPrefabField(GPUInstancerPrototype selectedPrototype)
@@ -387,196 +340,6 @@ namespace GPUInstancer
             EditorGUI.EndDisabledGroup();
         }
 
-        public static bool MultiToggle(List<GPUInstancerPrototype> selectedPrototypeList, string text, bool value, bool isMixed, UnityAction<GPUInstancerPrototype, bool> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
 
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.Toggle(text, value);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiSlider(List<GPUInstancerPrototype> selectedPrototypeList, string text, float value, float leftValue, float rightValue, bool isMixed, UnityAction<GPUInstancerPrototype, float> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.Slider(text, value, leftValue, rightValue);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiMinMaxSlider(List<GPUInstancerPrototype> selectedPrototypeList, string text, float minValue, float maxValue, float minLimit, float maxLimit, bool isMixed, UnityAction<GPUInstancerPrototype, float, float> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.MinMaxSlider(text, ref minValue, ref maxValue, minLimit, maxLimit);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], minValue, maxValue);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiIntSlider(List<GPUInstancerPrototype> selectedPrototypeList, string text, int value, int leftValue, int rightValue, bool isMixed, UnityAction<GPUInstancerPrototype, int> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.IntSlider(text, value, leftValue, rightValue);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiVector4(List<GPUInstancerPrototype> selectedPrototypeList, string text, Vector4 value, bool isMixed, UnityAction<GPUInstancerPrototype, Vector4> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.Vector4Field(text, value);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiFloat(List<GPUInstancerPrototype> selectedPrototypeList, string text, float value, bool isMixed, UnityAction<GPUInstancerPrototype, float> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            if (text == null)
-                value = EditorGUILayout.FloatField(value);
-            else
-                value = EditorGUILayout.FloatField(text, value);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiColor(List<GPUInstancerPrototype> selectedPrototypeList, string text, Color value, bool isMixed, UnityAction<GPUInstancerPrototype, Color> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.ColorField(text, value);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiVector3(List<GPUInstancerPrototype> selectedPrototypeList, string text, Vector3 value, bool isMixed, bool acceptNegative, UnityAction<GPUInstancerPrototype, Vector3> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.Vector3Field(text, value);
-            if (!acceptNegative)
-            {
-                if (value.x < 0)
-                    value.x = 0;
-                if (value.y < 0)
-                    value.y = 0;
-                if (value.z < 0)
-                    value.z = 0;
-            }
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
-
-        public static bool MultiPopup(List<GPUInstancerPrototype> selectedPrototypeList, string text, int value, string[] options, bool isMixed, UnityAction<GPUInstancerPrototype, int> prototypeAction)
-        {
-            bool hasChanged = false;
-            EditorGUI.showMixedValue = isMixed;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.Popup(text, value, options);
-            if (EditorGUI.EndChangeCheck())
-            {
-                for (int i = 0; i < selectedPrototypeList.Count; i++)
-                {
-                    prototypeAction(selectedPrototypeList[i], value);
-                }
-                hasChanged = true;
-            }
-            EditorGUI.showMixedValue = false;
-
-            return hasChanged;
-        }
     }
 }

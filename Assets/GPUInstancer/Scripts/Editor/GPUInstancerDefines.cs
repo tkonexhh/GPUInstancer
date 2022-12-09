@@ -81,11 +81,6 @@ namespace GPUInstancer
 
                                 Debug.Log("GPUI detected Universal Render Pipeline.");
                             }
-                            // else if (item.name.Contains("com.unity.shadergraph"))
-                            // {
-                            //     GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = true;
-                            //     Debug.Log("GPUI detected ShaderGraph package.");
-                            // }
                         }
 
                         EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings);
@@ -105,12 +100,5 @@ namespace GPUInstancer
                 GPUInstancerConstants.gpuiSettings.shaderBindings = GPUInstancerSettings.GetDefaultGPUInstancerShaderBindings();
             return GPUInstancerConstants.gpuiSettings.shaderBindings;
         }
-
-        // public static ShaderVariantCollection GetShaderVariantCollection()
-        // {
-        //     if (GPUInstancerConstants.gpuiSettings.shaderVariantCollection == null)
-        //         GPUInstancerConstants.gpuiSettings.shaderVariantCollection = GPUInstancerSettings.GetDefaultShaderVariantCollection();
-        //     return GPUInstancerConstants.gpuiSettings.shaderVariantCollection;
-        // }
     }
 }
