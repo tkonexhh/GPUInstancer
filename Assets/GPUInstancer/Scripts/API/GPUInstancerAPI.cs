@@ -51,7 +51,7 @@ namespace GPUInstancer
                 Debug.LogError("Can not find shader! Please make sure that the material has a shader assigned.");
                 return false;
             }
-            GPUInstancerConstants.gpuiSettings.shaderBindings.ClearEmptyShaderInstances();
+            // GPUInstancerConstants.gpuiSettings.shaderBindings.ClearEmptyShaderInstances();
             if (!GPUInstancerConstants.gpuiSettings.shaderBindings.IsShadersInstancedVersionExists(shader.name))
             {
                 if (GPUInstancerUtility.IsShaderInstanced(shader))

@@ -20,7 +20,6 @@ namespace GPUInstancer
             }
         }
 
-        public static readonly Matrix4x4 zeroMatrix = Matrix4x4.zero;
 
         #region Stride Sizes
         // Compute buffer stride sizes
@@ -30,16 +29,6 @@ namespace GPUInstancer
         public static readonly int STRIDE_SIZE_FLOAT = 4;
         public static readonly int STRIDE_SIZE_FLOAT4 = 16;
         #endregion Stride Sizes
-
-        #region Platform Dependent
-
-        public static float COMPUTE_SHADER_THREAD_COUNT = 512;
-        public static float COMPUTE_SHADER_THREAD_COUNT_2D = 16;
-
-        public static readonly string GUID_COMPUTE_PLATFORM_DEFINES = "74a30c752a8958c45a96bc127e05f114";
-        public static readonly string GUID_CGINC_PLATFORM_DEPENDENT = "79e50e99a1888054cb229e1c710f1795";
-
-        #endregion Platform Dependent
 
         #region CS Visibility
         public static class VisibilityKernelPoperties
@@ -74,8 +63,6 @@ namespace GPUInstancer
         public static readonly string SHADER_GPUI_STANDARD_SPECULAR = "GPUInstancer/Standard (Specular setup)";
         public static readonly string SHADER_GPUI_STANDARD_ROUGHNESS = "GPUInstancer/Standard (Roughness setup)";
         public static readonly string SHADER_GPUI_VERTEXLIT = "GPUInstancer/VertexLit";
-        public static readonly string SHADER_GPUI_FOLIAGE = "GPUInstancer/Foliage";
-        public static readonly string SHADER_GPUI_FOLIAGE_LWRP = "GPUInstancer/FoliageLWRP";
 
 #if UNITY_2020_2_OR_NEWER
         public static readonly string SHADER_GPUI_FOLIAGE_URP = "GPUInstancer/FoliageURP_GPUI_SG";
@@ -87,7 +74,6 @@ namespace GPUInstancer
 
         public static readonly string SHADER_GPUI_SPEED_TREE = "GPUInstancer/Nature/SPDTree";
         public static readonly string SHADER_GPUI_SPEED_TREE_8 = "GPUInstancer/Nature/SPDTree8";
-        public static readonly string SHADER_GPUI_TREE_PROXY = "Hidden/GPUInstancer/Nature/TreeProxy";
         public static readonly string SHADER_GPUI_TREE_CREATOR_BARK = "GPUInstancer/Nature/Tree Creator Bark";
         public static readonly string SHADER_GPUI_TREE_CREATOR_BARK_OPTIMIZED = "GPUInstancer/Nature/Tree Creator Bark Optimized";
         public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES = "GPUInstancer/Nature/Tree Creator Leaves";
@@ -96,14 +82,8 @@ namespace GPUInstancer
         public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES_FAST_OPTIMIZED = "GPUInstancer/Nature/Tree Creator Leaves Fast Optimized";
         public static readonly string SHADER_GPUI_TREE_SOFT_OCCLUSION_BARK = "GPUInstancer/Nature/Tree Soft Occlusion Bark";
         public static readonly string SHADER_GPUI_TREE_SOFT_OCCLUSION_LEAVES = "GPUInstancer/Nature/Tree Soft Occlusion Leaves";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_TREE = "GPUInstancer/Billboard/2DRendererTree";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_TREECREATOR = "GPUInstancer/Billboard/2DRendererTreeCreator";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_SOFTOCCLUSION = "GPUInstancer/Billboard/2DRendererSoftOcclusion";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_STANDARD = "GPUInstancer/Billboard/2DRendererStandard";
 
         public static readonly string SHADER_GPUI_ERROR = "Hidden/GPUInstancer/InternalErrorShader";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_URP = "GPUInstancer/Billboard/BillboardURP_GPUI";
-        public static readonly string SHADER_GPUI_BILLBOARD_2D_RENDERER_HDRP = "GPUInstancer/Billboard/BillboardHDRP_GPUI";
 
         #endregion Shaders
 

@@ -9,7 +9,6 @@ namespace GPUInstancer
 {
     public class GPUInstancerSettings : ScriptableObject
     {
-        public float versionNo;
 
         public GPUInstancerShaderBindings shaderBindings;
         public ShaderVariantCollection shaderVariantCollection;
@@ -19,8 +18,6 @@ namespace GPUInstancer
         public bool isURP;
         public bool isShaderGraphPresent;
         public int instancingBoundsSize = 10000;
-
-        private Material _foliageHDRPTemplate;
 
 
 
@@ -47,10 +44,10 @@ namespace GPUInstancer
 
 
         #region Core Settings
-        public List<GPUIRenderingSettings> renderingSettingPresets;
+        // public List<GPUIRenderingSettings> renderingSettingPresets;
 
-        public bool hasCustomRenderingSettings;
-        public GPUIRenderingSettings customRenderingSettings;
+        // public bool hasCustomRenderingSettings;
+        // public GPUIRenderingSettings customRenderingSettings;
         #endregion Core Settings
 
         public static GPUInstancerSettings GetDefaultGPUInstancerSettings()
@@ -83,16 +80,16 @@ namespace GPUInstancer
             SetDefaultGPUInstancerShaderBindings();
             SetDefaultShaderVariantCollection();
 
-            renderingSettingPresets = new List<GPUIRenderingSettings>
-            {
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.Default, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.OpenGLCore, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.Metal, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.GLES31, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.Vulkan, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.PS4, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
-                new GPUIRenderingSettings(){ platform = GPUIPlatform.XBoxOne, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 }
-            };
+            // renderingSettingPresets = new List<GPUIRenderingSettings>
+            // {
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Default, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.OpenGLCore, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Metal, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x256 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.GLES31, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.Vulkan, matrixHandlingType = GPUIMatrixHandlingType.CopyToTexture, computeThreadCount = GPUIComputeThreadCount.x128 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.PS4, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 },
+            //     new GPUIRenderingSettings(){ platform = GPUIPlatform.XBoxOne, matrixHandlingType = GPUIMatrixHandlingType.Default, computeThreadCount = GPUIComputeThreadCount.x512 }
+            // };
 
 
         }
@@ -182,11 +179,7 @@ namespace GPUInstancer
 
         public virtual void SetDefaultShaderVariants()
         {
-            if (IsStandardRenderPipeline())
-            {
-                AddShaderVariantToCollection(GPUInstancerConstants.SHADER_GPUI_SHADOWS_ONLY);
-                AddShaderVariantToCollection(GPUInstancerConstants.SHADER_GPUI_TREE_PROXY);
-            }
+
         }
 
         public virtual void AddShaderVariantToCollection(string shaderName, string extensionCode = null)
@@ -230,71 +223,6 @@ namespace GPUInstancer
         }
         #endregion Shader Variant Collection
 
-        #region Rendering Settings
-        public GPUIMatrixHandlingType GetMatrixHandlingType(GPUIPlatform platform)
-        {
-            if (hasCustomRenderingSettings && customRenderingSettings != null)
-                return customRenderingSettings.matrixHandlingType;
-            for (int i = 0; i < renderingSettingPresets.Count; i++)
-            {
-                if (renderingSettingPresets[i].platform == platform)
-                    return renderingSettingPresets[i].matrixHandlingType;
-            }
-            return GPUIMatrixHandlingType.Default;
-        }
-
-        public GPUIComputeThreadCount GetComputeThreadCount(GPUIPlatform platform)
-        {
-            if (hasCustomRenderingSettings && customRenderingSettings != null)
-                return customRenderingSettings.computeThreadCount;
-            for (int i = 0; i < renderingSettingPresets.Count; i++)
-            {
-                if (renderingSettingPresets[i].platform == platform)
-                    return renderingSettingPresets[i].computeThreadCount;
-            }
-            return GPUIComputeThreadCount.x1024;
-        }
-
-        [Serializable]
-        public class GPUIRenderingSettings
-        {
-            public GPUIPlatform platform;
-            public GPUIMatrixHandlingType matrixHandlingType;
-            public GPUIComputeThreadCount computeThreadCount;
-        }
-        #endregion Rendering Settings
-
-        public bool IsStandardRenderPipeline()
-        {
-            return !isLWRP && !isHDRP && !isURP;
-        }
-
     }
 
-    public enum GPUIPlatform
-    {
-        Default,
-        OpenGLCore,
-        Metal,
-        GLES31,
-        Vulkan,
-        PS4,
-        XBoxOne
-    }
-
-    public enum GPUIMatrixHandlingType
-    {
-        Default = 0,
-        MatrixAppend = 1,
-        CopyToTexture = 2
-    }
-
-    public enum GPUIComputeThreadCount
-    {
-        x64 = 0,
-        x128 = 1,
-        x256 = 2,
-        x512 = 3,
-        x1024 = 4
-    }
 }

@@ -28,36 +28,8 @@ namespace GPUInstancer
         };
 
 
-        #region Extensions
-        public List<GPUInstancerShaderBindingsExtension> shaderBindingsExtensions;
-
-
-        public virtual GPUInstancerShaderBindingsExtension GetExtension(string extensionCode)
-        {
-            if (shaderBindingsExtensions != null && shaderBindingsExtensions.Count > 0)
-            {
-                foreach (GPUInstancerShaderBindingsExtension extension in shaderBindingsExtensions)
-                {
-                    if (extension.GetExtensionCode().Equals(extensionCode))
-                    {
-                        return extension;
-                    }
-                }
-            }
-            Debug.LogError("GPU Instancer Shader Bindings Extension can not be found. ExtensionCode: " + extensionCode);
-            return null;
-        }
-        #endregion Extensions
-
         public virtual Shader GetInstancedShader(string shaderName, string extensionCode = null)
         {
-            if (!string.IsNullOrEmpty(extensionCode))
-            {
-                GPUInstancerShaderBindingsExtension extension = GetExtension(extensionCode);
-                if (extension != null)
-                    return extension.GetInstancedShader(shaderInstances, shaderName);
-                return null;
-            }
 
             if (string.IsNullOrEmpty(shaderName))
                 return null;
@@ -77,22 +49,13 @@ namespace GPUInstancer
             if (_standardUnityShadersGPUI.Contains(shaderName))
                 return Shader.Find(shaderName);
 
-            // if (_extraGPUIShaders.Contains(shaderName))
-            //     return Shader.Find(shaderName);
-
             Debug.LogError("Can not find GPU Instancer setup for shader: " + shaderName + ". Check prototype settings on the Manager for instructions.", Shader.Find(shaderName));
             return Shader.Find(GPUInstancerConstants.SHADER_GPUI_ERROR);
         }
 
         public virtual Material GetInstancedMaterial(Material originalMaterial, string extensionCode = null)
         {
-            if (!string.IsNullOrEmpty(extensionCode))
-            {
-                GPUInstancerShaderBindingsExtension extension = GetExtension(extensionCode);
-                if (extension != null)
-                    return extension.GetInstancedMaterial(shaderInstances, originalMaterial);
-                return null;
-            }
+
             if (originalMaterial == null || originalMaterial.shader == null)
             {
                 Debug.LogWarning("One of the GPU Instancer prototypes is missing material reference! Check the Material references in MeshRenderer.");
@@ -119,75 +82,6 @@ namespace GPUInstancer
 #endif
         }
 
-        public virtual void ClearEmptyShaderInstances()
-        {
-            if (shaderInstances != null)
-            {
-#if UNITY_EDITOR
-                return;
-                bool modified = false;
-                if (shaderBindingsExtensions != null && shaderBindingsExtensions.Count > 0)
-                {
-                    foreach (GPUInstancerShaderBindingsExtension extension in shaderBindingsExtensions)
-                    {
-                        modified |= extension.ClearEmptyShaderInstances(shaderInstances);
-                    }
-                }
-
-                modified |= shaderInstances.RemoveAll(si => si == null || si.instancedShader == null || string.IsNullOrEmpty(si.name)) > 0;
-
-                if (GPUInstancerConstants.gpuiSettings != null && !GPUInstancerConstants.gpuiSettings.disableAutoShaderConversion)
-                {
-                    for (int i = 0; i < shaderInstances.Count; i++)
-                    {
-                        if (shaderInstances[i].isOriginalInstanced || !string.IsNullOrEmpty(shaderInstances[i].extensionCode))
-                            continue;
-
-                        Shader originalShader = Shader.Find(shaderInstances[i].name);
-                        string originalAssetPath = UnityEditor.AssetDatabase.GetAssetPath(originalShader);
-                        DateTime lastWriteTime = System.IO.File.GetLastWriteTime(originalAssetPath);
-                        if (lastWriteTime >= DateTime.Now)
-                            continue;
-
-                        DateTime instancedTime = DateTime.MinValue;
-                        bool isValidDate = false;
-                        if (!string.IsNullOrEmpty(shaderInstances[i].modifiedDate))
-                            isValidDate = DateTime.TryParseExact(shaderInstances[i].modifiedDate, "MM/dd/yyyy HH:mm:ss.fff", System.Globalization.CultureInfo.InvariantCulture,
-                                System.Globalization.DateTimeStyles.None, out instancedTime);
-                        if (!isValidDate || lastWriteTime > Convert.ToDateTime(shaderInstances[i].modifiedDate, System.Globalization.CultureInfo.InvariantCulture))
-                        {
-                            modified = true;
-                            if (!GPUInstancerUtility.IsShaderInstanced(originalShader))
-                            {
-                                shaderInstances[i].instancedShader = GPUInstancerUtility.CreateInstancedShader(originalShader);
-                                shaderInstances[i].modifiedDate = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff",
-                                    System.Globalization.CultureInfo.InvariantCulture);
-                            }
-                            else
-                                shaderInstances[i].isOriginalInstanced = true;
-                        }
-                    }
-                }
-
-                // remove non unique instances
-                List<string> shaderNames = new List<string>();
-                foreach (ShaderInstance si in shaderInstances.ToArray())
-                {
-                    if (shaderNames.Contains(si.name + si.extensionCode))
-                    {
-                        shaderInstances.Remove(si);
-                        modified = true;
-                    }
-                    else
-                        shaderNames.Add(si.name + si.extensionCode);
-                }
-
-                if (modified)
-                    UnityEditor.EditorUtility.SetDirty(this);
-#endif
-            }
-        }
-
         public virtual void AddShaderInstance(string name, Shader instancedShader, bool isOriginalInstanced = false, string extensionCode = null)
         {
             shaderInstances.Add(new ShaderInstance(name, instancedShader, isOriginalInstanced, extensionCode));
@@ -198,13 +92,7 @@ namespace GPUInstancer
 
         public virtual bool IsShadersInstancedVersionExists(string shaderName, string extensionCode = null)
         {
-            if (!string.IsNullOrEmpty(extensionCode))
-            {
-                GPUInstancerShaderBindingsExtension extension = GetExtension(extensionCode);
-                if (extension != null)
-                    return extension.IsShadersInstancedVersionExists(shaderInstances, shaderName);
-                return false;
-            }
+
             if (_standardUnityShaders.Contains(shaderName) || _standardUnityShadersGPUI.Contains(shaderName))
                 return true;
 
@@ -248,23 +136,6 @@ namespace GPUInstancer
             this.isOriginalInstanced = isOriginalInstanced;
             this.extensionCode = extensionCode;
         }
-
-        // public virtual void Regenerate()
-        // {
-        //     if (isOriginalInstanced)
-        //     {
-        //         instancedShader = GPUInstancerUtility.CreateInstancedShader(instancedShader, true);
-        //         return;
-        //     }
-
-        //     Shader originalShader = Shader.Find(name);
-        //     if (originalShader != null)
-        //     {
-        //         instancedShader = GPUInstancerUtility.CreateInstancedShader(originalShader);
-        //         modifiedDate = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff",
-        //             System.Globalization.CultureInfo.InvariantCulture);
-        //     }
-        // }
     }
 
 }

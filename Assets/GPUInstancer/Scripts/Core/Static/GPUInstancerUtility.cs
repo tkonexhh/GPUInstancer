@@ -15,7 +15,6 @@ namespace GPUInstancer
     public static class GPUInstancerUtility
     {
         #region GPU Instancing
-        public static GPUIMatrixHandlingType matrixHandlingType;
 
         /// <summary>
         /// Initializes GPU buffer related data for the instance prototypes. Instance transformation matrices must be generated before this.
@@ -36,11 +35,6 @@ namespace GPUInstancer
             if (runtimeData == null || runtimeData.bufferSize == 0)
                 return;
 
-            if (runtimeData.instanceData == null)
-            {
-                Debug.LogError("instance prototype with an empty LOD list detected. There must be at least one LOD defined per instance prototype.");
-                return;
-            }
 
             #region Set Visibility Buffer
             // Setup the visibility compute buffer
@@ -61,9 +55,9 @@ namespace GPUInstancer
                 // Initialize indirect renderer buffer
                 int totalSubMeshCount = 0;
 
-                for (int j = 0; j < runtimeData.instanceData.renderers.Count; j++)
+                for (int j = 0; j < runtimeData.renderers.Count; j++)
                 {
-                    totalSubMeshCount += runtimeData.instanceData.renderers[j].mesh.subMeshCount;
+                    totalSubMeshCount += runtimeData.renderers[j].mesh.subMeshCount;
                 }
 
                 // Initialize indirect renderer buffer. First LOD's each renderer's all submeshes will be followed by second LOD's each renderer's submeshes and so on.
@@ -71,15 +65,15 @@ namespace GPUInstancer
                 int argsLastIndex = 0;
 
                 // setup LOD renderers:
-                for (int r = 0; r < runtimeData.instanceData.renderers.Count; r++)
+                for (int r = 0; r < runtimeData.renderers.Count; r++)
                 {
-                    runtimeData.instanceData.renderers[r].argsBufferOffset = argsLastIndex;
+                    runtimeData.renderers[r].argsBufferOffset = argsLastIndex;
                     // Setup the indirect renderer buffer:
-                    for (int j = 0; j < runtimeData.instanceData.renderers[r].mesh.subMeshCount; j++)
+                    for (int j = 0; j < runtimeData.renderers[r].mesh.subMeshCount; j++)
                     {
-                        runtimeData.args[argsLastIndex++] = runtimeData.instanceData.renderers[r].mesh.GetIndexCount(j); // index count per instance
+                        runtimeData.args[argsLastIndex++] = runtimeData.renderers[r].mesh.GetIndexCount(j); // index count per instance
                         runtimeData.args[argsLastIndex++] = 0;// (uint)runtimeData.bufferSize;
-                        runtimeData.args[argsLastIndex++] = runtimeData.instanceData.renderers[r].mesh.GetIndexStart(j); // start index location
+                        runtimeData.args[argsLastIndex++] = runtimeData.renderers[r].mesh.GetIndexStart(j); // start index location
                         runtimeData.args[argsLastIndex++] = 0; // base vertex location
                         runtimeData.args[argsLastIndex++] = 0; // start instance location
                     }
@@ -94,14 +88,12 @@ namespace GPUInstancer
             #endregion Set Args Buffer
 
             SetAppendBuffers(runtimeData);
-
-            runtimeData.InitializeData();
         }
 
         #region Set Append Buffers Platform Dependent
         public static void SetAppendBuffers<T>(T runtimeData) where T : GPUInstancerRuntimeData
         {
-            foreach (GPUInstancerRenderer renderer in runtimeData.instanceData.renderers)
+            foreach (GPUInstancerRenderer renderer in runtimeData.renderers)
             {
                 // Setup instance LOD renderer material property block shader buffers with the append buffer
                 renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
@@ -158,9 +150,9 @@ namespace GPUInstancer
                 int offset = 0;
                 int submeshIndex = 0;
 
-                for (int r = 0; r < runtimeData.instanceData.renderers.Count; r++)
+                for (int r = 0; r < runtimeData.renderers.Count; r++)
                 {
-                    rdRenderer = runtimeData.instanceData.renderers[r];
+                    rdRenderer = runtimeData.renderers[r];
                     for (int m = 0; m < rdRenderer.materials.Count; m++)
                     {
                         rdMaterial = rdRenderer.materials[m];
@@ -341,14 +333,13 @@ namespace GPUInstancer
                 AssetDatabase.CreateAsset(prototype, assetPath);
             }
 
-#if UNITY_2018_3_OR_NEWER
             if (!Application.isPlaying && prefabScript != null && prefabScript.prefabPrototype != prototype)
             {
                 GameObject prefabContents = LoadPrefabContents(go);
                 prefabContents.GetComponent<GPUInstancerPrefab>().prefabPrototype = prototype;
                 UnloadPrefabContents(go, prefabContents);
             }
-#endif
+
 #endif
             return prototype;
         }
@@ -435,56 +426,6 @@ namespace GPUInstancer
                 // create shader versions for packages inside GPUI folder
                 if (originalAssetPath.StartsWith("Packages/"))
                     createInDefaultFolder = true;
-
-                // Packages/com.unity.render-pipelines.high-definition/HDRP/
-                // if HDRP, replace relative paths
-                bool isHDRP = false;
-                string hdrpIncludeAddition = "Packages/com.unity.render-pipelines.high-definition/";
-                if (originalShader.name.StartsWith("HDRenderPipeline/"))
-                {
-                    isHDRP = true;
-                    string[] hdrpSplit = originalAssetPath.Split('/');
-                    bool foundHDRP = false;
-                    for (int i = 0; i < hdrpSplit.Length; i++)
-                    {
-                        if (hdrpSplit[i].Contains(".shader"))
-                            break;
-                        if (foundHDRP)
-                        {
-                            hdrpIncludeAddition += hdrpSplit[i] + "/";
-                        }
-                        else
-                        {
-                            if (hdrpSplit[i] == "com.unity.render-pipelines.high-definition")
-                                foundHDRP = true;
-                        }
-                    }
-                }
-
-                // Packages/com.unity.render-pipelines.lightweight/Shaders/Lit.shader
-                // if LWRP, replace relative paths
-                bool isLWRP = false;
-                string lwrpIncludeAddition = "Packages/com.unity.render-pipelines.lightweight/";
-                if (originalShader.name.StartsWith("Lightweight Render Pipeline/"))
-                {
-                    isLWRP = true;
-                    string[] lwrpSplit = originalAssetPath.Split('/');
-                    bool foundLWRP = false;
-                    for (int i = 0; i < lwrpSplit.Length; i++)
-                    {
-                        if (lwrpSplit[i].Contains(".shader"))
-                            break;
-                        if (foundLWRP)
-                        {
-                            lwrpIncludeAddition += lwrpSplit[i] + "/";
-                        }
-                        else
-                        {
-                            if (lwrpSplit[i] == "com.unity.render-pipelines.lightweight")
-                                foundLWRP = true;
-                        }
-                    }
-                }
 
 
                 // Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader
@@ -574,65 +515,7 @@ namespace GPUInstancer
                 }
                 #endregion CGPROGRAM
 
-                // For HDRP Shaders Include relative path fix
-                #region HDRP relative path fix
-                if (isHDRP && createInDefaultFolder)
-                {
-                    lastIndex = 0;
-                    searchStart = "#include \"";
-                    searchEnd = "\"";
-                    string restOfText;
 
-                    foundIndex = -1;
-                    while (true)
-                    {
-                        foundIndex = newShaderText.IndexOf(searchStart, lastIndex);
-                        if (foundIndex == -1)
-                            break;
-                        lastIndex = foundIndex + searchStart.Length + 1;
-
-                        restOfText = newShaderText.Substring(foundIndex + searchStart.Length, newShaderText.Length - foundIndex - searchStart.Length);
-                        if (!restOfText.StartsWith("HDRP") && !restOfText.StartsWith("CoreRP") && !restOfText.StartsWith("Packages"))
-                        {
-                            newShaderText = newShaderText.Substring(0, foundIndex + searchStart.Length) + hdrpIncludeAddition + restOfText;
-                            lastIndex += hdrpIncludeAddition.Length;
-                        }
-
-                        foundIndex = newShaderText.IndexOf(searchEnd, lastIndex);
-                        lastIndex = foundIndex;
-                    }
-                }
-                #endregion HDRP relative path fix
-
-                // For LWRP Shaders Include relative path fix
-                #region LWRP relative path fix
-                if (isLWRP && createInDefaultFolder)
-                {
-                    lastIndex = 0;
-                    searchStart = "#include \"";
-                    searchEnd = "\"";
-                    string restOfText;
-
-                    foundIndex = -1;
-                    while (true)
-                    {
-                        foundIndex = newShaderText.IndexOf(searchStart, lastIndex);
-                        if (foundIndex == -1)
-                            break;
-                        lastIndex = foundIndex + searchStart.Length + 1;
-
-                        restOfText = newShaderText.Substring(foundIndex + searchStart.Length, newShaderText.Length - foundIndex - searchStart.Length);
-                        if (!restOfText.StartsWith("LWRP") && !restOfText.StartsWith("CoreRP") && !restOfText.StartsWith("Packages"))
-                        {
-                            newShaderText = newShaderText.Substring(0, foundIndex + searchStart.Length) + lwrpIncludeAddition + restOfText;
-                            lastIndex += lwrpIncludeAddition.Length;
-                        }
-
-                        foundIndex = newShaderText.IndexOf(searchEnd, lastIndex);
-                        lastIndex = foundIndex;
-                    }
-                }
-                #endregion LWRP relative path fix
 
                 // For URP Shaders Include relative path fix
                 #region URP relative path fix
@@ -776,7 +659,7 @@ namespace GPUInstancer
 
 
         #region Prefab System
-#if UNITY_2018_3_OR_NEWER && UNITY_EDITOR
+#if UNITY_EDITOR
         public static T AddComponentToPrefab<T>(GameObject prefabObject) where T : Component
         {
             PrefabAssetType prefabType = PrefabUtility.GetPrefabAssetType(prefabObject);

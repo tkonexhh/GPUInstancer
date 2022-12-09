@@ -242,20 +242,17 @@ namespace GPUInstancer
 
                     int drawCallCount = 0;
                     int shadowDrawCallCount = 0;
-                    if (runtimeData.transformationMatrixVisibilityBuffer != null && runtimeData.instanceData != null && runtimeData.bufferSize > 0 && runtimeData.instanceCount > 0)
+                    if (runtimeData.transformationMatrixVisibilityBuffer != null && runtimeData.bufferSize > 0 && runtimeData.instanceCount > 0)
                     {
-                        // for (int i = 0; i < runtimeData.instanceLODs.Count; i++)
+
+                        for (int j = 0; j < runtimeData.renderers.Count; j++)
                         {
-                            for (int j = 0; j < runtimeData.instanceData.renderers.Count; j++)
-                            {
-                                GPUInstancerRenderer gpuiRenderer = runtimeData.instanceData.renderers[j];
-                                if (!GPUInstancerUtility.IsInLayer(prop_layerMask.intValue, gpuiRenderer.layer))
-                                    continue;
-                                drawCallCount += gpuiRenderer.materials.Count;
-                                // if (runtimeData.prototype.isShadowCasting && gpuiRenderer.castShadows && runtimeData.IsLODShadowCasting(i))
-                                //     shadowDrawCallCount += gpuiRenderer.materials.Count * QualitySettings.shadowCascades;
-                            }
+                            GPUInstancerRenderer gpuiRenderer = runtimeData.renderers[j];
+                            if (!GPUInstancerUtility.IsInLayer(prop_layerMask.intValue, gpuiRenderer.layer))
+                                continue;
+                            drawCallCount += gpuiRenderer.materials.Count;
                         }
+
                     }
                     string prototypeName = runtimeData.prototype.ToString();
                     GUILayout.Label(prototypeName + " Instance Count: " + String.Format("{0:n0}", runtimeData.instanceCount) +

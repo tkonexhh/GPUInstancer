@@ -25,12 +25,6 @@ namespace GPUInstancer
             prop_enableMROnManagerDisable = serializedObject.FindProperty("enableMROnManagerDisable");
         }
 
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            //if (!Application.isPlaying && _prefabManager.gpuiSimulator != null && _prefabManager.gpuiSimulator.simulateAtEditor)
-            //    _prefabManager.gpuiSimulator.StopSimulation();
-        }
 
         public override void OnInspectorGUI()
         {
@@ -39,8 +33,6 @@ namespace GPUInstancer
             base.OnInspectorGUI();
 
             DrawSceneSettingsBox();
-
-            DrawPrefabGlobalInfoBox();
 
             DrawRegisteredPrefabsBox();
             foreach (GPUInstancerPrefabPrototype prototype in _prefabManager.prototypeList)
@@ -89,11 +81,7 @@ namespace GPUInstancer
 
             if (!(pickerObject is GameObject))
             {
-#if UNITY_2018_3_OR_NEWER
                 if (PrefabUtility.GetPrefabAssetType(pickerObject) == PrefabAssetType.Model)
-#else
-                if (PrefabUtility.GetPrefabType(pickerObject) == PrefabType.ModelPrefab)
-#endif
                     EditorUtility.DisplayDialog(GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_TITLE, GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_3D, GPUInstancerConstants.TEXT_OK);
                 else
                     EditorUtility.DisplayDialog(GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_TITLE, GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING, GPUInstancerConstants.TEXT_OK);
@@ -102,7 +90,7 @@ namespace GPUInstancer
 
             GameObject prefabObject = (GameObject)pickerObject;
 
-#if UNITY_2018_3_OR_NEWER
+
             PrefabAssetType prefabType = PrefabUtility.GetPrefabAssetType(pickerObject);
 
             if (prefabType == PrefabAssetType.Regular || prefabType == PrefabAssetType.Variant)
@@ -130,37 +118,7 @@ namespace GPUInstancer
                     prefabObject = GPUInstancerUtility.GetCorrespongingPrefabOfVariant(prefabObject);
                 }
             }
-#else
-            PrefabType prefabType = PrefabUtility.GetPrefabType(pickerObject);
 
-            if (prefabType != PrefabType.Prefab)
-            {
-                bool instanceFound = false;
-                if (prefabType == PrefabType.PrefabInstance)
-                {
-#if UNITY_2018_2_OR_NEWER
-                    GameObject newPrefabObject = (GameObject)PrefabUtility.GetCorrespondingObjectFromSource(prefabObject);
-#else
-                    GameObject newPrefabObject = (GameObject)PrefabUtility.GetPrefabParent(prefabObject);
-#endif
-                    if (PrefabUtility.GetPrefabType(newPrefabObject) == PrefabType.Prefab)
-                    {
-                        while (newPrefabObject.transform.parent != null)
-                            newPrefabObject = newPrefabObject.transform.parent.gameObject;
-                        prefabObject = newPrefabObject;
-                        instanceFound = true;
-                    }
-                }
-                if (!instanceFound)
-                {
-                    if (prefabType == PrefabType.ModelPrefab)
-                        EditorUtility.DisplayDialog(GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_TITLE, GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_3D, GPUInstancerConstants.TEXT_OK);
-                    else
-                        EditorUtility.DisplayDialog(GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING_TITLE, GPUInstancerConstants.TEXT_PREFAB_TYPE_WARNING, GPUInstancerConstants.TEXT_OK);
-                    return null;
-                }
-            }
-#endif
 
             if (_prefabManager.prefabList.Contains(prefabObject))
             {
@@ -170,21 +128,16 @@ namespace GPUInstancer
             GPUInstancerPrefab prefabScript = prefabObject.GetComponent<GPUInstancerPrefab>();
             if (prefabScript != null && prefabScript.prefabPrototype != null && prefabScript.prefabPrototype.prefabObject != prefabObject)
             {
-#if UNITY_2018_3_OR_NEWER
+
                 GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefab>(prefabObject);
-#else
-                DestroyImmediate(prefabScript, true);
-#endif
+
                 prefabScript = null;
             }
 
             if (prefabScript == null)
             {
-#if UNITY_2018_3_OR_NEWER
                 prefabScript = GPUInstancerUtility.AddComponentToPrefab<GPUInstancerPrefab>(prefabObject);
-#else
-                prefabScript = prefabObject.AddComponent<GPUInstancerPrefab>();
-#endif
+
             }
             if (prefabScript == null)
                 return null;
@@ -228,8 +181,6 @@ namespace GPUInstancer
 
             DrawCameraDataFields();
 
-            DrawCullingSettings(_prefabManager.prototypeList);
-
             DrawFloatingOriginFields();
 
             DrawLayerMaskFields();
@@ -244,26 +195,11 @@ namespace GPUInstancer
             EditorGUI.EndDisabledGroup();
         }
 
-        public void DrawPrefabGlobalInfoBox()
-        {
-            //if (_prefabManager.prefabList == null)
-            //    return;
-
-            //EditorGUI.BeginDisabledGroup(Application.isPlaying);
-            //EditorGUILayout.BeginVertical(GPUInstancerEditorConstants.Styles.box);
-            //GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabGlobal, GPUInstancerEditorConstants.Styles.boldLabel);
-
-            //EditorGUILayout.EndVertical();
-            //EditorGUI.EndDisabledGroup();
-        }
 
         public static void SetRenderersEnabled(GPUInstancerPrefabPrototype prefabPrototype, bool enabled)
         {
-#if UNITY_2018_3_OR_NEWER
             GameObject prefabContents = GPUInstancerUtility.LoadPrefabContents(prefabPrototype.prefabObject);
-#else
-            GameObject prefabContents = prefabPrototype.prefabObject;
-#endif
+
             MeshRenderer[] meshRenderers = prefabContents.GetComponentsInChildren<MeshRenderer>(true);
             if (meshRenderers != null && meshRenderers.Length > 0)
                 for (int mr = 0; mr < meshRenderers.Length; mr++)
@@ -280,9 +216,9 @@ namespace GPUInstancer
 
 
 
-#if UNITY_2018_3_OR_NEWER
+
             GPUInstancerUtility.UnloadPrefabContents(prefabPrototype.prefabObject, prefabContents, true);
-#endif
+
             EditorUtility.SetDirty(prefabPrototype.prefabObject);
             prefabPrototype.meshRenderersDisabled = !enabled;
             EditorUtility.SetDirty(prefabPrototype);
@@ -415,9 +351,9 @@ namespace GPUInstancer
                     {
                         Undo.RecordObject(_prefabManager, "Register prefabs in scene");
                         _prefabManager.RegisterPrefabsInScene();
-#if UNITY_2018_1_OR_NEWER
+
                         SerializeAdditionalTransforms();
-#endif
+
                     });
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_registerPrefabsInScene);
 
@@ -543,11 +479,9 @@ namespace GPUInstancer
                         GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prefabPrototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
                         if (prefabRuntimeHandler == null)
                         {
-#if UNITY_2018_3_OR_NEWER
+
                             GPUInstancerUtility.AddComponentToPrefab<GPUInstancerPrefabRuntimeHandler>(prefabPrototype.prefabObject);
-#else
-                            prefabPrototype.prefabObject.AddComponent<GPUInstancerPrefabRuntimeHandler>();
-#endif
+
                             EditorUtility.SetDirty(prefabPrototype.prefabObject);
                         }
                     }
@@ -559,22 +493,13 @@ namespace GPUInstancer
                         GPUInstancerPrefabRuntimeHandler prefabRuntimeHandler = prefabPrototype.prefabObject.GetComponent<GPUInstancerPrefabRuntimeHandler>();
                         if (prefabRuntimeHandler != null)
                         {
-#if UNITY_2018_3_OR_NEWER
                             GPUInstancerUtility.RemoveComponentFromPrefab<GPUInstancerPrefabRuntimeHandler>(prefabPrototype.prefabObject);
-#else
-                            DestroyImmediate(prefabRuntimeHandler, true);
-#endif
                         }
                     }
                 }
             }
             EditorGUI.EndDisabledGroup();
 
-            // if (!meshRenderersDisabledMixed && !meshRenderersDisabled)
-            // {
-            //     hasChanged |= MultiToggle(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_autoUpdateTransformData, autoUpdateTransformData, autoUpdateTransformDataMixed, (p, v) => ((GPUInstancerPrefabPrototype)p).autoUpdateTransformData = v);
-            //     DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_autoUpdateTransformData);
-            // }
             EditorGUI.EndDisabledGroup();
 
             if (!enableRuntimeModificationsMixed && !enableRuntimeModifications)
@@ -585,12 +510,6 @@ namespace GPUInstancer
                         prefabPrototype.addRemoveInstancesAtRuntime = false;
                     if (prefabPrototype.startWithRigidBody)
                         prefabPrototype.startWithRigidBody = false;
-                    // if (prefabPrototype.autoUpdateTransformData)
-                    // {
-                    //     prefabPrototype.autoUpdateTransformData = false;
-                    //     if (prefabPrototype.meshRenderersDisabled)
-                    //         SetRenderersEnabled(prefabPrototype, !prefabPrototype.meshRenderersDisabled);
-                    // }
                 }
             }
 

@@ -22,9 +22,6 @@ namespace GPUInstancer
         protected SerializedProperty prop_autoSelectCamera;
         protected SerializedProperty prop_mainCamera;
         protected SerializedProperty prop_renderOnlySelectedCamera;
-        protected SerializedProperty prop_isManagerFrustumCulling;
-        // protected SerializedProperty prop_isManagerOcclusionCulling;
-        // protected SerializedProperty prop_minCullingDistance;
 
         protected bool showSceneSettingsBox = true;
         protected bool showPrototypeBox = true;
@@ -70,9 +67,7 @@ namespace GPUInstancer
             prop_autoSelectCamera = serializedObject.FindProperty("autoSelectCamera");
             prop_mainCamera = serializedObject.FindProperty("cameraData").FindPropertyRelative("mainCamera");
             prop_renderOnlySelectedCamera = serializedObject.FindProperty("cameraData").FindPropertyRelative("renderOnlySelectedCamera");
-            prop_isManagerFrustumCulling = serializedObject.FindProperty("isFrustumCulling");
-            // prop_isManagerOcclusionCulling = serializedObject.FindProperty("isOcclusionCulling");
-            // prop_minCullingDistance = serializedObject.FindProperty("minCullingDistance");
+
 
             GPUInstancerDefines.previewCache.ClearEmptyPreviews();
         }
@@ -152,8 +147,8 @@ namespace GPUInstancer
                         Texture2D texture = GetPreviewTexture(prototypeList[i]);
                         prototypeContents[i].image = texture;
                         GPUInstancerDefines.previewCache.AddPreview(prototypeList[i], texture);
-                        if (!GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-                            return;
+
+                        return;
                     }
                 }
             }
@@ -196,7 +191,7 @@ namespace GPUInstancer
                         if (manager != null && manager.isInitialized)
                         {
                             GPUInstancerRuntimeData runtimeData = manager.GetRuntimeData(prototype);
-                            if (runtimeData != null && runtimeData.instanceData != null)
+                            if (runtimeData != null)
                             {
                                 return _previewDrawer.GetPreviewForGameObject(null, new Rect(0, 0, PROTOTYPE_RECT_SIZE - 10, PROTOTYPE_RECT_SIZE - 10),
                        useCustomPreviewBackgroundColor ? previewBackgroundColor : Color.clear, runtimeData);
@@ -272,53 +267,6 @@ namespace GPUInstancer
 
         }
 
-        public void DrawCullingSettings(List<GPUInstancerPrototype> protoypeList)
-        {
-            EditorGUILayout.PropertyField(prop_isManagerFrustumCulling, GPUInstancerEditorConstants.Contents.useManagerFrustumCulling);
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_managerFrustumCulling);
-            // EditorGUILayout.PropertyField(prop_isManagerOcclusionCulling, GPUInstancerEditorConstants.Contents.useManagerOcclusionCulling);
-            // DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_managerOcclusionCulling);
-
-            // #if GPUI_URP
-            //             if (prop_isManagerOcclusionCulling.boolValue
-            //                 && GraphicsSettings.currentRenderPipeline is UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset
-            //                 && !((UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset)GraphicsSettings.currentRenderPipeline).supportsCameraDepthTexture)
-            //                 EditorGUILayout.HelpBox("The Occlusion Culling feature requires the Depth Texture option to be enabled in the URP pipeline settings. It is currently disabled.", MessageType.Warning);
-            // #endif
-
-            // Min Culling Distance
-            // EditorGUI.BeginChangeCheck();
-            // float newCullingDistanceValue = EditorGUILayout.Slider(GPUInstancerEditorConstants.Contents.minManagerCullingDistance, prop_minCullingDistance.floatValue, 0, 100);
-
-            // if (EditorGUI.EndChangeCheck())
-            // {
-            //     if (protoypeList != null)
-            //     {
-            //         foreach (GPUInstancerPrototype prototype in protoypeList)
-            //         {
-            //             if (prototype.minCullingDistance == prop_minCullingDistance.floatValue)
-            //             {
-            //                 prototype.minCullingDistance = newCullingDistanceValue;
-            //                 EditorUtility.SetDirty(prototype);
-            //             }
-            //         }
-            //     }
-            //     prop_minCullingDistance.floatValue = newCullingDistanceValue;
-            // }
-            // DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_minCullingDistance);
-
-            // if (protoypeList != null)
-            // {
-            //     foreach (GPUInstancerPrototype prototype in protoypeList)
-            //     {
-            //         if (prototype.minCullingDistance < newCullingDistanceValue)
-            //         {
-            //             prototype.minCullingDistance = newCullingDistanceValue;
-            //             EditorUtility.SetDirty(prototype);
-            //         }
-            //     }
-            // }
-        }
 
         public void DrawSceneSettingsBox()
         {
@@ -357,9 +305,9 @@ namespace GPUInstancer
             GUI.SetNextControlName(prototypeContent.tooltip);
             Color prototypeColor;
             if (isSelected)
-                prototypeColor = string.IsNullOrEmpty(prototype.warningText) ? GPUInstancerEditorConstants.Colors.lightGreen : GPUInstancerEditorConstants.Colors.lightred;
+                prototypeColor = GPUInstancerEditorConstants.Colors.lightGreen;
             else
-                prototypeColor = string.IsNullOrEmpty(prototype.warningText) ? GUI.backgroundColor : GPUInstancerEditorConstants.Colors.darkred;
+                prototypeColor = GUI.backgroundColor;
 
             GPUInstancerEditorConstants.DrawColoredButton(prototypeContent, prototypeColor, GPUInstancerEditorConstants.Styles.label.normal.textColor, FontStyle.Normal, iconRect,
                     () =>
@@ -418,16 +366,6 @@ namespace GPUInstancer
                 float minDistance = prototype0.minDistance;
                 bool maxDistanceMixed = false;
                 float maxDistance = prototype0.maxDistance;
-                bool isFrustumCullingMixed = false;
-                bool isFrustumCulling = prototype0.isFrustumCulling;
-                bool frustumOffsetMixed = false;
-                float frustumOffset = prototype0.frustumOffset;
-                // bool occlusionOffsetMixed = false;
-                // float occlusionOffset = prototype0.occlusionOffset;
-                // bool occlusionAccuracyMixed = false;
-                // int occlusionAccuracy = prototype0.occlusionAccuracy;
-                // bool minCullingDistanceMixed = false;
-                // float minCullingDistance = prototype0.minCullingDistance;
                 bool boundsOffsetMixed = false;
                 Vector3 boundsOffset = prototype0.boundsOffset;
                 for (int i = 1; i < selectedPrototypeList.Count; i++)
@@ -437,18 +375,7 @@ namespace GPUInstancer
                         minDistanceMixed = true;
                     if (!maxDistanceMixed && maxDistance != selectedPrototypeList[i].maxDistance)
                         maxDistanceMixed = true;
-                    if (!isFrustumCullingMixed && isFrustumCulling != selectedPrototypeList[i].isFrustumCulling)
-                        isFrustumCullingMixed = true;
-                    if (!frustumOffsetMixed && frustumOffset != selectedPrototypeList[i].frustumOffset)
-                        frustumOffsetMixed = true;
-                    // if (!isOcclusionCullingMixed && isOcclusionCulling != selectedPrototypeList[i].isOcclusionCulling)
-                    //     isOcclusionCullingMixed = true;
-                    // if (!occlusionOffsetMixed && occlusionOffset != selectedPrototypeList[i].occlusionOffset)
-                    //     occlusionOffsetMixed = true;
-                    // if (!occlusionAccuracyMixed && occlusionAccuracy != selectedPrototypeList[i].occlusionAccuracy)
-                    //     occlusionAccuracyMixed = true;
-                    // if (!minCullingDistanceMixed && minCullingDistance != selectedPrototypeList[i].minCullingDistance)
-                    //     minCullingDistanceMixed = true;
+
                     if (!boundsOffsetMixed && boundsOffset != selectedPrototypeList[i].boundsOffset)
                         boundsOffsetMixed = true;
                 }
@@ -466,20 +393,7 @@ namespace GPUInstancer
                 hasChanged |= MultiFloat(selectedPrototypeList, null, maxDistance, minDistanceMixed, (p, v) => p.maxDistance = v);
                 EditorGUILayout.EndHorizontal();
                 DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_maxDistance);
-                if (isManagerFrustumCulling)
-                {
-                    hasChanged |= MultiToggle(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_isFrustumCulling, isFrustumCulling, isFrustumCullingMixed, (p, v) => p.isFrustumCulling = v);
-                    DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_isFrustumCulling);
 
-                    hasChanged |= MultiSlider(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_frustumOffset, frustumOffset, 0.0f, 0.5f, frustumOffsetMixed, (p, v) => p.frustumOffset = v);
-                    DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_frustumOffset);
-                }
-
-                if (isManagerFrustumCulling)
-                {
-                    // hasChanged |= MultiSlider(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_minCullingDistance, minCullingDistance, 0, 100, minCullingDistanceMixed, (p, v) => p.minCullingDistance = v);
-                    // DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_minCullingDistance);
-                }
                 hasChanged |= MultiVector3(selectedPrototypeList, GPUInstancerEditorConstants.TEXT_boundsOffset, boundsOffset, boundsOffsetMixed, false, (p, v) => p.boundsOffset = v);
                 DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_boundsOffset);
 
@@ -569,22 +483,7 @@ namespace GPUInstancer
             EditorGUILayout.EndHorizontal();
             DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_maxDistance);
 
-            if (isFrustumCulling)
-            {
-                selectedPrototype.isFrustumCulling = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_isFrustumCulling, selectedPrototype.isFrustumCulling);
-                DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_isFrustumCulling);
-                if (selectedPrototype.isFrustumCulling)
-                {
-                    selectedPrototype.frustumOffset = EditorGUILayout.Slider(GPUInstancerEditorConstants.TEXT_frustumOffset, selectedPrototype.frustumOffset, 0.0f, 0.5f);
-                    DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_frustumOffset);
-                }
-            }
 
-            if (isFrustumCulling)
-            {
-                // selectedPrototype.minCullingDistance = EditorGUILayout.Slider(GPUInstancerEditorConstants.TEXT_minCullingDistance, selectedPrototype.minCullingDistance, 0, 100);
-                // DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_minCullingDistance);
-            }
             EditorGUI.BeginDisabledGroup(Application.isPlaying);
             selectedPrototype.boundsOffset = EditorGUILayout.Vector3Field(GPUInstancerEditorConstants.TEXT_boundsOffset, selectedPrototype.boundsOffset);
             EditorGUI.EndDisabledGroup();

@@ -99,8 +99,7 @@ namespace GPUInstancer
                                 Debug.Log("GPUI detected ShaderGraph package.");
                             }
                         }
-                        if (GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-                            Debug.Log("GPUI detected Standard Render Pipeline.");
+
                         EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings);
                     }
                 }

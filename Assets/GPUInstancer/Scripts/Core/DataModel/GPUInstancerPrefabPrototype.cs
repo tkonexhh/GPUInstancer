@@ -12,7 +12,6 @@ namespace GPUInstancer
         public int extraBufferSize;
         public bool addRuntimeHandlerScript;
         public bool meshRenderersDisabled;
-        //public bool meshRenderersDisabledSimulation = true;
         public bool isTransformsSerialized;
         public TextAsset serializedTransformData;
         public int serializedTransformDataCount;

@@ -272,28 +272,13 @@ namespace GPUInstancer
             public static GUIContent useCamera = new GUIContent(TEXT_useCamera);
             public static GUIContent renderOnlySelectedCamera = new GUIContent(TEXT_renderOnlySelectedCamera, TEXT_renderOnlySelectedCamera);
             public static GUIContent useManagerFrustumCulling = new GUIContent(TEXT_useManagerFrustumCulling);
-            public static GUIContent useManagerOcclusionCulling = new GUIContent(TEXT_useManagerOcclusionCulling);
-            public static GUIContent minManagerCullingDistance = new GUIContent(TEXT_minCullingDistance);
-            public static GUIContent simulateAtEditor = new GUIContent(TEXT_simulateAtEditor);
+
             public static GUIContent simulateAtEditorStop = new GUIContent(TEXT_simulateAtEditorStop);
             public static GUIContent simulateAtEditorPrep = new GUIContent(TEXT_simulateAtEditorPrep);
 
 
-
             public static GUIContent importSelectedPrefabs = new GUIContent(TEXT_importSelectedPrefabs);
             public static GUIContent cancel = new GUIContent(TEXT_cancel);
-
-
-
-            public static List<GUIContent> shadowLODs = new List<GUIContent> {
-                new GUIContent("LOD 0 Shadow"), new GUIContent("LOD 1 Shadow"), new GUIContent("LOD 2 Shadow"), new GUIContent("LOD 3 Shadow"),
-                new GUIContent("LOD 4 Shadow"), new GUIContent("LOD 5 Shadow"), new GUIContent("LOD 6 Shadow"), new GUIContent("LOD 7 Shadow")
-            };
-
-            public static List<GUIContent> LODs = new List<GUIContent> {
-                new GUIContent("LOD 0"), new GUIContent("LOD 1"), new GUIContent("LOD 2"), new GUIContent("LOD 3"),
-                new GUIContent("LOD 4"), new GUIContent("LOD 5"), new GUIContent("LOD 6"), new GUIContent("LOD 7"), new GUIContent("None")
-            };
 
 
             public static GUIContent disableMeshRenderers = new GUIContent("Disable Mesh Renderers");
@@ -319,8 +304,6 @@ namespace GPUInstancer
             public static GUIContent[] settingComputeThreadOptions = new GUIContent[] { new GUIContent("64"), new GUIContent("128"), new GUIContent("256"), new GUIContent("512"), new GUIContent("1024") };
             public static GUIContent settingMatrixHandlingType = new GUIContent(TEXT_settingMatrixHandlingType, HELPTEXT_settingMatrixHandlingType);
             public static GUIContent[] settingMatrixHandlingTypeOptions = new GUIContent[] { new GUIContent("Unlimited"), new GUIContent("1 Compute Buffer"), new GUIContent("None") };
-            public static GUIContent settingOcclusionCullingType = new GUIContent(TEXT_settingOcclusionCullingType, HELPTEXT_settingOcclusionCullingType);
-            public static GUIContent[] settingOcclusionCullingTypeOptions = new GUIContent[] { new GUIContent("Graphics.Blit"), new GUIContent("Compute Shader") };
 
             public static GUIContent useFloatingOriginHandler = new GUIContent("Use Floating Origin");
             public static GUIContent floatingOriginTransform = new GUIContent("Transform of Floating Origin");
@@ -459,25 +442,12 @@ namespace GPUInstancer
             List<GameObject> prefabList = new List<GameObject>();
             foreach (GameObject go in prefabInstances)
             {
-#if UNITY_2018_3_OR_NEWER
                 AddPrefabObjectsToList(go, prefabList);
-#else
-                if (PrefabUtility.GetPrefabType(go) == PrefabType.PrefabInstance)
-                {
-#if UNITY_2018_2_OR_NEWER
-                    GameObject prefab = (GameObject)PrefabUtility.GetCorrespondingObjectFromSource(go);
-#else
-                    GameObject prefab = (GameObject)PrefabUtility.GetPrefabParent(go);
-#endif
-                    if (prefab.transform.parent == null && !prefabList.Contains(prefab))
-                        prefabList.Add(prefab);
-                }
-#endif
             }
             GPUInstancerPrefabImporterWindow.ShowWindow(prefabList);
         }
 
-#if UNITY_2018_3_OR_NEWER
+
         private static void AddPrefabObjectsToList(GameObject go, List<GameObject> prefabList)
         {
             PrefabAssetType prefabType = PrefabUtility.GetPrefabAssetType(go);
@@ -508,7 +478,7 @@ namespace GPUInstancer
                 }
             }
         }
-#endif
+
 
         [MenuItem("Tools/GPU Instancer/Show Prefab Replacer", validate = false, priority = 102)]
         public static void ToolbarShowPrefabReplacer()
@@ -542,41 +512,6 @@ namespace GPUInstancer
                 }
             }
         }
-
-        // [MenuItem("Tools/GPU Instancer/Shaders/Regenerate GPUI Shaders", validate = false, priority = 202)]
-        // public static void RegenrateGPUIShaders()
-        // {
-        //     GPUInstancerShaderBindings shaderBindings = GPUInstancerDefines.GetGPUInstancerShaderBindings();
-        //     if (shaderBindings != null && shaderBindings.shaderInstances != null && shaderBindings.shaderInstances.Count > 0)
-        //     {
-        //         if (EditorUtility.DisplayDialog("Regenerate GPUI Shaders", "This operation will update all shaders that is generated by GPU Instancer.\n\nDo you wish to continue?",
-        //             "Yes", "No"))
-        //         {
-        //             foreach (ShaderInstance si in shaderBindings.shaderInstances)
-        //             {
-        //                 si.Regenerate();
-        //             }
-        //             EditorUtility.SetDirty(shaderBindings);
-        //         }
-        //     }
-        // }
-
-        // [MenuItem("Tools/GPU Instancer/Shaders/Clear Shader Variants", validate = false, priority = 301)]
-        // public static void ClearShaderVariants()
-        // {
-        //     ShaderVariantCollection shaderVariantCollection = GPUInstancerDefines.GetShaderVariantCollection();
-        //     if (shaderVariantCollection != null && shaderVariantCollection.shaderCount > 0)
-        //     {
-        //         if (EditorUtility.DisplayDialog("Clear Shader Variants", "This operation will clear shader variant references for GPUI compatible shaders and they will be recreated when needed.\n\nDo you wish to continue?",
-        //             "Yes", "No"))
-        //         {
-        //             shaderVariantCollection.Clear();
-        //             EditorUtility.SetDirty(shaderVariantCollection);
-        //             AssetDatabase.SaveAssets();
-        //             AssetDatabase.Refresh();
-        //         }
-        //     }
-        // }
 
         [MenuItem("Tools/GPU Instancer/Shaders/Edit Shader Variants", validate = false, priority = 301)]
         public static void EditShaderVariants()
@@ -672,17 +607,17 @@ namespace GPUInstancer
 
             if (!gPUInstancerSettings)
                 return;
-            if (!_loadedSettings)
-            {
-                _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
-                if (gPUInstancerSettings.customRenderingSettings != null)
-                {
-                    _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
-                    _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
-                }
-                _loadedSettings = true;
-                _customRenderingSettingsChanged = false;
-            }
+            // if (!_loadedSettings)
+            // {
+            //     _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
+            //     if (gPUInstancerSettings.customRenderingSettings != null)
+            //     {
+            //         _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
+            //         _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
+            //     }
+            //     _loadedSettings = true;
+            //     _customRenderingSettingsChanged = false;
+            // }
 
             float previousLabelWight = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = previousLabelWight + 75f;
@@ -754,45 +689,45 @@ namespace GPUInstancer
                 _customRenderingSettingsChanged = true;
             }
 
-            if (_customRenderingSettingsChanged)
-            {
-                EditorGUILayout.BeginHorizontal();
-                DrawColoredButton(new GUIContent("Apply", HELPTEXT_customRenderingSettingsApply), Colors.green, Color.white, FontStyle.Bold, Rect.zero,
-                () =>
-                {
-                    if (_hasCustomRenderingSettings)
-                    {
-                        gPUInstancerSettings.hasCustomRenderingSettings = true;
-                        gPUInstancerSettings.customRenderingSettings = new GPUInstancerSettings.GPUIRenderingSettings();
-                        gPUInstancerSettings.customRenderingSettings.platform = GPUIPlatform.Default;
-                        gPUInstancerSettings.customRenderingSettings.computeThreadCount = (GPUIComputeThreadCount)_threadCountSelection;
-                        gPUInstancerSettings.customRenderingSettings.matrixHandlingType = (GPUIMatrixHandlingType)_matrixHandlingTypeSelection;
-                    }
-                    else
-                    {
-                        gPUInstancerSettings.hasCustomRenderingSettings = false;
-                        gPUInstancerSettings.customRenderingSettings = null;
-                    }
-                    _customRenderingSettingsChanged = false;
+            // if (_customRenderingSettingsChanged)
+            // {
+            //     EditorGUILayout.BeginHorizontal();
+            //     DrawColoredButton(new GUIContent("Apply", HELPTEXT_customRenderingSettingsApply), Colors.green, Color.white, FontStyle.Bold, Rect.zero,
+            //     () =>
+            //     {
+            //         if (_hasCustomRenderingSettings)
+            //         {
+            //             gPUInstancerSettings.hasCustomRenderingSettings = true;
+            //             gPUInstancerSettings.customRenderingSettings = new GPUInstancerSettings.GPUIRenderingSettings();
+            //             gPUInstancerSettings.customRenderingSettings.platform = GPUIPlatform.Default;
+            //             gPUInstancerSettings.customRenderingSettings.computeThreadCount = (GPUIComputeThreadCount)_threadCountSelection;
+            //             gPUInstancerSettings.customRenderingSettings.matrixHandlingType = (GPUIMatrixHandlingType)_matrixHandlingTypeSelection;
+            //         }
+            //         else
+            //         {
+            //             gPUInstancerSettings.hasCustomRenderingSettings = false;
+            //             gPUInstancerSettings.customRenderingSettings = null;
+            //         }
+            //         _customRenderingSettingsChanged = false;
 
-                    // GPUInstancerUtility.UpdatePlatformDependentFiles();
-                });
+            //         // GPUInstancerUtility.UpdatePlatformDependentFiles();
+            //     });
 
-                DrawColoredButton(new GUIContent("Revert", HELPTEXT_customRenderingSettingsRevert), Colors.lightred, Color.white, FontStyle.Bold, Rect.zero,
-                () =>
-                {
-                    _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
-                    if (gPUInstancerSettings.customRenderingSettings != null)
-                    {
-                        _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
-                        _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
-                    }
-                    _customRenderingSettingsChanged = false;
-                });
-                EditorGUILayout.EndHorizontal();
+            //     DrawColoredButton(new GUIContent("Revert", HELPTEXT_customRenderingSettingsRevert), Colors.lightred, Color.white, FontStyle.Bold, Rect.zero,
+            //     () =>
+            //     {
+            //         _hasCustomRenderingSettings = gPUInstancerSettings.hasCustomRenderingSettings;
+            //         if (gPUInstancerSettings.customRenderingSettings != null)
+            //         {
+            //             _threadCountSelection = (int)gPUInstancerSettings.customRenderingSettings.computeThreadCount;
+            //             _matrixHandlingTypeSelection = (int)gPUInstancerSettings.customRenderingSettings.matrixHandlingType;
+            //         }
+            //         _customRenderingSettingsChanged = false;
+            //     });
+            //     EditorGUILayout.EndHorizontal();
 
-                EditorGUILayout.Space();
-            }
+            //     EditorGUILayout.Space();
+            // }
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();

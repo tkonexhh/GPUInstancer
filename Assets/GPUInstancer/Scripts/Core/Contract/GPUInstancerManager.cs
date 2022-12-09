@@ -266,25 +266,16 @@ namespace GPUInstancer
 
             if (GPUInstancerConstants.gpuiSettings != null && GPUInstancerConstants.gpuiSettings.shaderBindings != null)
             {
-                GPUInstancerConstants.gpuiSettings.shaderBindings.ClearEmptyShaderInstances();
+                // GPUInstancerConstants.gpuiSettings.shaderBindings.ClearEmptyShaderInstances();
                 foreach (GPUInstancerPrototype prototype in prototypeList)
                 {
                     if (prototype.prefabObject != null)
                     {
-                        // GPUInstancerUtility.GenerateInstancedShadersForGameObject(prototype);
-                        if (string.IsNullOrEmpty(prototype.warningText))
-                        {
-                            if (prototype.prefabObject.GetComponentInChildren<MeshRenderer>() == null)
-                            {
-                                prototype.warningText = "Prefab object does not contain any Mesh Renderers.";
-                            }
-                        }
+
                     }
                     else
                     {
-                        if (GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-                            GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(GPUInstancerConstants.SHADER_GPUI_FOLIAGE);
-                        else if (GPUInstancerConstants.gpuiSettings.isURP)
+                        if (GPUInstancerConstants.gpuiSettings.isURP)
                         {
                             if (Shader.Find(GPUInstancerConstants.SHADER_GPUI_FOLIAGE_URP) != null)
                                 GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(GPUInstancerConstants.SHADER_GPUI_FOLIAGE_URP);

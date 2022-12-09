@@ -11,8 +11,6 @@ namespace GPUInstancer
         // Culling
         public float minDistance = 0;
         public float maxDistance = 500;
-        public bool isFrustumCulling = false;
-        public float frustumOffset = 0.2f;
 
         // Bounds
         public Vector3 boundsOffset;

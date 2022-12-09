@@ -12,10 +12,8 @@ namespace GPUInstancer
     public class GPUInstancerRuntimeData
     {
         public GPUInstancerPrototype prototype;
-
-        // Mesh - Material - LOD info
-        // public List<GPUInstancerPrototypeLOD> instanceLODs;
-        public GPUInstancerPrototypeLOD instanceData;
+        // public GPUInstancerPrototypeLOD instanceData;
+        public List<GPUInstancerRenderer> renderers;
         public Bounds instanceBounds;
 
         // Instance Data
@@ -37,10 +35,6 @@ namespace GPUInstancer
             this.prototype = prototype;
         }
 
-        public virtual void InitializeData()
-        {
-        }
-
         public virtual void ReleaseBuffers()
         {
             if (instanceDataNativeArray.IsCreated)
@@ -49,35 +43,9 @@ namespace GPUInstancer
 
         #region AddLodAndRenderer
 
-        /// <summary>
-        /// Registers an LOD to the prototype. LODs contain the renderers for instance prototypes,
-        /// so even if no LOD is being used, the prototype must be registered as LOD0 using this method.
-        /// </summary>
-        /// <param name="screenRelativeTransitionHeight">if not defined, will default to 0</param>
-        public virtual void AddLod(float screenRelativeTransitionHeight = -1, bool excludeBounds = false)
-        {
-            GPUInstancerPrototypeLOD instanceLOD = new GPUInstancerPrototypeLOD();
-            instanceData = instanceLOD;
-        }
-
-        /// <summary>
-        /// Adds a renderer to an LOD. Renderers define the meshes and materials to render for a given instance prototype LOD.
-        /// </summary>
-        /// <param name="lod">The LOD to add this renderer to. LOD indices start from 0.</param>
-        /// <param name="mesh">The mesh that this renderer will use.</param>
-        /// <param name="materials">The list of materials that this renderer will use (must be GPU Instancer compatible materials)</param>
-        /// <param name="transformOffset">The transformation matrix that represents a change in position, rotation and scale 
-        /// for this renderer as an offset from the instance prototype. This matrix will be applied to the prototype instance 
-        /// matrix for final rendering calculations in the shader. Use Matrix4x4.Identity if no offset is desired.</param>
         public virtual void AddRenderer(Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows,
             int layer = 0, Renderer rendererRef = null, bool receiveShadows = true)
         {
-
-            if (instanceData == null)
-            {
-                return;
-            }
-
             if (mesh == null)
             {
                 Debug.LogError("Can't add renderer: mesh is null. Make sure that all the MeshFilters on the objects has a mesh assigned.");
@@ -90,8 +58,8 @@ namespace GPUInstancer
                 return;
             }
 
-            if (instanceData.renderers == null)
-                instanceData.renderers = new List<GPUInstancerRenderer>();
+            if (renderers == null)
+                renderers = new List<GPUInstancerRenderer>();
 
             GPUInstancerRenderer renderer = new GPUInstancerRenderer
             {
@@ -102,28 +70,27 @@ namespace GPUInstancer
                 layer = layer,
                 castShadows = castShadows,
                 receiveShadows = receiveShadows,
-                rendererRef = rendererRef,
-                rendererRefName = rendererRef != null && rendererRef.gameObject != null ? rendererRef.gameObject.name : null
+
             };
 
-            instanceData.renderers.Add(renderer);
+            renderers.Add(renderer);
             CalculateBounds();
         }
 
         public virtual void CalculateBounds()
         {
-            if (instanceData == null || instanceData.renderers == null || instanceData.renderers.Count == 0)
+            if (renderers == null || renderers.Count == 0)
                 return;
 
             Bounds rendererBounds;
 
-            for (int r = 0; r < instanceData.renderers.Count; r++)
+            for (int r = 0; r < renderers.Count; r++)
             {
-                rendererBounds = new Bounds(instanceData.renderers[r].mesh.bounds.center + (Vector3)instanceData.renderers[r].transformOffset.GetColumn(3),
+                rendererBounds = new Bounds(renderers[r].mesh.bounds.center + (Vector3)renderers[r].transformOffset.GetColumn(3),
                     new Vector3(
-                   instanceData.renderers[r].mesh.bounds.size.x * instanceData.renderers[r].transformOffset.GetRow(0).magnitude,
-                    instanceData.renderers[r].mesh.bounds.size.y * instanceData.renderers[r].transformOffset.GetRow(1).magnitude,
-                   instanceData.renderers[r].mesh.bounds.size.z * instanceData.renderers[r].transformOffset.GetRow(2).magnitude));
+                    renderers[r].mesh.bounds.size.x * renderers[r].transformOffset.GetRow(0).magnitude,
+                    renderers[r].mesh.bounds.size.y * renderers[r].transformOffset.GetRow(1).magnitude,
+                    renderers[r].mesh.bounds.size.z * renderers[r].transformOffset.GetRow(2).magnitude));
                 if (r == 0)
                 {
                     instanceBounds = rendererBounds;
@@ -148,28 +115,12 @@ namespace GPUInstancer
                 return false;
 
 
-            if (instanceData == null)
-                AddLod();
-            return CreateRenderersFromMeshRenderers(0, prototype);
-
+            return CreateRenderersFromMeshRenderers(prototype);
         }
 
-
-
-        /// <summary>
-        /// Generates instancing renderer data for a given protoype from its Mesh renderers at the given LOD level.
-        /// </summary>
-        /// <param name="lod">Which LOD level to generate renderers in</param>
-        /// <param name="prototype">GPU Instancer Prototype</param>
-        /// <param name="gpuiSettings">GPU Instancer settings to find appropriate shader for materials</param>
-        /// <returns></returns>
-        public virtual bool CreateRenderersFromMeshRenderers(int lod, GPUInstancerPrototype prototype)
+        public virtual bool CreateRenderersFromMeshRenderers(GPUInstancerPrototype prototype)
         {
-            if (instanceData == null)
-            {
-                Debug.LogError("Can't create renderer(s): Invalid LOD");
-                return false;
-            }
+
 
             if (!prototype.prefabObject)
             {
@@ -240,12 +191,6 @@ namespace GPUInstancer
         #endregion CreateRenderersFromGameObject
     }
 
-    public class GPUInstancerPrototypeLOD
-    {
-        // Prototype Data
-        public List<GPUInstancerRenderer> renderers; // support for multiple mesh renderers
-    }
-
     public class GPUInstancerRenderer
     {
         public Mesh mesh;
@@ -256,7 +201,5 @@ namespace GPUInstancer
         public int layer;
         public bool castShadows;
         public bool receiveShadows;
-        public Renderer rendererRef;
-        public string rendererRefName;
     }
 }

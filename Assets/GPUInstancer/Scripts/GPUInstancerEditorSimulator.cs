@@ -48,12 +48,9 @@ namespace GPUInstancer
             EditorApplication.update += FindSceneViewCamera;
             EditorApplication.update -= EditorUpdate;
             EditorApplication.update += EditorUpdate;
-#if UNITY_2017_2_OR_NEWER
+
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
-#else
-            EditorApplication.playmodeStateChanged = HandlePlayModeStateChanged;
-#endif
         }
 
         public void StopSimulation()
@@ -63,46 +60,25 @@ namespace GPUInstancer
 
             simulateAtEditor = false;
 
-#if UNITY_2018_1_OR_NEWER
-            if (!GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-#if UNITY_2019_1_OR_NEWER
-                UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
-#else
-                UnityEngine.Experimental.Rendering.RenderPipeline.beginCameraRendering -= CameraOnPreCull;
-#endif
-            else
-#endif
-                Camera.onPreCull -= CameraOnPreCull;
+            UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
 
             EditorApplication.update -= EditorUpdate;
-#if UNITY_2017_2_OR_NEWER
+
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
-#endif
+
         }
 
         public void ClearEditorUpdates()
         {
             simulateAtEditor = false;
 
-#if UNITY_2018_1_OR_NEWER
-            if (!GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-#if UNITY_2019_1_OR_NEWER
-                UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
-#else
-                UnityEngine.Experimental.Rendering.RenderPipeline.beginCameraRendering -= CameraOnPreCull;
-#endif
-            else
-#endif
-                Camera.onPreCull -= CameraOnPreCull;
-
+            UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
 
             EditorApplication.update -= FindSceneViewCamera;
-#if UNITY_2017_2_OR_NEWER
+
             EditorApplication.pauseStateChanged -= HandlePauseStateChanged;
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
-#else
-            EditorApplication.playmodeStateChanged = null;
-#endif
+
         }
 
         private void FindSceneViewCamera()
@@ -133,37 +109,22 @@ namespace GPUInstancer
                     if (!gpuiManager.isInitialized)
                     {
                         gpuiManager.InitializeRuntimeDataAndBuffers();
-                        // if (gpuiManager.GetComponent<GPUInstancerLODColorDebugger>())
-                        //     gpuiManager.GetComponent<GPUInstancerLODColorDebugger>().ChangeLODColors();
                     }
                     initializingInstances = false;
                     return;
                 }
 
-#if UNITY_2018_1_OR_NEWER
-                if (!GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline())
-                {
-#if UNITY_2019_1_OR_NEWER
-                    UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
-                    UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering += CameraOnBeginRenderingSRP;
-#else
-                    UnityEngine.Experimental.Rendering.RenderPipeline.beginCameraRendering -= CameraOnPreCull;
-                    UnityEngine.Experimental.Rendering.RenderPipeline.beginCameraRendering += CameraOnPreCull;
-#endif
-                }
-                else
-                {
-#endif
-                    Camera.onPreCull -= CameraOnPreCull;
-                    Camera.onPreCull += CameraOnPreCull;
-#if UNITY_2018_1_OR_NEWER
-                }
-#endif
+
+
+                UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering -= CameraOnBeginRenderingSRP;
+                UnityEngine.Rendering.RenderPipelineManager.beginFrameRendering += CameraOnBeginRenderingSRP;
+
+
                 EditorApplication.update -= EditorUpdate;
             }
         }
 
-#if UNITY_2019_1_OR_NEWER
+
         private void CameraOnBeginRenderingSRP(UnityEngine.Rendering.ScriptableRenderContext context, Camera[] cams)
         {
             if (!gpuiManager.isInitialized)
@@ -186,32 +147,7 @@ namespace GPUInstancer
                 }
             }
         }
-#endif
 
-        private void CameraOnPreCull(Camera cam)
-        {
-            if (!gpuiManager.isInitialized)
-            {
-                StopSimulation();
-                StartSimulation();
-                return;
-            }
-            if (sceneViewCameraData.mainCamera == cam)
-            {
-                gpuiManager.Update();
-                gpuiManager.UpdateBuffers(sceneViewCameraData);
-            }
-            else if (gpuiManager.cameraData.mainCamera == cam)
-            {
-                gpuiManager.Update();
-                gpuiManager.UpdateBuffers(gpuiManager.cameraData);
-            }
-        }
-
-
-
-
-#if UNITY_2017_2_OR_NEWER
         public void HandlePlayModeStateChanged(PlayModeStateChange state)
         {
             StopSimulation();
@@ -237,15 +173,7 @@ namespace GPUInstancer
                 }
             }
         }
-#else
-        public void HandlePlayModeStateChanged()
-        {
-            if (Application.isPlaying && EditorApplication.isPaused)
-                StartSimulation();
-            else
-                StopSimulation();
-        }
-#endif // UNITY_2017_2_OR_NEWER
+
     }
 }
 #endif // UNITY_EDITOR
