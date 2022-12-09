@@ -15,10 +15,5 @@ namespace GPUInstancer
                 return prefabObject.name;
             return name;
         }
-
-        public virtual Texture2D GetPreviewTexture()
-        {
-            return null;
-        }
     }
 }

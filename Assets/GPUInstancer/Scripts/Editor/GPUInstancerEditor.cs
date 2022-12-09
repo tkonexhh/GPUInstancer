@@ -152,18 +152,8 @@ namespace GPUInstancer
         {
             try
             {
-                if (prototype.prefabObject == null)
-                {
-                    if (prototype.GetPreviewTexture() != null)
-                    {
-                        _previewDrawer.SetAdditionalTexture(prototype.GetPreviewTexture());
-                        Texture2D result = _previewDrawer.GetPreviewForGameObject(null, new Rect(0, 0, PROTOTYPE_RECT_SIZE - 10, PROTOTYPE_RECT_SIZE - 10),
-                            useCustomPreviewBackgroundColor ? previewBackgroundColor : Color.clear);
-                        _previewDrawer.SetAdditionalTexture(null);
-                        return result;
-                    }
-                }
-                else
+
+                if (prototype.prefabObject != null)
                 {
                     if (prototype.prefabObject.GetComponentInChildren<MeshFilter>() == null && prototype.prefabObject.GetComponentInChildren<SkinnedMeshRenderer>() == null)
                         return null;

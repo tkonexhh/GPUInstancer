@@ -150,8 +150,8 @@ namespace GPUInstancer
             GPUInstancerRuntimeData runtimeData = GetRuntimeData(p);
             if (runtimeData == null)
             {
-                runtimeData = new GPUInstancerRuntimeData(p);
-                if (!runtimeData.CreateRenderersFromGameObject(p))
+                runtimeData = new GPUInstancerRuntimeData(p.prefabObject);
+                if (!runtimeData.CreateRenderersFromGameObject(p.prefabObject))
                     return null;
                 runtimeDataList.Add(runtimeData);
                 runtimeDataDictionary.Add(p, runtimeData);
@@ -160,21 +160,7 @@ namespace GPUInstancer
             int instanceCount = 0;
             List<GPUInstancerPrefab> registeredPrefabsList = null;
 
-#if UNITY_EDITOR
-            if (!Application.isPlaying && p.meshRenderersDisabled)
-            {
-                List<GPUInstancerPrefab> prefabInstances = registeredPrefabs.Find(rpd => rpd.prefabPrototype == p).registeredPrefabs;
-                runtimeData.ReleaseBuffers();
-                runtimeData.bufferSize = prefabInstances.Count;
-                runtimeData.instanceDataNativeArray = new NativeArray<Matrix4x4>(runtimeData.bufferSize, Allocator.Persistent);
-                instanceCount = runtimeData.bufferSize;
-                for (int i = 0; i < instanceCount; i++)
-                {
-                    runtimeData.instanceDataNativeArray[i] = prefabInstances[i].GetInstanceTransform().localToWorldMatrix;
-                }
-            }
-#endif
-            else if (_registeredPrefabsRuntimeData.TryGetValue(p, out registeredPrefabsList))
+            if (_registeredPrefabsRuntimeData.TryGetValue(p, out registeredPrefabsList))
             {
                 runtimeData.ReleaseBuffers();
                 runtimeData.bufferSize = registeredPrefabsList.Count + additionalBufferSize;

@@ -11,9 +11,8 @@ namespace GPUInstancer
 {
     public class GPUInstancerRuntimeData
     {
-        public GPUInstancerPrototype prototype;
-        // public GPUInstancerPrototypeLOD instanceData;
-        public List<GPUInstancerRenderer> renderers;
+        public GameObject prototype;
+        public List<GPUInstancerRenderer> renderers = new List<GPUInstancerRenderer>();
         public Bounds instanceBounds;
 
         // Instance Data
@@ -30,7 +29,7 @@ namespace GPUInstancer
         public uint[] args;
 
 
-        public GPUInstancerRuntimeData(GPUInstancerPrototype prototype)
+        public GPUInstancerRuntimeData(GameObject prototype)
         {
             this.prototype = prototype;
         }
@@ -56,9 +55,6 @@ namespace GPUInstancer
                 Debug.LogError("Can't add renderer: no materials. Make sure that all the MeshRenderers have their materials assigned.");
                 return;
             }
-
-            if (renderers == null)
-                renderers = new List<GPUInstancerRenderer>();
 
             GPUInstancerRenderer renderer = new GPUInstancerRenderer
             {
@@ -105,25 +101,20 @@ namespace GPUInstancer
         /// <summary>
         /// Generates instancing renderer data for a given GameObject, at the first LOD level.
         /// </summary>
-        public virtual bool CreateRenderersFromGameObject(GPUInstancerPrototype prototype)
+        public virtual bool CreateRenderersFromGameObject(GameObject prefabObject)
         {
-            if (prototype.prefabObject == null)
+            if (prefabObject == null)
             {
                 Debug.LogError("Can't create renderer(s): reference GameObject is null");
                 return false;
             }
 
-            return CreateRenderersFromMeshRenderers(prototype);
-        }
-
-        public virtual bool CreateRenderersFromMeshRenderers(GPUInstancerPrototype prototype)
-        {
             List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
-            GetMeshRenderersOfTransform(prototype.prefabObject.transform, meshRenderers);
+            GetMeshRenderersOfTransform(prefabObject.transform, meshRenderers);
 
             if (meshRenderers.Count == 0)
             {
-                Debug.LogError("Can't create renderer(s): no MeshRenderers found in the reference GameObject <" + prototype.prefabObject.name +
+                Debug.LogError("Can't create renderer(s): no MeshRenderers found in the reference GameObject <" + prefabObject.name +
                         "> or any of its children");
                 return false;
             }
@@ -132,7 +123,7 @@ namespace GPUInstancer
             {
                 if (meshRenderer.GetComponent<MeshFilter>() == null)
                 {
-                    Debug.LogWarning("MeshRenderer with no MeshFilter found on GameObject <" + prototype.prefabObject.name +
+                    Debug.LogWarning("MeshRenderer with no MeshFilter found on GameObject <" + prefabObject.name +
                         "> (Child: <" + meshRenderer.gameObject + ">). Are you missing a component?");
                     continue;
                 }
@@ -146,7 +137,7 @@ namespace GPUInstancer
 
                 Matrix4x4 transformOffset = Matrix4x4.identity;
                 Transform currentTransform = meshRenderer.gameObject.transform;
-                while (currentTransform != prototype.prefabObject.transform)
+                while (currentTransform != prefabObject.transform)
                 {
                     transformOffset = Matrix4x4.TRS(currentTransform.localPosition, currentTransform.localRotation, currentTransform.localScale) * transformOffset;
                     currentTransform = currentTransform.parent;
