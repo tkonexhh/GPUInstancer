@@ -36,199 +36,19 @@ namespace GPUInstancer
         public static float COMPUTE_SHADER_THREAD_COUNT = 512;
         public static float COMPUTE_SHADER_THREAD_COUNT_2D = 16;
 
-        public static int COMPUTE_MAX_LOD_BUFFER = 3;
-        public static int TEXTURE_MAX_SIZE = 16384;
-        public static bool DETAIL_STORE_INSTANCE_DATA = false;
-
         public static readonly string GUID_COMPUTE_PLATFORM_DEFINES = "74a30c752a8958c45a96bc127e05f114";
         public static readonly string GUID_CGINC_PLATFORM_DEPENDENT = "79e50e99a1888054cb229e1c710f1795";
 
         #endregion Platform Dependent
 
         #region CS Visibility
-        // Shader constants
-
-        public static readonly string[] CAMERA_COMPUTE_KERNELS = new string[] {
-            "CSInstancedCameraCalculationKernel", "CSInstancedCameraCalculationKernelCrossFade"
-        };
-        public static readonly string[] VISIBILITY_COMPUTE_KERNELS = new string[] {
-            "CSInstancedRenderingVisibilityKernelLOD0", "CSInstancedRenderingVisibilityKernelLOD1",
-            "CSInstancedRenderingVisibilityKernelLOD2"
-        };
-
-        public static readonly string CAMERA_COMPUTE_RESOURCE_PATH = "Compute/CSInstancedCameraCalculationKernel";
-
-
-        public static readonly string VISIBILITY_COMPUTE_RESOURCE_PATH = "Compute/CSInstancedRenderingVisibilityKernel";
-        public static readonly string VISIBILITY_COMPUTE_RESOURCE_PATH_VULKAN = "Compute/CSInstancedRenderingVisibilityKernelVulkan";
-        public static readonly string BUFFER_TO_TEXTURE_COMPUTE_RESOURCE_PATH = "Compute/CSInstancedBufferToTexture";
-        public static readonly string BUFFER_TO_TEXTURE_KERNEL = "CSInstancedBufferToTextureKernel";
-
-        public static readonly string ARGS_BUFFER_COMPUTE_RESOURCE_PATH = "Compute/CSArgsBuffer";
-        public static readonly string ARGS_BUFFER_DOUBLE_INSTANCE_COUNT_KERNEL = "CSArgsBufferDoubleInstanceCount";
-
-        public static class BufferToTextureKernelPoperties
-        {
-            public static readonly int TRANSFORMATION_MATRIX_TEXTURE = Shader.PropertyToID("gpuiTransformationMatrixTexture");
-        }
-
         public static class VisibilityKernelPoperties
         {
             public static readonly int TRANSFORMATION_MATRIX_BUFFER = Shader.PropertyToID("gpuiTransformationMatrix");
-            public static readonly int INSTANCE_LOD_BUFFER = Shader.PropertyToID("gpuiInstanceLODData");
-            public static readonly int[] TRANSFORMATION_MATRIX_APPEND_BUFFERS = new int[] {
-                Shader.PropertyToID("gpuiTransformationMatrix_LOD0"), Shader.PropertyToID("gpuiTransformationMatrix_LOD1"),  Shader.PropertyToID("gpuiTransformationMatrix_LOD2")};
-            public static readonly int INSTANCE_DATA_BUFFER = Shader.PropertyToID("gpuiInstanceData");
             public static readonly int RENDERER_TRANSFORM_OFFSET = Shader.PropertyToID("gpuiTransformOffset");
-            public static readonly int BUFFER_PARAMETER_MVP_MATRIX = Shader.PropertyToID("mvpMatrix");
-            public static readonly int BUFFER_PARAMETER_MVP_MATRIX2 = Shader.PropertyToID("mvpMatrix2");
-            public static readonly int BUFFER_PARAMETER_BOUNDS_CENTER = Shader.PropertyToID("boundsCenter");
-            public static readonly int BUFFER_PARAMETER_BOUNDS_EXTENTS = Shader.PropertyToID("boundsExtents");
-            public static readonly int BUFFER_PARAMETER_FRUSTUM_CULL_SWITCH = Shader.PropertyToID("isFrustumCulling");
-            public static readonly int BUFFER_PARAMETER_HIERARCHICAL_Z_TEXTURE_SIZE = Shader.PropertyToID("hiZTxtrSize");
-            public static readonly int BUFFER_PARAMETER_FRUSTUM_OFFSET = Shader.PropertyToID("frustumOffset");
-            public static readonly int BUFFER_PARAMETER_MIN_VIEW_DISTANCE = Shader.PropertyToID("minDistance");
-            public static readonly int BUFFER_PARAMETER_MAX_VIEW_DISTANCE = Shader.PropertyToID("maxDistance");
-            public static readonly int BUFFER_PARAMETER_CAMERA_POSITION = Shader.PropertyToID("camPos");
-            public static readonly int BUFFER_PARAMETER_BUFFER_SIZE = Shader.PropertyToID("bufferSize");
-
-            public static readonly int BUFFER_PARAMETER_OCCLUSION_OFFSET = Shader.PropertyToID("occlusionOffset");
-            public static readonly int BUFFER_PARAMETER_OCCLUSION_ACCURACY = Shader.PropertyToID("occlusionAccuracy");
-
-            public static readonly int BUFFER_PARAMETER_SHADOW_DISTANCE = Shader.PropertyToID("shadowDistance");
-
-            public static readonly int BUFFER_PARAMETER_LOD_SIZES = Shader.PropertyToID("lodSizes");
-            public static readonly int BUFFER_PARAMETER_LOD_SHIFT = Shader.PropertyToID("lodShift");
-            public static readonly int BUFFER_PARAMETER_LOD_APPEND_INDEX = Shader.PropertyToID("lodAppendIndex");
-            public static readonly int BUFFER_PARAMETER_LOD_COUNT = Shader.PropertyToID("lodCount");
-            public static readonly int BUFFER_PARAMETER_LOD_LEVEL = Shader.PropertyToID("LODLevel");
-            public static readonly int BUFFER_PARAMETER_HALF_ANGLE = Shader.PropertyToID("halfAngle");
-
-            public static readonly int BUFFER_PARAMETER_OCCLUSION_CULL_SWITCH = Shader.PropertyToID("isOcclusionCulling");
-            public static readonly int BUFFER_PARAMETER_HIERARCHICAL_Z_TEXTURE_MAP = Shader.PropertyToID("hiZMap");
-
-            public static readonly int BUFFER_PARAMETER_MIN_CULLING_DISTANCE = Shader.PropertyToID("minCullingDistance");
-
-            public static readonly int ARGS_BUFFER = Shader.PropertyToID("argsBuffer");
-            public static readonly int COUNT = Shader.PropertyToID("count");
-
-            public static readonly int MAX_TEXTURE_SIZE = Shader.PropertyToID("maxTextureSize");
-            public static readonly int UNITY_RENDERING_LAYER = Shader.PropertyToID("unity_RenderingLayer");
-
-            public static readonly int ARGS_BUFFER_INDEX = Shader.PropertyToID("argsBufferIndex");
         }
         #endregion CS Visibility
 
-        #region CS Set Data Partial
-        // Compute Buffer Set Data Partial compute shader constants
-        public static readonly string COMPUTE_SET_DATA_PARTIAL_RESOURCE_PATH = "Compute/CSInstancedComputeBufferSetDataPartialKernel";
-        public static readonly string COMPUTE_SET_DATA_PARTIAL_KERNEL = "CSInstancedComputeBufferSetDataPartialKernel";
-        public static readonly string COMPUTE_SET_DATA_SINGLE_KERNEL = "CSInstancedComputeBufferSetDataSingleKernel";
-
-
-        public static ComputeShader computeBufferSetDataPartial;
-        public static int computeBufferSetDataPartialKernelId;
-        public static int computeBufferSetDataSingleKernelId;
-
-        public static void SetupComputeSetDataPartial()
-        {
-            if (computeBufferSetDataPartial == null)
-            {
-                computeBufferSetDataPartial = Resources.Load<ComputeShader>(COMPUTE_SET_DATA_PARTIAL_RESOURCE_PATH);
-                if (computeBufferSetDataPartial != null)
-                {
-                    computeBufferSetDataPartialKernelId = computeBufferSetDataPartial.FindKernel(COMPUTE_SET_DATA_PARTIAL_KERNEL);
-                    computeBufferSetDataSingleKernelId = computeBufferSetDataPartial.FindKernel(COMPUTE_SET_DATA_SINGLE_KERNEL);
-                }
-            }
-        }
-        #endregion CS Set Data Partial
-
-
-        #region CS Texture Utils
-
-        public static readonly string COMPUTE_TEXTURE_UTILS_PATH = "Compute/CSTextureUtils";
-        public static readonly string COMPUTE_COPY_TEXTURE_KERNEL = "CSCopyTexture";
-
-        public static class CopyTextureKernelProperties
-        {
-            public static readonly int SOURCE_TEXTURE = Shader.PropertyToID("source");
-            public static readonly int SOURCE_TEXTURE_ARRAY = Shader.PropertyToID("textureArray");
-            public static readonly int DESTINATION_TEXTURE = Shader.PropertyToID("destination");
-            public static readonly int OFFSET_X = Shader.PropertyToID("offsetX");
-            public static readonly int SOURCE_SIZE_X = Shader.PropertyToID("sourceSizeX");
-            public static readonly int SOURCE_SIZE_Y = Shader.PropertyToID("sourceSizeY");
-            public static readonly int DESTINATION_SIZE_X = Shader.PropertyToID("destinationSizeX");
-            public static readonly int DESTINATION_SIZE_Y = Shader.PropertyToID("destinationSizeY");
-            public static readonly int REVERSE_Z = Shader.PropertyToID("reverseZ");
-            public static readonly int TEXTURE_ARRAY_INDEX = Shader.PropertyToID("textureArrayIndex");
-        }
-
-        public static ComputeShader computeTextureUtils;
-        public static int computeTextureUtilsCopyTextureId;
-
-        public static void SetupComputeTextureUtils()
-        {
-            if (computeTextureUtils == null)
-            {
-                computeTextureUtils = Resources.Load<ComputeShader>(COMPUTE_TEXTURE_UTILS_PATH);
-
-                if (computeTextureUtils != null)
-                {
-                    computeTextureUtilsCopyTextureId = computeTextureUtils.FindKernel(COMPUTE_COPY_TEXTURE_KERNEL);
-                }
-            }
-        }
-
-        #endregion CS Texture Utils    
-
-        #region CS Runtime Modification
-        public static readonly string COMPUTE_RUNTIME_MODIFICATION_RESOURCE_PATH = "Compute/CSRuntimeModification";
-        public static readonly string COMPUTE_TRANSFORM_OFFSET_KERNEL = "CSInstancedTransformOffsetKernel";
-        public static readonly string COMPUTE_REMOVE_INSIDE_BOUNDS_KERNEL = "CSRemoveInsideBounds";
-        public static readonly string COMPUTE_REMOVE_INSIDE_BOX_KERNEL = "CSRemoveInsideBox";
-        public static readonly string COMPUTE_REMOVE_INSIDE_SPHERE_KERNEL = "CSRemoveInsideSphere";
-        public static readonly string COMPUTE_REMOVE_INSIDE_CAPSULE_KERNEL = "CSRemoveInsideCapsule";
-        public static readonly string COMPUTE_MATRIX_OFFSET_KERNEL = "CSInstancedMatrixOffsetKernel";
-
-
-        public static class RuntimeModificationKernelProperties
-        {
-            public static readonly int BUFFER_PARAMETER_POSITION_OFFSET = Shader.PropertyToID("positionOffset");
-            public static readonly int BUFFER_PARAMETER_MATRIX_OFFSET = Shader.PropertyToID("matrixOffset");
-            public static readonly int BUFFER_PARAMETER_MODIFIER_TRANSFORM = Shader.PropertyToID("modifierTransform");
-            public static readonly int BUFFER_PARAMETER_MODIFIER_RADIUS = Shader.PropertyToID("modifierRadius");
-            public static readonly int BUFFER_PARAMETER_MODIFIER_HEIGHT = Shader.PropertyToID("modifierHeight");
-            public static readonly int BUFFER_PARAMETER_MODIFIER_AXIS = Shader.PropertyToID("modifierAxis");
-        }
-
-        public static ComputeShader computeRuntimeModification;
-        public static int computeBufferTransformOffsetId;
-        public static int computeRemoveInsideBoundsId;
-        public static int computeRemoveInsideBoxId;
-        public static int computeRemoveInsideSphereId;
-        public static int computeRemoveInsideCapsuleId;
-        public static int computeBufferMatrixOffsetId;
-
-        public static void SetupComputeRuntimeModification()
-        {
-            if (computeRuntimeModification == null)
-            {
-                computeRuntimeModification = Resources.Load<ComputeShader>(COMPUTE_RUNTIME_MODIFICATION_RESOURCE_PATH);
-
-                if (computeRuntimeModification != null)
-                {
-                    computeBufferTransformOffsetId = computeRuntimeModification.FindKernel(COMPUTE_TRANSFORM_OFFSET_KERNEL);
-                    computeRemoveInsideBoundsId = computeRuntimeModification.FindKernel(COMPUTE_REMOVE_INSIDE_BOUNDS_KERNEL);
-                    computeRemoveInsideBoxId = computeRuntimeModification.FindKernel(COMPUTE_REMOVE_INSIDE_BOX_KERNEL);
-                    computeRemoveInsideSphereId = computeRuntimeModification.FindKernel(COMPUTE_REMOVE_INSIDE_SPHERE_KERNEL);
-                    computeRemoveInsideCapsuleId = computeRuntimeModification.FindKernel(COMPUTE_REMOVE_INSIDE_CAPSULE_KERNEL);
-                    computeBufferMatrixOffsetId = computeRuntimeModification.FindKernel(COMPUTE_MATRIX_OFFSET_KERNEL);
-                }
-            }
-        }
-
-        #endregion CS Runtime Modification
 
         #region Shaders
         // Unity Shader Names
@@ -258,10 +78,8 @@ namespace GPUInstancer
         public static readonly string SHADER_GPUI_FOLIAGE_LWRP = "GPUInstancer/FoliageLWRP";
 
 #if UNITY_2020_2_OR_NEWER
-        public static readonly string SHADER_GPUI_FOLIAGE_HDRP = "GPUInstancer/FoliageHDRP_GPUI_SG";
         public static readonly string SHADER_GPUI_FOLIAGE_URP = "GPUInstancer/FoliageURP_GPUI_SG";
 #else
-        public static readonly string SHADER_GPUI_FOLIAGE_HDRP = "GPUInstancer/FoliageHDRP";
         public static readonly string SHADER_GPUI_FOLIAGE_URP = "GPUInstancer/FoliageURP";
 #endif
         public static readonly string SHADER_GPUI_SHADOWS_ONLY = "Hidden/GPUInstancer/ShadowsOnly";
@@ -302,15 +120,8 @@ namespace GPUInstancer
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
         public static readonly string PROTOTYPES_SHADERS_PATH = "PrototypeData/Shaders/";
         public static readonly string PROTOTYPES_SERIALIZED_PATH = "PrototypeData/SerializedTransforms/";
-        public static readonly string FOLIAGE_SHADER_LWRP_PACKAGE_PATH = "Extras/GPUI_Foliage_LWRP_Support.unitypackage";
-#if UNITY_2020_2_OR_NEWER
-        public static readonly string FOLIAGE_SHADER_URP_PACKAGE_PATH = "Extras/GPUI_Foliage_URP_Support_(10_&_Later).unitypackage";
-        public static readonly string FOLIAGE_SHADER_HDRP_PACKAGE_PATH = "Extras/GPUI_Foliage_HDRP_Support_(10_&_Later).unitypackage";
-#else
-        public static readonly string FOLIAGE_SHADER_URP_PACKAGE_PATH = "Extras/GPUI_Foliage_URP_Support_(8_&_Before).unitypackage";
-        public static readonly string FOLIAGE_SHADER_HDRP_PACKAGE_PATH = "Extras/GPUI_Foliage_HDRP_Support_(8_&_Before).unitypackage";
-#endif
-        public static readonly string FOLIAGE_SHADER_HDRP_TEMPLATE_MATERIAL_PATH = "Materials/FoliageHDRP_Template";
+
+
 
         private static string _defaultPath;
         public static string GetDefaultPath()

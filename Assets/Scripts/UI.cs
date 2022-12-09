@@ -40,7 +40,7 @@ public class UI : MonoBehaviour
     private void Update()
     {
         modeText.text = grassRenderer.mode.ToString();
-        if (gpuInstancerPrefabManager.gameObject.activeSelf)
+        if (gpuInstancerPrefabManager != null && gpuInstancerPrefabManager.gameObject.activeSelf)
         {
             modeText.text = "GPUI";
         }

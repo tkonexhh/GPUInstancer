@@ -133,8 +133,8 @@ namespace GPUInstancer
                     if (!gpuiManager.isInitialized)
                     {
                         gpuiManager.InitializeRuntimeDataAndBuffers();
-                        if (gpuiManager.GetComponent<GPUInstancerLODColorDebugger>())
-                            gpuiManager.GetComponent<GPUInstancerLODColorDebugger>().ChangeLODColors();
+                        // if (gpuiManager.GetComponent<GPUInstancerLODColorDebugger>())
+                        //     gpuiManager.GetComponent<GPUInstancerLODColorDebugger>().ChangeLODColors();
                     }
                     initializingInstances = false;
                     return;

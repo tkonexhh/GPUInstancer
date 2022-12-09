@@ -35,27 +35,6 @@ namespace GPUInstancer
                 GPUInstancerManager.activeManagerList.ForEach(m => m.SetCamera(camera));
         }
 
-
-        /// <summary>
-        /// Updates all transform values in GPU memory with the given offset position.
-        /// </summary>
-        /// <param name="manager">GPUI Manager to apply the offset</param>
-        /// <param name="offsetPosition">Offset Position</param>
-        public static void SetGlobalPositionOffset(GPUInstancerManager manager, Vector3 offsetPosition)
-        {
-            GPUInstancerUtility.SetGlobalPositionOffset(manager, offsetPosition);
-        }
-
-        /// <summary>
-        /// Updates all transform values in GPU memory with the given offset matrix.
-        /// </summary>
-        /// <param name="manager">GPUI Manager to apply the offset</param>
-        /// <param name="offsetMatrix">Offset Matrix</param>
-        public static void SetGlobalMatrixOffset(GPUInstancerManager manager, Matrix4x4 offsetMatrix)
-        {
-            GPUInstancerUtility.SetGlobalMatrixOffset(manager, offsetMatrix);
-        }
-
         #endregion Global
 
         #region Editor Only

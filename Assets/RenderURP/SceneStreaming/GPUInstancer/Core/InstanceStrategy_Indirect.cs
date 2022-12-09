@@ -46,7 +46,7 @@ namespace Inutan
                         m_Args[argsLastIndex++] = rdRenderer.mesh.GetIndexCount(j); // index count per instance
                         m_Args[argsLastIndex++] = 0;// (uint)runtimeData.bufferSize;
                         m_Args[argsLastIndex++] = rdRenderer.mesh.GetIndexStart(j); // start index location
-                        m_Args[argsLastIndex++] = rdRenderer.mesh.GetBaseVertex(j); // base vertex location
+                        m_Args[argsLastIndex++] = 0; // base vertex location
                         m_Args[argsLastIndex++] = 0; // start instance location
                     }
                 }
@@ -108,8 +108,16 @@ namespace Inutan
                     submeshIndex = Math.Min(m, rdRenderer.mesh.subMeshCount - 1);
                     rdMaterial = rdRenderer.materials[m];
                     offset = (rdRenderer.argsBufferOffset + 5 * submeshIndex) * GPUInstancerConstants.STRIDE_SIZE_INT;
-                    Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex, rdMaterial, instancingBounds, m_ArgsBuffer, offset, rdRenderer.mpb,
-                        rdRenderer.castShadows ? ShadowCastingMode.On : ShadowCastingMode.Off, rdRenderer.receiveShadows);
+
+                    Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex,
+                        rdMaterial,
+                        instancingBounds,
+                        m_ArgsBuffer,
+                        offset,
+                        rdRenderer.mpb,
+                        ShadowCastingMode.Off,
+                        false,
+                        rdRenderer.layer);
                 }
             }
         }

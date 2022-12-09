@@ -196,7 +196,7 @@ namespace GPUInstancer
                         if (manager != null && manager.isInitialized)
                         {
                             GPUInstancerRuntimeData runtimeData = manager.GetRuntimeData(prototype);
-                            if (runtimeData != null && runtimeData.instanceLODs != null && runtimeData.instanceLODs.Count > 0)
+                            if (runtimeData != null && runtimeData.instanceData != null)
                             {
                                 return _previewDrawer.GetPreviewForGameObject(null, new Rect(0, 0, PROTOTYPE_RECT_SIZE - 10, PROTOTYPE_RECT_SIZE - 10),
                        useCustomPreviewBackgroundColor ? previewBackgroundColor : Color.clear, runtimeData);

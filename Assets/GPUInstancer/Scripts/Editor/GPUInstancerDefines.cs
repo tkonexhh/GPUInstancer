@@ -16,10 +16,8 @@ namespace GPUInstancer
 
         // billboard extensions
         public static GPUInstancerPreviewCache previewCache;
-
-#if UNITY_2018_1_OR_NEWER
         public static UnityEditor.PackageManager.Requests.ListRequest _packageListRequest;
-#endif
+
 
         static GPUInstancerDefines()
         {
@@ -33,7 +31,6 @@ namespace GPUInstancer
                 PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, defines);
             }
 
-
             EditorApplication.update -= GenerateSettings;
             EditorApplication.update += GenerateSettings;
 
@@ -46,33 +43,7 @@ namespace GPUInstancer
             if (EditorApplication.isCompiling || EditorApplication.isUpdating)
                 return;
 
-            SetVersionNo();
-
             EditorApplication.update -= GenerateSettings;
-        }
-
-
-
-        static void SetVersionNo()
-        {
-#if UNITY_2018_1_OR_NEWER
-            bool forcePackageLoad = false;
-#endif
-            if (GPUInstancerConstants.gpuiSettings.versionNo != GPUInstancerEditorConstants.GPUI_VERSION_NO)
-            {
-                float previousVerisonNo = GPUInstancerConstants.gpuiSettings.versionNo;
-                UpdateVersion(previousVerisonNo, GPUInstancerEditorConstants.GPUI_VERSION_NO);
-                GPUInstancerConstants.gpuiSettings.versionNo = GPUInstancerEditorConstants.GPUI_VERSION_NO;
-                EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings);
-#if UNITY_2018_1_OR_NEWER
-                forcePackageLoad = true;
-#endif
-                ImportPackages(previousVerisonNo == 0);
-            }
-
-#if UNITY_2018_1_OR_NEWER
-            LoadPackageDefinitions(forcePackageLoad);
-#endif
         }
 
         public static void ImportPackages(bool forceReimport)
@@ -80,111 +51,8 @@ namespace GPUInstancer
             GPUIPackageImporter.ImportPackages(AUTO_PACKAGE_IMPORTER_GUIDS, forceReimport);
         }
 
-        public static bool IsVersionUpdateRequired(float previousVersion, float newVersion)
-        {
-            if (previousVersion < 1 && newVersion >= 1)
-            {
-                Shader standardShader = Shader.Find(GPUInstancerConstants.SHADER_GPUI_STANDARD);
-                if (standardShader != null)
-                {
-                    string standardShaderPath = AssetDatabase.GetAssetPath(standardShader);
-                    if (!string.IsNullOrEmpty(standardShaderPath))
-                        return standardShaderPath.Contains("GPUInstancer/Resources/Shaders");
-                }
-            }
-            return false;
-        }
 
-        public static void UpdateVersion(float previousVersion, float newVersion)
-        {
-            // v1.0.0 Update
-            if (previousVersion < 1 && newVersion >= 1)
-            {
-                Shader standardShader = Shader.Find(GPUInstancerConstants.SHADER_GPUI_STANDARD);
-                if (standardShader != null)
-                {
-                    string standardShaderPath = AssetDatabase.GetAssetPath(standardShader);
-                    if (!string.IsNullOrEmpty(standardShaderPath))
-                    {
-                        if (standardShaderPath.Contains("GPUInstancer/Resources/Shaders"))
-                        {
-                            EditorUtility.DisplayDialog(GPUInstancerEditorConstants.GPUI_VERSION + " Auto Update", GPUInstancerEditorConstants.HELPTEXT_Version100Update, "Proceed with the Update");
 
-                            string gpuiPath = standardShaderPath.Substring(0, standardShaderPath.IndexOf("GPUInstancer")) + "GPUInstancer/";
-                            string[] files = null;
-                            if (Directory.Exists(gpuiPath + "Shaders/"))
-                            {
-                                Directory.Move(gpuiPath + "Shaders/", gpuiPath + "Shaders_moved/");
-                                File.Delete(gpuiPath + "Shaders.meta");
-                                files = Directory.GetFiles(gpuiPath + "Shaders_moved/");
-                            }
-
-                            // Update Shaders folder path
-                            FileUtil.MoveFileOrDirectory(gpuiPath + "Resources/Shaders", gpuiPath + "Shaders");
-                            FileUtil.MoveFileOrDirectory(gpuiPath + "Resources/Shaders.meta", gpuiPath + "Shaders.meta");
-                            // delete ShaderVariants folder
-                            FileUtil.DeleteFileOrDirectory(gpuiPath + "Resources/ShaderVariants");
-                            FileUtil.DeleteFileOrDirectory(gpuiPath + "Resources/ShaderVariants.meta");
-
-                            if (files != null)
-                            {
-                                foreach (string file in files)
-                                {
-                                    File.Move(file, file.Replace("Shaders_moved", "Shaders"));
-                                }
-                                Directory.Delete(gpuiPath + "Shaders_moved/");
-                            }
-
-                            AssetDatabase.SaveAssets();
-                            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
-
-                            EditorApplication.update -= RegenerateShaders;
-                            EditorApplication.update += RegenerateShaders;
-                        }
-                    }
-                }
-            }
-            // v1.5.2 Update
-            else if (previousVersion < 1.53f && newVersion >= 1.53f)
-            {
-                if (GPUInstancerConstants.gpuiSettings.isHDRP)
-                {
-                    GPUInstancerShaderBindings shaderBindings = GetGPUInstancerShaderBindings();
-                    if (shaderBindings != null && shaderBindings.shaderInstances != null && shaderBindings.shaderInstances.Count > 0)
-                    {
-                        foreach (ShaderInstance si in shaderBindings.shaderInstances)
-                        {
-                            if (si != null)
-                                si.Regenerate();
-                        }
-                        EditorUtility.SetDirty(shaderBindings);
-                    }
-                }
-            }
-        }
-
-        private static void RegenerateShaders()
-        {
-            try
-            {
-                if (GPUInstancerConstants.gpuiSettings != null && GPUInstancerConstants.gpuiSettings.shaderBindings != null)
-                {
-                    if (GPUInstancerConstants.gpuiSettings.shaderBindings.shaderInstances != null && GPUInstancerConstants.gpuiSettings.shaderBindings.shaderInstances.Count > 0)
-                    {
-                        foreach (ShaderInstance si in GPUInstancerConstants.gpuiSettings.shaderBindings.shaderInstances)
-                        {
-                            si.Regenerate();
-                        }
-                        if (GPUInstancerConstants.gpuiSettings.shaderBindings != null)
-                            EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings.shaderBindings);
-                    }
-                }
-            }
-            catch (Exception) { }
-            EditorApplication.update -= RegenerateShaders;
-        }
-
-#if UNITY_2018_1_OR_NEWER
         public static void LoadPackageDefinitions(bool forceNew = false)
         {
             if (forceNew || !GPUInstancerConstants.gpuiSettings.packagesLoaded)
@@ -242,7 +110,7 @@ namespace GPUInstancer
             GPUInstancerConstants.gpuiSettings.packagesLoaded = true;
             EditorApplication.update -= PackageListRequestHandler;
         }
-#endif
+
 
         public static GPUInstancerShaderBindings GetGPUInstancerShaderBindings()
         {

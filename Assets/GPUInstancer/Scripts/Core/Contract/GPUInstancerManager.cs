@@ -32,14 +32,7 @@ namespace GPUInstancer
         public static List<GPUInstancerManager> activeManagerList;
         public static bool showRenderedAmount;
 
-        protected static ComputeShader _cameraComputeShader;
-        protected static int[] _cameraComputeKernelIDs;
-        protected static ComputeShader _visibilityComputeShader;
-        protected static int[] _instanceVisibilityComputeKernelIDs;
-        protected static ComputeShader _bufferToTextureComputeShader;
-        protected static int _bufferToTextureComputeKernelID;
-        protected static ComputeShader _argsBufferComputeShader;
-        protected static int _argsBufferDoubleInstanceCountComputeKernelID;
+
 
 #if UNITY_EDITOR
         public List<GPUInstancerPrototype> selectedPrototypeList;
@@ -55,8 +48,6 @@ namespace GPUInstancer
         public bool showGlobalValuesBox = true;
         public bool showRegisteredPrefabsBox = true;
         public bool showPrototypesBox = true;
-
-        public bool keepSimulationLive = false;
 #endif
 
         public class GPUIThreadData
@@ -70,15 +61,6 @@ namespace GPUInstancer
         public readonly Queue<Action> threadQueue = new Queue<Action>();
 
 
-
-        // Time management
-        public static int lastDrawCallFrame;
-        public static float lastDrawCallTime;
-        public static float timeSinceLastDrawCall;
-
-
-        [NonSerialized]
-        protected bool isInitial = true;
 
         [NonSerialized]
         public bool isInitialized = false;
@@ -100,7 +82,7 @@ namespace GPUInstancer
         public virtual void Awake()
         {
             GPUInstancerConstants.gpuiSettings.SetDefultBindings();
-            GPUInstancerUtility.SetPlatformDependentVariables();
+            // GPUInstancerUtility.SetPlatformDependentVariables();
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -109,49 +91,7 @@ namespace GPUInstancer
             if (Application.isPlaying && activeManagerList == null)
                 activeManagerList = new List<GPUInstancerManager>();
 
-            if (SystemInfo.supportsComputeShaders)
-            {
-                if (_visibilityComputeShader == null)
-                {
-                    switch (GPUInstancerUtility.matrixHandlingType)
-                    {
-                        case GPUIMatrixHandlingType.MatrixAppend:
-                            _visibilityComputeShader = (ComputeShader)Resources.Load(GPUInstancerConstants.VISIBILITY_COMPUTE_RESOURCE_PATH_VULKAN);
-                            GPUInstancerConstants.DETAIL_STORE_INSTANCE_DATA = true;
-                            GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER = 2;
-                            break;
-                        case GPUIMatrixHandlingType.CopyToTexture:
-                            _visibilityComputeShader = (ComputeShader)Resources.Load(GPUInstancerConstants.VISIBILITY_COMPUTE_RESOURCE_PATH);
-                            _bufferToTextureComputeShader = (ComputeShader)Resources.Load(GPUInstancerConstants.BUFFER_TO_TEXTURE_COMPUTE_RESOURCE_PATH);
-                            _bufferToTextureComputeKernelID = _bufferToTextureComputeShader.FindKernel(GPUInstancerConstants.BUFFER_TO_TEXTURE_KERNEL);
-                            break;
-                        default:
-                            _visibilityComputeShader = (ComputeShader)Resources.Load(GPUInstancerConstants.VISIBILITY_COMPUTE_RESOURCE_PATH);
-                            break;
-                    }
 
-                    _instanceVisibilityComputeKernelIDs = new int[GPUInstancerConstants.VISIBILITY_COMPUTE_KERNELS.Length];
-                    for (int i = 0; i < _instanceVisibilityComputeKernelIDs.Length; i++)
-                        _instanceVisibilityComputeKernelIDs[i] = _visibilityComputeShader.FindKernel(GPUInstancerConstants.VISIBILITY_COMPUTE_KERNELS[i]);
-                    GPUInstancerConstants.TEXTURE_MAX_SIZE = SystemInfo.maxTextureSize;
-
-                    _cameraComputeShader = (ComputeShader)Resources.Load(GPUInstancerConstants.CAMERA_COMPUTE_RESOURCE_PATH);
-                    _cameraComputeKernelIDs = new int[GPUInstancerConstants.CAMERA_COMPUTE_KERNELS.Length];
-                    for (int i = 0; i < _cameraComputeKernelIDs.Length; i++)
-                        _cameraComputeKernelIDs[i] = _cameraComputeShader.FindKernel(GPUInstancerConstants.CAMERA_COMPUTE_KERNELS[i]);
-
-                    _argsBufferComputeShader = Resources.Load<ComputeShader>(GPUInstancerConstants.ARGS_BUFFER_COMPUTE_RESOURCE_PATH);
-                    _argsBufferDoubleInstanceCountComputeKernelID = _argsBufferComputeShader.FindKernel(GPUInstancerConstants.ARGS_BUFFER_DOUBLE_INSTANCE_COUNT_KERNEL);
-                }
-
-                GPUInstancerConstants.SetupComputeRuntimeModification();
-                GPUInstancerConstants.SetupComputeSetDataPartial();
-            }
-            else if (Application.isPlaying)
-            {
-                Debug.LogError("Target Graphics API does not support Compute Shaders. Please refer to Minimum Requirements on GPUInstancer/ReadMe.txt for detailed information.");
-                this.enabled = false;
-            }
 
             showRenderedAmount = false;
 
@@ -165,15 +105,7 @@ namespace GPUInstancer
 
         public virtual void Start()
         {
-            if (Application.isPlaying && SystemInfo.supportsComputeShaders)
-            {
-                // SetupOcclusionCulling(cameraData);
-            }
-#if UNITY_EDITOR
-            // Sometimes Awake is not called on Editor Mode after compilation
-            else if (_instanceVisibilityComputeKernelIDs == null)
-                Awake();
-#endif
+
         }
 
         public virtual void OnEnable()
@@ -203,7 +135,7 @@ namespace GPUInstancer
 
                 if (runtimeDataList == null || runtimeDataList.Count == 0)
                     InitializeRuntimeDataAndBuffers();
-                isInitial = true;
+
             }
 
             if (useFloatingOriginHandler && floatingOriginTransform != null)
@@ -339,7 +271,7 @@ namespace GPUInstancer
                 {
                     if (prototype.prefabObject != null)
                     {
-                        GPUInstancerUtility.GenerateInstancedShadersForGameObject(prototype);
+                        // GPUInstancerUtility.GenerateInstancedShadersForGameObject(prototype);
                         if (string.IsNullOrEmpty(prototype.warningText))
                         {
                             if (prototype.prefabObject.GetComponentInChildren<MeshRenderer>() == null)
@@ -366,7 +298,7 @@ namespace GPUInstancer
 #endif
         public virtual void InitializeRuntimeDataAndBuffers(bool forceNew = true)
         {
-            GPUInstancerUtility.SetPlatformDependentVariables();
+            // GPUInstancerUtility.SetPlatformDependentVariables();
             if (forceNew || !isInitialized)
             {
                 instancingBounds = new Bounds(Vector3.zero, Vector3.one * GPUInstancerConstants.gpuiSettings.instancingBoundsSize);
@@ -388,7 +320,6 @@ namespace GPUInstancer
             }
         }
 
-
         public virtual void DeletePrototype(GPUInstancerPrototype prototype, bool removeSO = true)
         {
 #if UNITY_EDITOR
@@ -396,9 +327,6 @@ namespace GPUInstancer
 #endif
             prototypeList.Remove(prototype);
         }
-
-
-
         #endregion Virtual Methods
 
         #region Public Methods
@@ -423,32 +351,16 @@ namespace GPUInstancer
                 cameraData.CalculateHalfAngle();
         }
 
-
-
         public void UpdateBuffers(GPUInstancerCameraData renderingCameraData)
         {
             if (renderingCameraData != null && renderingCameraData.mainCamera != null && SystemInfo.supportsComputeShaders)
             {
-
                 renderingCameraData.CalculateCameraData();
 
                 instancingBounds.center = renderingCameraData.mainCamera.transform.position;
 
-                if (lastDrawCallFrame != Time.frameCount)
-                {
-                    lastDrawCallFrame = Time.frameCount;
-                    timeSinceLastDrawCall = Time.realtimeSinceStartup - lastDrawCallTime;
-                    lastDrawCallTime = Time.realtimeSinceStartup;
-                }
-
-                GPUInstancerUtility.UpdateGPUBuffers(_cameraComputeShader, _cameraComputeKernelIDs, _visibilityComputeShader, _instanceVisibilityComputeKernelIDs, runtimeDataList, renderingCameraData, isFrustumCulling,
-                    false, showRenderedAmount, isInitial);
-                isInitial = false;
-
-                if (GPUInstancerUtility.matrixHandlingType == GPUIMatrixHandlingType.CopyToTexture)
-                    GPUInstancerUtility.DispatchBufferToTexture(runtimeDataList, _bufferToTextureComputeShader, _bufferToTextureComputeKernelID);
-
-                GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds, renderingCameraData, layerMask, lightProbeDisabled);
+                GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList, renderingCameraData, isFrustumCulling);
+                GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds, renderingCameraData);
             }
         }
 
@@ -458,14 +370,9 @@ namespace GPUInstancer
                 cameraData = new GPUInstancerCameraData(camera);
             else
                 cameraData.SetCamera(camera);
-
-            // if (cameraData.hiZOcclusionGenerator != null)
-            //     DestroyImmediate(cameraData.hiZOcclusionGenerator);
         }
 
-
-
-#if UNITY_EDITOR && UNITY_2017_2_OR_NEWER
+#if UNITY_EDITOR
         public void HandlePlayModeStateChanged(PlayModeStateChange state)
         {
             playModeState = state;

@@ -8,8 +8,6 @@ namespace GPUInstancer
         public bool showRenderedAmount;
         public bool showPrototypesSeparate;
         public bool showPrefabManagers = true;
-        public bool showDetailManagers = true;
-        public bool showTreeManagers = true;
 
         private static List<GPUInstancerRuntimeData> singlesList = new List<GPUInstancerRuntimeData>() { null };
 
@@ -92,53 +90,12 @@ namespace GPUInstancer
             GUI.Label(new Rect(10, Screen.height - startPos - 25, 700, 30),
                 "Total " + name + " instance count: " + totalInstanceCount);
 
-            if (showRenderedAmount)
-            {
-                GUI.Label(new Rect(10, Screen.height - startPos - 65, 700, 30),
-                    "Rendered " + name + " instance count: " + GetRenderedAmountsGUITextFromArgs(runtimeDataList));
-                // GUI.Label(new Rect(10, Screen.height - startPos - 85, 700, 30),
-                //     "Rendered Shadow " + name + " instance count: " + GetRenderedAmountsGUITextFromArgs(runtimeDataList, true));
-            }
+
 
             if (enabledCount > 0)
                 GUI.Label(new Rect(10, Screen.height - startPos - 105, 700, 30),
                     "Instancing disabled " + name + " instance count: " + enabledCount);
         }
 
-        private static string GetRenderedAmountsGUITextFromArgs<T>(List<T> runtimeData, bool isShadow = false) where T : GPUInstancerRuntimeData
-        {
-            int totalRendered = 0;
-            int maxLodCount = 1;
-            for (int i = 0; i < runtimeData.Count; i++)
-            {
-                if (maxLodCount < runtimeData[i].instanceLODs.Count)
-                    maxLodCount = runtimeData[i].instanceLODs.Count;
-            }
-
-            int[] lodCounts = new int[maxLodCount];
-            for (int i = 0; i < runtimeData.Count; i++)
-            {
-                // if (isShadow)
-                // {
-                //     if (runtimeData[i].shadowArgs != null && runtimeData[i].shadowArgs.Length > 0)
-                //         for (int lod = 0; lod < runtimeData[i].instanceLODs.Count; lod++)
-                //             lodCounts[lod] += (int)runtimeData[i].shadowArgs[runtimeData[i].instanceLODs[lod].argsBufferOffset + 1];
-                // }
-                // else
-                {
-                    if (runtimeData[i].args != null && runtimeData[i].args.Length > 0)
-                        for (int lod = 0; lod < runtimeData[i].instanceLODs.Count; lod++)
-                            lodCounts[lod] += (int)runtimeData[i].args[runtimeData[i].instanceLODs[lod].argsBufferOffset + 1];
-                }
-            }
-            string lodstr = "";
-            for (int lod = 0; lod < lodCounts.Length; lod++)
-            {
-                totalRendered += lodCounts[lod];
-                lodstr += "LOD" + lod + ": " + lodCounts[lod] + (lod == lodCounts.Length - 1 ? "" : ", ");
-            }
-
-            return totalRendered + " (" + lodstr + ")";
-        }
     }
 }

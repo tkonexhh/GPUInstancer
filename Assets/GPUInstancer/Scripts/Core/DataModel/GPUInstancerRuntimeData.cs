@@ -14,15 +14,9 @@ namespace GPUInstancer
         public GPUInstancerPrototype prototype;
 
         // Mesh - Material - LOD info
-        public List<GPUInstancerPrototypeLOD> instanceLODs;
+        // public List<GPUInstancerPrototypeLOD> instanceLODs;
         public GPUInstancerPrototypeLOD instanceData;
         public Bounds instanceBounds;
-        public float[] lodSizes = new float[] {
-            1000, 1000, 1000, 1000,
-            1000, 1000, 1000, 1000,
-            1000, 1000, 1000, 1000,
-            1000, 1000, 1000, 1000 };
-        public float lodBiasApplied = -1;
 
         // Instance Data
         public NativeArray<Matrix4x4> instanceDataNativeArray;
@@ -35,7 +29,6 @@ namespace GPUInstancer
         // Buffers Data
         public ComputeBuffer transformationMatrixVisibilityBuffer;
         public ComputeBuffer argsBuffer; // for multiple material (submesh) rendering
-        public ComputeBuffer instanceLODDataBuffer; // for storing LOD data
         public uint[] args;
 
 
@@ -63,32 +56,8 @@ namespace GPUInstancer
         /// <param name="screenRelativeTransitionHeight">if not defined, will default to 0</param>
         public virtual void AddLod(float screenRelativeTransitionHeight = -1, bool excludeBounds = false)
         {
-            if (instanceLODs == null)
-                instanceLODs = new List<GPUInstancerPrototypeLOD>();
-
             GPUInstancerPrototypeLOD instanceLOD = new GPUInstancerPrototypeLOD();
-            instanceLOD.excludeBounds = excludeBounds;
             instanceData = instanceLOD;
-            instanceLODs.Add(instanceLOD);
-
-            // Ensure the LOD will render if this is the first LOD and lodDistance is not set.
-            if (instanceLODs.Count == 1 && screenRelativeTransitionHeight < 0f)
-                lodSizes[0] = 0;
-
-            // Do not modify the lodDistances vector if LOD distance is not supplied.
-            if (screenRelativeTransitionHeight < 0f)
-                return;
-
-            if (lodBiasApplied == -1)
-                lodBiasApplied = QualitySettings.lodBias;
-
-            int lodIndex = (instanceLODs.Count - 1) * 4;
-            if (instanceLODs.Count > 4)
-                lodIndex = (instanceLODs.Count - 5) * 4 + 1;
-
-            float lodSize = screenRelativeTransitionHeight / lodBiasApplied;
-            lodSizes[lodIndex] = lodSize;
-
         }
 
         /// <summary>
@@ -100,13 +69,12 @@ namespace GPUInstancer
         /// <param name="transformOffset">The transformation matrix that represents a change in position, rotation and scale 
         /// for this renderer as an offset from the instance prototype. This matrix will be applied to the prototype instance 
         /// matrix for final rendering calculations in the shader. Use Matrix4x4.Identity if no offset is desired.</param>
-        public virtual void AddRenderer(int lod, Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows,
+        public virtual void AddRenderer(Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows,
             int layer = 0, Renderer rendererRef = null, bool receiveShadows = true)
         {
 
-            if (instanceLODs == null || instanceLODs.Count <= lod || instanceLODs[lod] == null)
+            if (instanceData == null)
             {
-                Debug.LogError("Can't add renderer: Invalid LOD");
                 return;
             }
 
@@ -122,8 +90,8 @@ namespace GPUInstancer
                 return;
             }
 
-            if (instanceLODs[lod].renderers == null)
-                instanceLODs[lod].renderers = new List<GPUInstancerRenderer>();
+            if (instanceData.renderers == null)
+                instanceData.renderers = new List<GPUInstancerRenderer>();
 
             GPUInstancerRenderer renderer = new GPUInstancerRenderer
             {
@@ -138,40 +106,30 @@ namespace GPUInstancer
                 rendererRefName = rendererRef != null && rendererRef.gameObject != null ? rendererRef.gameObject.name : null
             };
 
-            instanceLODs[lod].renderers.Add(renderer);
+            instanceData.renderers.Add(renderer);
             CalculateBounds();
         }
 
         public virtual void CalculateBounds()
         {
-            if (instanceLODs == null || instanceLODs.Count == 0 || instanceLODs[0].renderers == null ||
-                instanceLODs[0].renderers.Count == 0)
+            if (instanceData == null || instanceData.renderers == null || instanceData.renderers.Count == 0)
                 return;
 
             Bounds rendererBounds;
-            for (int lod = 0; lod < instanceLODs.Count; lod++)
+
+            for (int r = 0; r < instanceData.renderers.Count; r++)
             {
-                if (instanceLODs[lod].excludeBounds)
-                    continue;
-
-                for (int r = 0; r < instanceLODs[lod].renderers.Count; r++)
+                rendererBounds = new Bounds(instanceData.renderers[r].mesh.bounds.center + (Vector3)instanceData.renderers[r].transformOffset.GetColumn(3),
+                    new Vector3(
+                   instanceData.renderers[r].mesh.bounds.size.x * instanceData.renderers[r].transformOffset.GetRow(0).magnitude,
+                    instanceData.renderers[r].mesh.bounds.size.y * instanceData.renderers[r].transformOffset.GetRow(1).magnitude,
+                   instanceData.renderers[r].mesh.bounds.size.z * instanceData.renderers[r].transformOffset.GetRow(2).magnitude));
+                if (r == 0)
                 {
-                    rendererBounds = new Bounds(instanceLODs[lod].renderers[r].mesh.bounds.center + (Vector3)instanceLODs[lod].renderers[r].transformOffset.GetColumn(3),
-                        new Vector3(
-                        instanceLODs[lod].renderers[r].mesh.bounds.size.x * instanceLODs[lod].renderers[r].transformOffset.GetRow(0).magnitude,
-                        instanceLODs[lod].renderers[r].mesh.bounds.size.y * instanceLODs[lod].renderers[r].transformOffset.GetRow(1).magnitude,
-                        instanceLODs[lod].renderers[r].mesh.bounds.size.z * instanceLODs[lod].renderers[r].transformOffset.GetRow(2).magnitude));
-                    if (lod == 0 && r == 0)
-                    {
-                        instanceBounds = rendererBounds;
-                        continue;
-                    }
-                    instanceBounds.Encapsulate(rendererBounds);
-
-                    //Vector3[] verts = instanceLODs[lod].renderers[r].mesh.vertices;
-                    //for (var v = 0; v < verts.Length; v++)
-                    //    instanceBounds.Encapsulate(verts[v]);
+                    instanceBounds = rendererBounds;
+                    continue;
                 }
+                instanceBounds.Encapsulate(rendererBounds);
             }
 
             instanceBounds.size += prototype.boundsOffset;
@@ -190,7 +148,7 @@ namespace GPUInstancer
                 return false;
 
 
-            if (instanceLODs == null || instanceLODs.Count == 0)
+            if (instanceData == null)
                 AddLod();
             return CreateRenderersFromMeshRenderers(0, prototype);
 
@@ -207,7 +165,7 @@ namespace GPUInstancer
         /// <returns></returns>
         public virtual bool CreateRenderersFromMeshRenderers(int lod, GPUInstancerPrototype prototype)
         {
-            if (instanceLODs == null || instanceLODs.Count <= lod || instanceLODs[lod] == null)
+            if (instanceData == null)
             {
                 Debug.LogError("Can't create renderer(s): Invalid LOD");
                 return false;
@@ -256,7 +214,7 @@ namespace GPUInstancer
                 MaterialPropertyBlock mpb = new MaterialPropertyBlock();
                 meshRenderer.GetPropertyBlock(mpb);
 
-                AddRenderer(lod, meshRenderer.GetComponent<MeshFilter>().sharedMesh, instanceMaterials, transformOffset, mpb,
+                AddRenderer(meshRenderer.GetComponent<MeshFilter>().sharedMesh, instanceMaterials, transformOffset, mpb,
                     meshRenderer.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off, meshRenderer.gameObject.layer, meshRenderer, meshRenderer.receiveShadows);
             }
 
@@ -286,15 +244,6 @@ namespace GPUInstancer
     {
         // Prototype Data
         public List<GPUInstancerRenderer> renderers; // support for multiple mesh renderers
-        // Buffers Data
-        public ComputeBuffer transformationMatrixAppendBuffer;
-        public ComputeBuffer shadowAppendBuffer;
-        public bool excludeBounds;
-
-        public RenderTexture transformationMatrixAppendTexture;
-        public RenderTexture shadowAppendTexture;
-
-        public int argsBufferOffset { get { return renderers == null || renderers.Count == 0 ? -1 : renderers[0].argsBufferOffset; } }
     }
 
     public class GPUInstancerRenderer

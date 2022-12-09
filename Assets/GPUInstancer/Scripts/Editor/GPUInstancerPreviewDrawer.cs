@@ -305,7 +305,7 @@ namespace GPUInstancer
                 _camera.Render();
                 UnityEditorInternal.InternalEditorUtility.RemoveCustomLighting();
             }
-            else if (runtimeData != null && runtimeData.instanceLODs != null && runtimeData.instanceLODs.Count > 0 && runtimeData.instanceLODs[0].renderers != null)
+            else if (runtimeData != null && runtimeData.instanceData != null && runtimeData.instanceData.renderers != null)
             {
                 float maxBounds = Mathf.Max(Mathf.Max(runtimeData.instanceBounds.extents.x, runtimeData.instanceBounds.extents.y), runtimeData.instanceBounds.extents.z);
                 _camera.transform.position = runtimeData.instanceBounds.center;
@@ -313,9 +313,9 @@ namespace GPUInstancer
 
                 UnityEditorInternal.InternalEditorUtility.SetCustomLighting(lights, Color.gray);
 
-                for (int i = 0; i < runtimeData.instanceLODs[0].renderers.Count; i++)
+                for (int i = 0; i < runtimeData.instanceData.renderers.Count; i++)
                 {
-                    GPUInstancerRenderer renderer = runtimeData.instanceLODs[0].renderers[i];
+                    GPUInstancerRenderer renderer = runtimeData.instanceData.renderers[i];
                     if (renderer.materials != null)
                     {
                         int submeshIndex = 0;

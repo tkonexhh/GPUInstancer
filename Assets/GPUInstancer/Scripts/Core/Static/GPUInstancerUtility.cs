@@ -15,8 +15,6 @@ namespace GPUInstancer
     public static class GPUInstancerUtility
     {
         #region GPU Instancing
-
-        public static Texture2D dummyHiZTex;
         public static GPUIMatrixHandlingType matrixHandlingType;
 
         /// <summary>
@@ -38,14 +36,11 @@ namespace GPUInstancer
             if (runtimeData == null || runtimeData.bufferSize == 0)
                 return;
 
-            if (runtimeData.instanceLODs == null || runtimeData.instanceLODs.Count == 0)
+            if (runtimeData.instanceData == null)
             {
                 Debug.LogError("instance prototype with an empty LOD list detected. There must be at least one LOD defined per instance prototype.");
                 return;
             }
-
-            if (dummyHiZTex == null)
-                dummyHiZTex = new Texture2D(1, 1);
 
             #region Set Visibility Buffer
             // Setup the visibility compute buffer
@@ -57,63 +52,43 @@ namespace GPUInstancer
                 if (runtimeData.instanceDataNativeArray.IsCreated)
                     runtimeData.transformationMatrixVisibilityBuffer.SetData(runtimeData.instanceDataNativeArray);
             }
+
             #endregion Set Visibility Buffer
-
-            #region Set LOD Buffer
-            // Setup the LOD buffer
-            if (runtimeData.instanceLODDataBuffer == null || runtimeData.instanceLODDataBuffer.count != runtimeData.bufferSize)
-            {
-                if (runtimeData.instanceLODDataBuffer != null)
-                    runtimeData.instanceLODDataBuffer.Release();
-
-                runtimeData.instanceLODDataBuffer = new ComputeBuffer(runtimeData.bufferSize, GPUInstancerConstants.STRIDE_SIZE_FLOAT4);
-            }
-            #endregion Set LOD Buffer
 
             #region Set Args Buffer
             if (runtimeData.argsBuffer == null)
             {
                 // Initialize indirect renderer buffer
-
                 int totalSubMeshCount = 0;
-                for (int i = 0; i < runtimeData.instanceLODs.Count; i++)
+
+                for (int j = 0; j < runtimeData.instanceData.renderers.Count; j++)
                 {
-                    for (int j = 0; j < runtimeData.instanceLODs[i].renderers.Count; j++)
-                    {
-                        totalSubMeshCount += runtimeData.instanceLODs[i].renderers[j].mesh.subMeshCount;
-                    }
+                    totalSubMeshCount += runtimeData.instanceData.renderers[j].mesh.subMeshCount;
                 }
 
                 // Initialize indirect renderer buffer. First LOD's each renderer's all submeshes will be followed by second LOD's each renderer's submeshes and so on.
                 runtimeData.args = new uint[5 * totalSubMeshCount];
                 int argsLastIndex = 0;
 
-                // Setup LOD Data:
-                for (int lod = 0; lod < runtimeData.instanceLODs.Count; lod++)
+                // setup LOD renderers:
+                for (int r = 0; r < runtimeData.instanceData.renderers.Count; r++)
                 {
-                    // setup LOD renderers:
-                    for (int r = 0; r < runtimeData.instanceLODs[lod].renderers.Count; r++)
+                    runtimeData.instanceData.renderers[r].argsBufferOffset = argsLastIndex;
+                    // Setup the indirect renderer buffer:
+                    for (int j = 0; j < runtimeData.instanceData.renderers[r].mesh.subMeshCount; j++)
                     {
-                        runtimeData.instanceLODs[lod].renderers[r].argsBufferOffset = argsLastIndex;
-                        // Setup the indirect renderer buffer:
-                        for (int j = 0; j < runtimeData.instanceLODs[lod].renderers[r].mesh.subMeshCount; j++)
-                        {
-                            runtimeData.args[argsLastIndex++] = runtimeData.instanceLODs[lod].renderers[r].mesh.GetIndexCount(j); // index count per instance
-                            runtimeData.args[argsLastIndex++] = 0;// (uint)runtimeData.bufferSize;
-                            runtimeData.args[argsLastIndex++] = runtimeData.instanceLODs[lod].renderers[r].mesh.GetIndexStart(j); // start index location
-                            runtimeData.args[argsLastIndex++] = 0; // base vertex location
-                            runtimeData.args[argsLastIndex++] = 0; // start instance location
-                        }
+                        runtimeData.args[argsLastIndex++] = runtimeData.instanceData.renderers[r].mesh.GetIndexCount(j); // index count per instance
+                        runtimeData.args[argsLastIndex++] = 0;// (uint)runtimeData.bufferSize;
+                        runtimeData.args[argsLastIndex++] = runtimeData.instanceData.renderers[r].mesh.GetIndexStart(j); // start index location
+                        runtimeData.args[argsLastIndex++] = 0; // base vertex location
+                        runtimeData.args[argsLastIndex++] = 0; // start instance location
                     }
                 }
 
                 if (runtimeData.args.Length > 0)
                 {
                     runtimeData.argsBuffer = new ComputeBuffer(runtimeData.args.Length, sizeof(uint), ComputeBufferType.IndirectArguments);
-
                     runtimeData.argsBuffer.SetData(runtimeData.args);
-
-
                 }
             }
             #endregion Set Args Buffer
@@ -126,326 +101,47 @@ namespace GPUInstancer
         #region Set Append Buffers Platform Dependent
         public static void SetAppendBuffers<T>(T runtimeData) where T : GPUInstancerRuntimeData
         {
-            switch (matrixHandlingType)
+            foreach (GPUInstancerRenderer renderer in runtimeData.instanceData.renderers)
             {
-                case GPUIMatrixHandlingType.MatrixAppend:
-                    SetAppendBuffersVulkan(runtimeData);
-                    break;
-                case GPUIMatrixHandlingType.CopyToTexture:
-                    SetAppendBuffersGLES3(runtimeData);
-                    break;
-                default:
-                    SetAppendBuffersDefault(runtimeData);
-                    break;
+                // Setup instance LOD renderer material property block shader buffers with the append buffer
+                renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
+                renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
             }
         }
 
-        private static void SetAppendBuffersDefault<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
-            int lod = 0;
-            foreach (GPUInstancerPrototypeLOD gpuiLod in runtimeData.instanceLODs)
-            {
-                if (gpuiLod.transformationMatrixAppendBuffer == null || gpuiLod.transformationMatrixAppendBuffer.count != runtimeData.bufferSize)
-                {
-                    // Create the LOD append buffers. Each LOD has its own append buffer.
-                    if (gpuiLod.transformationMatrixAppendBuffer != null)
-                        gpuiLod.transformationMatrixAppendBuffer.Release();
-
-                    gpuiLod.transformationMatrixAppendBuffer = new ComputeBuffer(runtimeData.bufferSize, GPUInstancerConstants.STRIDE_SIZE_INT, ComputeBufferType.Append);
-                }
-
-                foreach (GPUInstancerRenderer renderer in gpuiLod.renderers)
-                {
-                    // Setup instance LOD renderer material property block shader buffers with the append buffer
-                    renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, gpuiLod.transformationMatrixAppendBuffer);
-                    renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                    renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_LOD_BUFFER, runtimeData.instanceLODDataBuffer);
-                    renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
-                    renderer.mpb.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_LOD_LEVEL, -1);
-
-
-
-                    SetRenderingLayerMask(runtimeData, renderer);
-                }
-                lod++;
-            }
-        }
-
-        private static void SetAppendBuffersVulkan<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
-            foreach (GPUInstancerPrototypeLOD gpuiLod in runtimeData.instanceLODs)
-            {
-                if (gpuiLod.transformationMatrixAppendBuffer == null || gpuiLod.transformationMatrixAppendBuffer.count != runtimeData.bufferSize)
-                {
-                    // Create the LOD append buffers. Each LOD has its own append buffer.
-                    if (gpuiLod.transformationMatrixAppendBuffer != null)
-                        gpuiLod.transformationMatrixAppendBuffer.Release();
-
-                    gpuiLod.transformationMatrixAppendBuffer = new ComputeBuffer(runtimeData.bufferSize, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4, ComputeBufferType.Append);
-                }
-
-                foreach (GPUInstancerRenderer renderer in gpuiLod.renderers)
-                {
-                    // Setup instance LOD renderer material property block shader buffers with the append buffer
-                    renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, gpuiLod.transformationMatrixAppendBuffer);
-                    renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
-
-                    SetRenderingLayerMask(runtimeData, renderer);
-                }
-            }
-        }
-
-        private static void SetAppendBuffersGLES3<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
-            foreach (GPUInstancerPrototypeLOD gpuiLod in runtimeData.instanceLODs)
-            {
-                if (gpuiLod.transformationMatrixAppendBuffer == null || gpuiLod.transformationMatrixAppendBuffer.count != runtimeData.bufferSize)
-                {
-                    // Create the LOD append buffers. Each LOD has its own append buffer.
-                    if (gpuiLod.transformationMatrixAppendBuffer != null)
-                        gpuiLod.transformationMatrixAppendBuffer.Release();
-
-                    gpuiLod.transformationMatrixAppendBuffer = new ComputeBuffer(runtimeData.bufferSize, GPUInstancerConstants.STRIDE_SIZE_INT, ComputeBufferType.Append);
-                }
-                if (gpuiLod.transformationMatrixAppendTexture == null || gpuiLod.transformationMatrixAppendTexture.width != runtimeData.bufferSize)
-                {
-                    DestroyObject(gpuiLod.transformationMatrixAppendTexture);
-
-                    int rowCount = Mathf.CeilToInt(runtimeData.bufferSize / (float)GPUInstancerConstants.TEXTURE_MAX_SIZE);
-                    gpuiLod.transformationMatrixAppendTexture = new RenderTexture(rowCount == 1 ? runtimeData.bufferSize : GPUInstancerConstants.TEXTURE_MAX_SIZE, 4 * rowCount, 0, RenderTextureFormat.ARGBFloat, RenderTextureReadWrite.Linear)
-                    {
-                        isPowerOfTwo = false,
-                        enableRandomWrite = true,
-                        filterMode = FilterMode.Point,
-                        useMipMap = false,
-                        autoGenerateMips = false
-                    };
-                    gpuiLod.transformationMatrixAppendTexture.Create();
-                }
-
-                foreach (GPUInstancerRenderer renderer in gpuiLod.renderers)
-                {
-                    // Setup instance LOD renderer material property block shader buffers with the append buffer
-                    renderer.mpb.SetTexture(GPUInstancerConstants.BufferToTextureKernelPoperties.TRANSFORMATION_MATRIX_TEXTURE, gpuiLod.transformationMatrixAppendTexture);
-                    renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
-                    renderer.mpb.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BUFFER_SIZE, runtimeData.bufferSize);
-                    renderer.mpb.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.MAX_TEXTURE_SIZE, GPUInstancerConstants.TEXTURE_MAX_SIZE);
-
-                    SetRenderingLayerMask(runtimeData, renderer);
-                }
-            }
-        }
-
-        private static void SetRenderingLayerMask<T>(T runtimeData, GPUInstancerRenderer renderer) where T : GPUInstancerRuntimeData
-        {
-            // Set Rendering Layer Mask
-            if (!GPUInstancerConstants.gpuiSettings.IsStandardRenderPipeline() && renderer.rendererRef != null)
-            {
-                Vector4 renderingLayer = new Vector4(BitConverter.ToSingle(BitConverter.GetBytes(renderer.rendererRef.renderingLayerMask), 0), 0, 0, 0);
-                renderer.mpb.SetVector(GPUInstancerConstants.VisibilityKernelPoperties.UNITY_RENDERING_LAYER, renderingLayer);
-
-            }
-        }
         #endregion Set Append Buffers Platform Dependent
 
-        /// <summary>
-        /// Indirectly renders matrices for all prototypes. 
-        /// Transform matrices are sent to a compute shader which does culling operations and appends them to the GPU (Unlimited buffer size).
-        /// All GPU buffers must be already initialized.
-        /// </summary>
-        public static void UpdateGPUBuffers<T>(ComputeShader cameraComputeShader, int[] cameraComputeKernelIDs,
-            ComputeShader visibilityComputeShader, int[] instanceVisibilityComputeKernelIDs, List<T> runtimeDataList,
-            GPUInstancerCameraData cameraData, bool isManagerFrustumCulling, bool isManagerOcclusionCulling, bool showRenderedAmount, bool isInitial)
-            where T : GPUInstancerRuntimeData
+
+        public static void UpdateGPUBuffers<T>(List<T> runtimeDataList, GPUInstancerCameraData cameraData, bool isManagerFrustumCulling) where T : GPUInstancerRuntimeData
         {
             if (runtimeDataList == null)
                 return;
 
             for (int i = 0; i < runtimeDataList.Count; i++)
             {
-                UpdateGPUBuffer(cameraComputeShader, cameraComputeKernelIDs, visibilityComputeShader, instanceVisibilityComputeKernelIDs,
-                    runtimeDataList[i], cameraData, isManagerFrustumCulling, showRenderedAmount, isInitial);
+                UpdateGPUBuffer(runtimeDataList[i], cameraData, isManagerFrustumCulling);
             }
         }
 
-        /// <summary>
-        /// Indirectly renders matrices for all prototypes. 
-        /// Transform matrices are sent to a compute shader which does culling operations and appends them to the GPU (Unlimited buffer size).
-        /// All GPU buffers must be already initialized.
-        /// </summary>
-        public static void UpdateGPUBuffer<T>(ComputeShader cameraComputeShader, int[] cameraComputeKernelIDs,
-            ComputeShader visibilityComputeShader, int[] instanceVisibilityComputeKernelIDs, T runtimeData,
-            GPUInstancerCameraData cameraData, bool isManagerFrustumCulling, bool showRenderedAmount, bool isInitial)
-            where T : GPUInstancerRuntimeData
+        public static void UpdateGPUBuffer<T>(T runtimeData, GPUInstancerCameraData cameraData, bool isManagerFrustumCulling) where T : GPUInstancerRuntimeData
         {
             if (runtimeData == null)
                 return;
 
             if (runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0 || runtimeData.instanceCount == 0)
             {
-                if (showRenderedAmount && runtimeData.args != null)
+                if (runtimeData.args != null)
                 {
-                    for (int lod = 0; lod < runtimeData.instanceLODs.Count; lod++)
-                    {
-                        runtimeData.args[runtimeData.instanceLODs[lod].argsBufferOffset + 1] = 0;
-                    }
+                    runtimeData.args[1] = 0;
                 }
                 return;
             }
-
-            DispatchCSInstancedCameraCalculation(cameraComputeShader, cameraComputeKernelIDs, runtimeData, cameraData, isManagerFrustumCulling, isInitial);
-
-            int lodCount = runtimeData.instanceLODs.Count;
-            int instanceVisibilityComputeKernelId = instanceVisibilityComputeKernelIDs[
-                lodCount > GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER ?
-                    GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER - 1
-                    : lodCount - 1];
-
-            DispatchCSInstancedVisibilityCalculation(visibilityComputeShader, instanceVisibilityComputeKernelId, runtimeData, false, 0, 0);
-
-            if (lodCount > GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER)
-            {
-                instanceVisibilityComputeKernelId = instanceVisibilityComputeKernelIDs[lodCount - GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER - 1];
-
-                DispatchCSInstancedVisibilityCalculation(visibilityComputeShader, instanceVisibilityComputeKernelId, runtimeData, false,
-                    GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER, 0);
-            }
-
-            GPUInstancerPrototypeLOD rdLOD;
-            GPUInstancerRenderer rdRenderer;
-
-            // Copy (overwrite) the modified instance count of the append buffer to each index of the indirect renderer buffer (argsBuffer)
-            // that represents a submesh's instance count. The offset is calculated in parallel to the Graphics.DrawMeshInstancedIndirect call,
-            // which expects args[1] to be the instance count for the first LOD's first renderer. Every 5 index offset of args represents the 
-            // next submesh in the renderer, followed by the next renderer and it's submeshes. After all submeshes of all renderers for the 
-            // first LOD, the other LODs follow in the same manner.
-            // For reference, see: https://docs.unity3d.com/ScriptReference/ComputeBuffer.CopyCount.html
-
-            int offset = 0;
-            for (int lod = 0; lod < lodCount; lod++)
-            {
-                rdLOD = runtimeData.instanceLODs[lod];
-                for (int r = 0; r < rdLOD.renderers.Count; r++)
-                {
-                    rdRenderer = rdLOD.renderers[r];
-                    for (int j = 0; j < rdRenderer.mesh.subMeshCount; j++)
-                    {
-                        // LOD renderer start location + LOD renderer material start location + 1 :
-                        offset = (rdRenderer.argsBufferOffset * GPUInstancerConstants.STRIDE_SIZE_INT) + (j * GPUInstancerConstants.STRIDE_SIZE_INT * 5) + GPUInstancerConstants.STRIDE_SIZE_INT;
-                        ComputeBuffer.CopyCount(rdLOD.transformationMatrixAppendBuffer,
-                                runtimeData.argsBuffer,
-                                offset);
-                    }
-                }
-            }
-
-            // WARNING: this will read back the instance matrices buffer after the compute shader operates on it. This will impact FPS greatly. Use only for debug.
-            if (showRenderedAmount)
-            {
-                if (runtimeData.argsBuffer != null && runtimeData.args != null && runtimeData.args.Length > 0)
-                {
-                    runtimeData.argsBuffer.GetData(runtimeData.args);
-                }
-            }
+            runtimeData.args[1] = (uint)runtimeData.instanceCount;
+            runtimeData.transformationMatrixVisibilityBuffer.SetData(runtimeData.instanceDataNativeArray);
+            runtimeData.argsBuffer.SetData(runtimeData.args);
         }
 
-        public static void DispatchCSInstancedCameraCalculation<T>(ComputeShader cameraComputeShader, int[] cameraComputeKernelIDs, T runtimeData,
-            GPUInstancerCameraData cameraData, bool isManagerFrustumCulling, bool isInitial)
-            where T : GPUInstancerRuntimeData
-        {
-            int lodCount = runtimeData.instanceLODs.Count;
-
-            int instanceVisibilityComputeKernelId = cameraComputeKernelIDs[0];
-
-            cameraComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_LOD_BUFFER, runtimeData.instanceLODDataBuffer);
-            cameraComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-
-            cameraComputeShader.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_MVP_MATRIX,
-                cameraData.mvpMatrix);
-            cameraComputeShader.SetVector(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BOUNDS_CENTER,
-                runtimeData.instanceBounds.center);
-            cameraComputeShader.SetVector(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BOUNDS_EXTENTS,
-                runtimeData.instanceBounds.extents);
-            cameraComputeShader.SetBool(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_FRUSTUM_CULL_SWITCH,
-                isManagerFrustumCulling && runtimeData.prototype.isFrustumCulling);
-            cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_MIN_VIEW_DISTANCE,
-                runtimeData.prototype.minDistance);
-            cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_MAX_VIEW_DISTANCE,
-                runtimeData.prototype.maxDistance);
-            cameraComputeShader.SetVector(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_CAMERA_POSITION,
-                cameraData.cameraPosition);
-            cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_FRUSTUM_OFFSET,
-                runtimeData.prototype.frustumOffset);
-            // cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_OCCLUSION_OFFSET,
-            //     runtimeData.prototype.occlusionOffset);
-            // cameraComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_OCCLUSION_ACCURACY,
-            //     runtimeData.prototype.occlusionAccuracy);
-            // cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_MIN_CULLING_DISTANCE,
-            //     runtimeData.prototype.minCullingDistance);
-            cameraComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BUFFER_SIZE, runtimeData.instanceCount);
-
-            float shadowDistance = -1;
-
-            cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_SHADOW_DISTANCE, shadowDistance);
-
-            cameraComputeShader.SetFloats(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_LOD_SIZES, runtimeData.lodSizes);
-            cameraComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_LOD_COUNT, lodCount);
-
-            cameraComputeShader.SetFloat(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_HALF_ANGLE, cameraData.halfAngle);
-
-
-            cameraComputeShader.SetBool(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_OCCLUSION_CULL_SWITCH, false);
-            // setting a dummy placeholder or the compute shader will throw errors.
-            cameraComputeShader.SetTexture(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_HIERARCHICAL_Z_TEXTURE_MAP,
-                dummyHiZTex);
-
-
-            // Dispatch the compute shader
-            cameraComputeShader.Dispatch(instanceVisibilityComputeKernelId,
-                Mathf.CeilToInt(runtimeData.instanceCount / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT), 1, 1);
-        }
-
-        public static void DispatchCSInstancedVisibilityCalculation<T>(ComputeShader visibilityComputeShader, int instanceVisibilityComputeKernelId, T runtimeData,
-            bool isShadow, int lodShift, int lodAppendIndex) where T : GPUInstancerRuntimeData
-        {
-            GPUInstancerPrototypeLOD rdLOD;
-            int lodCount = runtimeData.instanceLODs.Count;
-
-            visibilityComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER,
-                runtimeData.transformationMatrixVisibilityBuffer);
-            visibilityComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_LOD_BUFFER,
-                runtimeData.instanceLODDataBuffer);
-
-            for (int lod = 0; lod < lodCount - lodShift && lod < GPUInstancerConstants.COMPUTE_MAX_LOD_BUFFER; lod++)
-            {
-                rdLOD = runtimeData.instanceLODs[lod + lodShift];
-                if (isShadow)
-                {
-                    rdLOD.shadowAppendBuffer.SetCounterValue(0);
-                    visibilityComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_APPEND_BUFFERS[lod],
-                            rdLOD.shadowAppendBuffer);
-                }
-                else
-                {
-                    if (lodAppendIndex == 0)
-                        rdLOD.transformationMatrixAppendBuffer.SetCounterValue(0);
-                    visibilityComputeShader.SetBuffer(instanceVisibilityComputeKernelId, GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_APPEND_BUFFERS[lod],
-                            rdLOD.transformationMatrixAppendBuffer);
-                }
-            }
-
-            visibilityComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BUFFER_SIZE, runtimeData.instanceCount);
-            visibilityComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_LOD_SHIFT, lodShift);
-            visibilityComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_LOD_APPEND_INDEX, lodAppendIndex);
-
-            // Dispatch the compute shader
-            visibilityComputeShader.Dispatch(instanceVisibilityComputeKernelId,
-                Mathf.CeilToInt(runtimeData.instanceCount / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT), 1, 1);
-        }
-
-        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds, GPUInstancerCameraData cameraData, int layerMask = ~0,
-            bool lightProbeDisabled = false)
-            where T : GPUInstancerRuntimeData
+        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds, GPUInstancerCameraData cameraData) where T : GPUInstancerRuntimeData
         {
             if (runtimeDataList == null)
                 return;
@@ -457,71 +153,36 @@ namespace GPUInstancer
                     continue;
 
                 // Everything is ready; execute the instanced indirect rendering. We execute a drawcall for each submesh of each LOD.
-                GPUInstancerPrototypeLOD rdLOD;
                 GPUInstancerRenderer rdRenderer;
                 Material rdMaterial;
                 int offset = 0;
                 int submeshIndex = 0;
-                for (int lod = 0; lod < runtimeData.instanceLODs.Count; lod++)
-                {
-                    rdLOD = runtimeData.instanceLODs[lod];
 
-                    for (int r = 0; r < rdLOD.renderers.Count; r++)
+                for (int r = 0; r < runtimeData.instanceData.renderers.Count; r++)
+                {
+                    rdRenderer = runtimeData.instanceData.renderers[r];
+                    for (int m = 0; m < rdRenderer.materials.Count; m++)
                     {
-                        rdRenderer = rdLOD.renderers[r];
-                        if (!IsInLayer(layerMask, rdRenderer.layer))
-                            continue;
+                        rdMaterial = rdRenderer.materials[m];
+                        submeshIndex = Math.Min(m, rdRenderer.mesh.subMeshCount - 1);
+                        offset = (rdRenderer.argsBufferOffset + 5 * submeshIndex) * GPUInstancerConstants.STRIDE_SIZE_INT;
 
-                        for (int m = 0; m < rdRenderer.materials.Count; m++)
-                        {
-                            rdMaterial = rdRenderer.materials[m];
-
-                            submeshIndex = Math.Min(m, rdRenderer.mesh.subMeshCount - 1);
-                            offset = (rdRenderer.argsBufferOffset + 5 * submeshIndex) * GPUInstancerConstants.STRIDE_SIZE_INT;
-
-                            Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex,
-                                rdMaterial,
-                                instancingBounds,
-                                runtimeData.argsBuffer,
-                                offset,
-                                rdRenderer.mpb,
-                                ShadowCastingMode.Off, rdRenderer.receiveShadows, rdRenderer.layer,
-                                rendereringCamera
-#if UNITY_2018_1_OR_NEWER
-                                , lightProbeDisabled ? LightProbeUsage.Off : LightProbeUsage.BlendProbes
-#endif
-                                );
-                        }
+                        Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex,
+                            rdMaterial,
+                            instancingBounds,
+                            runtimeData.argsBuffer,
+                            offset,
+                            rdRenderer.mpb,
+                            ShadowCastingMode.Off,
+                            rdRenderer.receiveShadows,
+                            rdRenderer.layer
+                            );
                     }
-                }
-            }
-        }
-
-        public static void DispatchBufferToTexture<T>(List<T> runtimeDataList, ComputeShader bufferToTextureComputeShader, int bufferToTextureComputeKernelID) where T : GPUInstancerRuntimeData
-        {
-            if (runtimeDataList == null)
-                return;
-
-            foreach (T runtimeData in runtimeDataList)
-            {
-                if (runtimeData == null || runtimeData.args == null || runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0)
-                    continue;
-
-                for (int lod = 0; lod < runtimeData.instanceLODs.Count; lod++)
-                {
-                    bufferToTextureComputeShader.SetBuffer(bufferToTextureComputeKernelID, GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                    bufferToTextureComputeShader.SetBuffer(bufferToTextureComputeKernelID, GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, runtimeData.instanceLODs[lod].transformationMatrixAppendBuffer);
-                    bufferToTextureComputeShader.SetTexture(bufferToTextureComputeKernelID, GPUInstancerConstants.BufferToTextureKernelPoperties.TRANSFORMATION_MATRIX_TEXTURE, runtimeData.instanceLODs[lod].transformationMatrixAppendTexture);
-                    bufferToTextureComputeShader.SetBuffer(bufferToTextureComputeKernelID, GPUInstancerConstants.VisibilityKernelPoperties.ARGS_BUFFER, runtimeData.argsBuffer);
-                    bufferToTextureComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.ARGS_BUFFER_INDEX, runtimeData.instanceLODs[lod].argsBufferOffset + 1);
-                    bufferToTextureComputeShader.SetInt(GPUInstancerConstants.VisibilityKernelPoperties.MAX_TEXTURE_SIZE, GPUInstancerConstants.TEXTURE_MAX_SIZE);
-
-                    bufferToTextureComputeShader.Dispatch(bufferToTextureComputeKernelID, Mathf.CeilToInt(runtimeData.bufferSize / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT), 1, 1);
-
 
                 }
             }
         }
+
 
 
         public static bool IsInLayer(int layerMask, int layer)
@@ -547,30 +208,6 @@ namespace GPUInstancer
         {
             if (runtimeData == null)
                 return;
-
-            if (runtimeData.instanceLODs != null)
-            {
-                for (int lod = 0; lod < runtimeData.instanceLODs.Count; lod++)
-                {
-                    if (runtimeData.instanceLODs[lod].transformationMatrixAppendBuffer != null)
-                        runtimeData.instanceLODs[lod].transformationMatrixAppendBuffer.Release();
-                    runtimeData.instanceLODs[lod].transformationMatrixAppendBuffer = null;
-
-                    DestroyObject(runtimeData.instanceLODs[lod].transformationMatrixAppendTexture);
-                    runtimeData.instanceLODs[lod].transformationMatrixAppendTexture = null;
-
-                    DestroyObject(runtimeData.instanceLODs[lod].shadowAppendTexture);
-                    runtimeData.instanceLODs[lod].shadowAppendTexture = null;
-
-                    if (runtimeData.instanceLODs[lod].shadowAppendBuffer != null)
-                        runtimeData.instanceLODs[lod].shadowAppendBuffer.Release();
-                    runtimeData.instanceLODs[lod].shadowAppendBuffer = null;
-                }
-            }
-
-            if (runtimeData.instanceLODDataBuffer != null)
-                runtimeData.instanceLODDataBuffer.Release();
-            runtimeData.instanceLODDataBuffer = null;
 
             if (runtimeData.transformationMatrixVisibilityBuffer != null)
                 runtimeData.transformationMatrixVisibilityBuffer.Release();
@@ -684,7 +321,7 @@ namespace GPUInstancer
                 // DetermineTreePrototypeType(prototype);
 
 
-                GenerateInstancedShadersForGameObject(prototype);
+                // GenerateInstancedShadersForGameObject(prototype);
 
 #if UNITY_EDITOR
                 if (!Application.isPlaying)
@@ -723,88 +360,6 @@ namespace GPUInstancer
 
 
         #region Shader Functions
-
-        public static void GenerateInstancedShadersForGameObject(GPUInstancerPrototype prototype)
-        {
-            if (prototype.prefabObject == null)
-                return;
-
-            MeshRenderer[] meshRenderers = prototype.prefabObject.GetComponentsInChildren<MeshRenderer>();
-
-#if UNITY_EDITOR
-            string warnings = "";
-#endif
-
-            foreach (MeshRenderer mr in meshRenderers)
-            {
-                Material[] mats = mr.sharedMaterials;
-
-                for (int i = 0; i < mats.Length; i++)
-                {
-                    if (mats[i] == null || mats[i].shader == null)
-                        continue;
-                    if (GPUInstancerConstants.gpuiSettings.shaderBindings.IsShadersInstancedVersionExists(mats[i].shader.name))
-                    {
-                        if (!GPUInstancerConstants.gpuiSettings.disableAutoVariantHandling)
-                            GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(mats[i]);
-                        continue;
-                    }
-
-                    if (!Application.isPlaying)
-                    {
-                        if (IsShaderInstanced(mats[i].shader))
-                        {
-                            GPUInstancerConstants.gpuiSettings.shaderBindings.AddShaderInstance(mats[i].shader.name, mats[i].shader, true);
-                            if (!GPUInstancerConstants.gpuiSettings.disableAutoVariantHandling)
-                                GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(mats[i]);
-                        }
-                        else if (!GPUInstancerConstants.gpuiSettings.disableAutoShaderConversion)
-                        {
-                            Shader instancedShader = CreateInstancedShader(mats[i].shader);
-                            if (instancedShader != null)
-                            {
-                                GPUInstancerConstants.gpuiSettings.shaderBindings.AddShaderInstance(mats[i].shader.name, instancedShader);
-                                if (!GPUInstancerConstants.gpuiSettings.disableAutoVariantHandling)
-                                    GPUInstancerConstants.gpuiSettings.AddShaderVariantToCollection(mats[i]);
-                            }
-#if UNITY_EDITOR
-                            else
-                            {
-                                if (!warnings.Contains(mats[i].shader.name))
-                                {
-                                    string originalAssetPath = AssetDatabase.GetAssetPath(mats[i].shader);
-                                    if (originalAssetPath.ToLower().EndsWith(".shadergraph"))
-                                        warnings += string.Format(GPUInstancerConstants.ERRORTEXT_shaderGraph, mats[i].shader.name);
-                                    else
-                                        warnings += "Can not create instanced version for shader: " + mats[i].shader.name + ". If you are using a Unity built-in shader, please download the shader to your project from the Unity Archive.";
-                                }
-                            }
-#endif
-                        }
-                    }
-                }
-            }
-
-
-#if UNITY_EDITOR
-            if (string.IsNullOrEmpty(warnings))
-            {
-                if (prototype.warningText != null)
-                {
-                    prototype.warningText = null;
-                    EditorUtility.SetDirty(prototype);
-                }
-            }
-            else
-            {
-                if (prototype.warningText != warnings)
-                {
-                    prototype.warningText = warnings;
-                    EditorUtility.SetDirty(prototype);
-                }
-            }
-#endif
-        }
 
         public static bool IsShaderInstanced(Shader shader)
         {
@@ -1137,7 +692,7 @@ namespace GPUInstancer
                 string newAssetPath = useOriginal ? originalAssetPath : originalAssetPath.Replace(originalFileName, originalFileName.Replace(".shader", "_GPUI.shader"));
 
                 byte[] bytes = System.Text.Encoding.UTF8.GetBytes(newShaderText);
-                VersionControlCheckout(newAssetPath);
+                // VersionControlCheckout(newAssetPath);
                 System.IO.FileStream fs = System.IO.File.Create(newAssetPath);
                 fs.Write(bytes, 0, bytes.Length);
                 fs.Close();
@@ -1200,152 +755,6 @@ namespace GPUInstancer
             transform.rotation = Quaternion.LookRotation(matrix.GetColumn(2), matrix.GetColumn(1));
         }
 
-        // Dispatch Compute Shader to update positions
-        public static void SetGlobalPositionOffset(GPUInstancerManager manager, Vector3 offsetPosition)
-        {
-            if (manager.runtimeDataList != null)
-            {
-                foreach (GPUInstancerRuntimeData runtimeData in manager.runtimeDataList)
-                {
-
-                    if (runtimeData == null)
-                    {
-                        Debug.LogWarning("SetGlobalPositionOffset called before manager initialization. Offset will not be applied.");
-                        continue;
-                    }
-
-                    if (runtimeData.instanceCount == 0 || runtimeData.bufferSize == 0)
-                        continue;
-
-                    if (runtimeData.transformationMatrixVisibilityBuffer == null)
-                    {
-                        Debug.LogWarning("SetGlobalPositionOffset called before buffers are initialized. Offset will not be applied.");
-                        continue;
-                    }
-
-                    GPUInstancerConstants.computeRuntimeModification.SetBuffer(GPUInstancerConstants.computeBufferTransformOffsetId,
-                        GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                    GPUInstancerConstants.computeRuntimeModification.SetInt(
-                        GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BUFFER_SIZE, runtimeData.bufferSize);
-                    GPUInstancerConstants.computeRuntimeModification.SetVector(
-                        GPUInstancerConstants.RuntimeModificationKernelProperties.BUFFER_PARAMETER_POSITION_OFFSET, offsetPosition);
-
-                    GPUInstancerConstants.computeRuntimeModification.Dispatch(GPUInstancerConstants.computeBufferTransformOffsetId,
-                        Mathf.CeilToInt(runtimeData.bufferSize / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT), 1, 1);
-                }
-            }
-        }
-
-        public static void SetGlobalMatrixOffset(GPUInstancerManager manager, Matrix4x4 offsetMatrix)
-        {
-            if (manager.runtimeDataList != null)
-            {
-                foreach (GPUInstancerRuntimeData runtimeData in manager.runtimeDataList)
-                {
-
-                    if (runtimeData == null)
-                    {
-                        Debug.LogWarning("SetGlobalMatrixOffset called before manager initialization. Offset will not be applied.");
-                        continue;
-                    }
-
-                    if (runtimeData.instanceCount == 0 || runtimeData.bufferSize == 0)
-                        continue;
-
-                    if (runtimeData.transformationMatrixVisibilityBuffer == null)
-                    {
-                        Debug.LogWarning("SetGlobalMatrixOffset called before buffers are initialized. Offset will not be applied.");
-                        continue;
-                    }
-
-                    GPUInstancerConstants.computeRuntimeModification.SetBuffer(GPUInstancerConstants.computeBufferMatrixOffsetId,
-                        GPUInstancerConstants.VisibilityKernelPoperties.INSTANCE_DATA_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                    GPUInstancerConstants.computeRuntimeModification.SetInt(
-                        GPUInstancerConstants.VisibilityKernelPoperties.BUFFER_PARAMETER_BUFFER_SIZE, runtimeData.bufferSize);
-                    GPUInstancerConstants.computeRuntimeModification.SetMatrix(
-                        GPUInstancerConstants.RuntimeModificationKernelProperties.BUFFER_PARAMETER_MATRIX_OFFSET, offsetMatrix);
-
-                    GPUInstancerConstants.computeRuntimeModification.Dispatch(GPUInstancerConstants.computeBufferMatrixOffsetId,
-                        Mathf.CeilToInt(runtimeData.bufferSize / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT), 1, 1);
-                }
-            }
-        }
-
-
-        #region Texture Methods
-
-        public static void CopyTextureWithComputeShader(Texture source, Texture destination, int offsetX, int sourceMip = 0, int destinationMip = 0, bool reverseZ = true)
-        {
-#if UNITY_2018_3_OR_NEWER
-            GPUInstancerConstants.computeTextureUtils.SetTexture(GPUInstancerConstants.computeTextureUtilsCopyTextureId,
-                GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_TEXTURE, source, sourceMip);
-            GPUInstancerConstants.computeTextureUtils.SetTexture(GPUInstancerConstants.computeTextureUtilsCopyTextureId,
-                GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_TEXTURE, destination, destinationMip);
-#else
-            GPUInstancerConstants.computeTextureUtils.SetTexture(GPUInstancerConstants.computeTextureUtilsCopyTextureId,
-                GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_TEXTURE, source);
-            GPUInstancerConstants.computeTextureUtils.SetTexture(GPUInstancerConstants.computeTextureUtilsCopyTextureId,
-                GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_TEXTURE, destination);
-#endif
-
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.OFFSET_X, offsetX);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_X, source.width);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_Y, source.height);
-            GPUInstancerConstants.computeTextureUtils.SetBool(GPUInstancerConstants.CopyTextureKernelProperties.REVERSE_Z, reverseZ);
-
-            GPUInstancerConstants.computeTextureUtils.Dispatch(GPUInstancerConstants.computeTextureUtilsCopyTextureId,
-                Mathf.CeilToInt(source.width / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D),
-                Mathf.CeilToInt(source.height / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D), 1);
-        }
-
-        public static void CopyTextureArrayWithComputeShader(Texture source, Texture destination, int offsetX, int textureArrayIndex, int sourceMip = 0, int destinationMip = 0, bool reverseZ = true)
-        {
-            GPUInstancerConstants.computeTextureUtils.SetTexture(2, GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_TEXTURE_ARRAY, source, sourceMip);
-            GPUInstancerConstants.computeTextureUtils.SetTexture(2, GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_TEXTURE, destination, destinationMip);
-
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.OFFSET_X, offsetX);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.TEXTURE_ARRAY_INDEX, textureArrayIndex);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_X, source.width);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_Y, source.height);
-            GPUInstancerConstants.computeTextureUtils.SetBool(GPUInstancerConstants.CopyTextureKernelProperties.REVERSE_Z, reverseZ);
-
-            GPUInstancerConstants.computeTextureUtils.Dispatch(2,
-                Mathf.CeilToInt(source.width / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D),
-                Mathf.CeilToInt(source.height / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D), 1);
-        }
-
-        public static void ReduceTextureWithComputeShader(Texture source, Texture destination, int offsetX, int sourceMip = 0, int destinationMip = 0)
-        {
-            int sourceW = source.width;
-            int sourceH = source.height;
-            int destinationW = destination.width;
-            int destinationH = destination.height;
-            for (int i = 0; i < sourceMip; i++)
-            {
-                sourceW >>= 1;
-                sourceH >>= 1;
-            }
-            for (int i = 0; i < destinationMip; i++)
-            {
-                destinationW >>= 1;
-                destinationH >>= 1;
-            }
-
-            GPUInstancerConstants.computeTextureUtils.SetTexture(1, GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_TEXTURE, source, sourceMip);
-            GPUInstancerConstants.computeTextureUtils.SetTexture(1, GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_TEXTURE, destination, destinationMip);
-
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.OFFSET_X, offsetX);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_X, sourceW);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.SOURCE_SIZE_Y, sourceH);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_SIZE_X, destinationW);
-            GPUInstancerConstants.computeTextureUtils.SetInt(GPUInstancerConstants.CopyTextureKernelProperties.DESTINATION_SIZE_Y, destinationH);
-
-            GPUInstancerConstants.computeTextureUtils.Dispatch(1, Mathf.CeilToInt(destinationW / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D),
-                Mathf.CeilToInt(destinationH / GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D), 1);
-        }
-
-        #endregion Texture Methods
-
         public static NativeArray<T> ResizeNativeArray<T>(NativeArray<T> previousArray, int newSize, Allocator allocator) where T : struct
         {
             NativeArray<T> result = new NativeArray<T>(newSize, allocator);
@@ -1361,17 +770,6 @@ namespace GPUInstancer
             return result;
         }
 
-
-        public static void DestroyObject(UnityEngine.Object obj)
-        {
-            if (obj != null)
-            {
-                if (Application.isPlaying)
-                    UnityEngine.Object.Destroy(obj);
-                else
-                    UnityEngine.Object.DestroyImmediate(obj);
-            }
-        }
 
         #endregion Extensions
 
@@ -1499,149 +897,8 @@ namespace GPUInstancer
 #endif
         #endregion Prefab System
 
-        #region Version Control
 
 
-        public static void VersionControlCheckout(string path)
-        {
-#if UNITY_EDITOR
-            if (UnityEditor.VersionControl.Provider.enabled && UnityEditor.VersionControl.Provider.isActive)
-            {
-                UnityEditor.VersionControl.Asset asset = UnityEditor.VersionControl.Provider.GetAssetByPath(path);
-                if (asset == null)
-                    return;
 
-                if (UnityEditor.VersionControl.Provider.hasCheckoutSupport)
-                {
-                    UnityEditor.VersionControl.Task checkOutTask = UnityEditor.VersionControl.Provider.Checkout(asset, UnityEditor.VersionControl.CheckoutMode.Both);
-                    checkOutTask.Wait();
-                }
-            }
-#endif
-        }
-        #endregion Version Control
-
-        #region Platform Dependent
-
-        public static void SetPlatformDependentVariables()
-        {
-            GPUIPlatform platform = DeterminePlatform();
-            matrixHandlingType = GPUInstancerConstants.gpuiSettings.GetMatrixHandlingType(platform);
-
-            GPUIComputeThreadCount computeThreadCount = GPUInstancerConstants.gpuiSettings.GetComputeThreadCount(platform);
-            switch (computeThreadCount)
-            {
-                case GPUIComputeThreadCount.x64:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 64;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 8;
-                    break;
-                case GPUIComputeThreadCount.x128:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 128;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 8;
-                    break;
-                case GPUIComputeThreadCount.x256:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 256;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 16;
-                    break;
-                case GPUIComputeThreadCount.x512:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 512;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 16;
-                    break;
-                case GPUIComputeThreadCount.x1024:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 1024;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 32;
-                    break;
-                default:
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT = 512;
-                    GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D = 16;
-                    break;
-            }
-        }
-
-        public static GPUIPlatform DeterminePlatform()
-        {
-            switch (SystemInfo.graphicsDeviceType)
-            {
-                case GraphicsDeviceType.OpenGLCore:
-                    return GPUIPlatform.OpenGLCore;
-                case GraphicsDeviceType.Metal:
-                    return GPUIPlatform.Metal;
-                case GraphicsDeviceType.OpenGLES3:
-                    return GPUIPlatform.GLES31;
-                case GraphicsDeviceType.Vulkan:
-                    return GPUIPlatform.Vulkan;
-                case GraphicsDeviceType.PlayStation4:
-                    return GPUIPlatform.PS4;
-                case GraphicsDeviceType.XboxOne:
-                    return GPUIPlatform.XBoxOne;
-                default:
-                    return GPUIPlatform.Default;
-            }
-        }
-
-        public static void UpdatePlatformDependentFiles()
-        {
-#if UNITY_EDITOR
-            SetPlatformDependentVariables();
-
-            // PlatformDefines.compute rewrite
-            string computePlatformDefinesPath = AssetDatabase.GUIDToAssetPath(GPUInstancerConstants.GUID_COMPUTE_PLATFORM_DEFINES);
-            if (!string.IsNullOrEmpty(computePlatformDefinesPath))
-            {
-                //TextAsset platformDefines = AssetDatabase.LoadAssetAtPath<TextAsset>(computePlatformDefinesPath);
-                string computePlatformDefinesText = "#ifndef __platformDefines_hlsl_\n#define __platformDefines_hlsl_\n\n";
-                if (!GPUInstancerConstants.gpuiSettings.hasCustomRenderingSettings)
-                {
-                    computePlatformDefinesText += "#if SHADER_API_METAL\n    #define GPUI_THREADS 256\n    #define GPUI_THREADS_2D 16\n#elif SHADER_API_GLES3\n    #define GPUI_THREADS 128\n    #define GPUI_THREADS_2D 8\n#elif SHADER_API_VULKAN\n    #define GPUI_THREADS 128\n    #define GPUI_THREADS_2D 8\n#elif SHADER_API_GLCORE\n    #define GPUI_THREADS 256\n    #define GPUI_THREADS_2D 16\n#elif SHADER_API_PS4\n    #define GPUI_THREADS 512\n    #define GPUI_THREADS_2D 16\n#else\n    #define GPUI_THREADS 512\n    #define GPUI_THREADS_2D 16\n#endif";
-                }
-                else
-                {
-                    computePlatformDefinesText += "#define GPUI_THREADS " + GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT + "\n#define GPUI_THREADS_2D " + GPUInstancerConstants.COMPUTE_SHADER_THREAD_COUNT_2D;
-                }
-                computePlatformDefinesText += "\n\n#endif";
-                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(computePlatformDefinesText);
-                VersionControlCheckout(computePlatformDefinesPath);
-                System.IO.FileStream fs = System.IO.File.Create(computePlatformDefinesPath);
-                fs.Write(bytes, 0, bytes.Length);
-                fs.Close();
-                AssetDatabase.ImportAsset(computePlatformDefinesPath, ImportAssetOptions.ForceUpdate);
-            }
-
-            // GPUIPlatformDependent.cginc rewrite
-            string cgincPlatformDependentPath = AssetDatabase.GUIDToAssetPath(GPUInstancerConstants.GUID_CGINC_PLATFORM_DEPENDENT);
-            if (!string.IsNullOrEmpty(cgincPlatformDependentPath))
-            {
-                //TextAsset cgincPlatformDependent = AssetDatabase.LoadAssetAtPath<TextAsset>(cgincPlatformDependentPath);
-                string cgincPlatformDependentText = "#ifndef GPU_INSTANCER_PLATFORM_DEPENDENT_INCLUDED\n#define GPU_INSTANCER_PLATFORM_DEPENDENT_INCLUDED\n\n";
-                if (!GPUInstancerConstants.gpuiSettings.hasCustomRenderingSettings)
-                {
-                    cgincPlatformDependentText += "#if SHADER_API_GLES3\n    #define GPUI_MHT_COPY_TEXTURE 1\n#elif SHADER_API_VULKAN\n    #define GPUI_MHT_COPY_TEXTURE 1\n#endif";
-                }
-                else if (matrixHandlingType == GPUIMatrixHandlingType.MatrixAppend)
-                {
-                    cgincPlatformDependentText += "    #define GPUI_MHT_MATRIX_APPEND 1";
-                }
-                else if (matrixHandlingType == GPUIMatrixHandlingType.CopyToTexture)
-                {
-                    cgincPlatformDependentText += "    #define GPUI_MHT_COPY_TEXTURE 1";
-                }
-                else
-                {
-                    cgincPlatformDependentText += "    #define gpui_InstanceID gpuiTransformationMatrix[unity_InstanceID]";
-                }
-                cgincPlatformDependentText += "\n\n#endif // GPU_INSTANCER_PLATFORM_DEPENDENT_INCLUDED";
-                byte[] bytes = System.Text.Encoding.UTF8.GetBytes(cgincPlatformDependentText);
-                VersionControlCheckout(cgincPlatformDependentPath);
-                System.IO.FileStream fs = System.IO.File.Create(cgincPlatformDependentPath);
-                fs.Write(bytes, 0, bytes.Length);
-                fs.Close();
-                AssetDatabase.ImportAsset(cgincPlatformDependentPath, ImportAssetOptions.ForceUpdate);
-            }
-
-            AssetDatabase.Refresh();
-#endif
-        }
-
-        #endregion Platform Dependent
     }
 }

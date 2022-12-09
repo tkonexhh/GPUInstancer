@@ -26,21 +26,7 @@ namespace GPUInstancer
             GPUInstancerConstants.SHADER_GPUI_TREE_CREATOR_LEAVES_FAST, GPUInstancerConstants.SHADER_GPUI_TREE_CREATOR_LEAVES_FAST_OPTIMIZED,
             GPUInstancerConstants.SHADER_GPUI_TREE_SOFT_OCCLUSION_BARK, GPUInstancerConstants.SHADER_GPUI_TREE_SOFT_OCCLUSION_LEAVES
         };
-        private static readonly List<string> _extraGPUIShaders = new List<string> {
-            GPUInstancerConstants.SHADER_GPUI_FOLIAGE,
-            GPUInstancerConstants.SHADER_GPUI_FOLIAGE_LWRP,
-            GPUInstancerConstants.SHADER_GPUI_FOLIAGE_URP,
-            GPUInstancerConstants.SHADER_GPUI_FOLIAGE_HDRP,
-            GPUInstancerConstants.SHADER_GPUI_SHADOWS_ONLY,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_TREE,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_TREECREATOR,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_SOFTOCCLUSION,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_STANDARD,
-            GPUInstancerConstants.SHADER_GPUI_TREE_PROXY,
-            GPUInstancerConstants.SHADER_GPUI_ERROR,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_URP,
-            GPUInstancerConstants.SHADER_GPUI_BILLBOARD_2D_RENDERER_HDRP
-        };
+
 
         #region Extensions
         public List<GPUInstancerShaderBindingsExtension> shaderBindingsExtensions;
@@ -91,8 +77,8 @@ namespace GPUInstancer
             if (_standardUnityShadersGPUI.Contains(shaderName))
                 return Shader.Find(shaderName);
 
-            if (_extraGPUIShaders.Contains(shaderName))
-                return Shader.Find(shaderName);
+            // if (_extraGPUIShaders.Contains(shaderName))
+            //     return Shader.Find(shaderName);
 
             Debug.LogError("Can not find GPU Instancer setup for shader: " + shaderName + ". Check prototype settings on the Manager for instructions.", Shader.Find(shaderName));
             return Shader.Find(GPUInstancerConstants.SHADER_GPUI_ERROR);
@@ -219,7 +205,7 @@ namespace GPUInstancer
                     return extension.IsShadersInstancedVersionExists(shaderInstances, shaderName);
                 return false;
             }
-            if (_standardUnityShaders.Contains(shaderName) || _standardUnityShadersGPUI.Contains(shaderName) || _extraGPUIShaders.Contains(shaderName))
+            if (_standardUnityShaders.Contains(shaderName) || _standardUnityShadersGPUI.Contains(shaderName))
                 return true;
 
             foreach (ShaderInstance si in shaderInstances)
@@ -232,7 +218,7 @@ namespace GPUInstancer
 
         public virtual bool IsOriginalShaderInstanced(string shaderName)
         {
-            if (_standardUnityShadersGPUI.Contains(shaderName) || _extraGPUIShaders.Contains(shaderName))
+            if (_standardUnityShadersGPUI.Contains(shaderName))
                 return true;
 
             foreach (ShaderInstance si in shaderInstances)
@@ -263,22 +249,22 @@ namespace GPUInstancer
             this.extensionCode = extensionCode;
         }
 
-        public virtual void Regenerate()
-        {
-            if (isOriginalInstanced)
-            {
-                instancedShader = GPUInstancerUtility.CreateInstancedShader(instancedShader, true);
-                return;
-            }
+        // public virtual void Regenerate()
+        // {
+        //     if (isOriginalInstanced)
+        //     {
+        //         instancedShader = GPUInstancerUtility.CreateInstancedShader(instancedShader, true);
+        //         return;
+        //     }
 
-            Shader originalShader = Shader.Find(name);
-            if (originalShader != null)
-            {
-                instancedShader = GPUInstancerUtility.CreateInstancedShader(originalShader);
-                modifiedDate = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff",
-                    System.Globalization.CultureInfo.InvariantCulture);
-            }
-        }
+        //     Shader originalShader = Shader.Find(name);
+        //     if (originalShader != null)
+        //     {
+        //         instancedShader = GPUInstancerUtility.CreateInstancedShader(originalShader);
+        //         modifiedDate = DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss.fff",
+        //             System.Globalization.CultureInfo.InvariantCulture);
+        //     }
+        // }
     }
 
 }

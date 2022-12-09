@@ -5,145 +5,20 @@
 
     #include "GPUIPlatformDependent.cginc"
 
-    uniform uint gpui_InstanceID;
-    #if GPUI_MHT_COPY_TEXTURE
-        uniform sampler2D gpuiTransformationMatrixTexture;
-        uniform float4x4 gpuiTransformOffset;
-        uniform float bufferSize;
-        uniform float maxTextureSize;
-    #elif GPUI_MHT_MATRIX_APPEND
-        uniform StructuredBuffer<float4x4> gpuiTransformationMatrix;
-        uniform float4x4 gpuiTransformOffset;
-    #else
-        uniform StructuredBuffer<uint> gpuiTransformationMatrix;
-        uniform StructuredBuffer<float4x4> gpuiInstanceData;
-        uniform StructuredBuffer<uint4> gpuiInstanceLODData;
-        uniform float4x4 gpuiTransformOffset;
-        uniform float LODLevel; // -1 if crossFade disabled, 0-7 if cross fade enabled
-        uniform float fadeLevelMultiplier; // 1 no animation
+    uniform StructuredBuffer<float4x4> gpuiTransformationMatrix;
+    uniform float4x4 gpuiTransformOffset;
 
-        #if UNITY_VERSION >= 201711
 
-            #ifdef UNITY_APPLY_DITHER_CROSSFADE
-                #undef UNITY_APPLY_DITHER_CROSSFADE
-            #endif
-
-            #if SHADER_API_GLCORE || SHADER_API_GLES3
-                #define UNITY_APPLY_DITHER_CROSSFADE(vpos)
-            #else
-                #ifdef LOD_FADE_CROSSFADE
-                    #define UNITY_APPLY_DITHER_CROSSFADE(vpos) UnityApplyDitherCrossFadeGPUI(vpos)
-                #else
-                    #define UNITY_APPLY_DITHER_CROSSFADE(vpos)
-                #endif
-            #endif
-
-            #if UNITY_VERSION >= 201920
-                uniform sampler2D _DitherMaskLOD2D;
-            #else
-                #ifndef LOD_FADE_CROSSFADE
-                    uniform sampler2D _DitherMaskLOD2D;
-                #endif // LOD_FADE_CROSSFADE
-            #endif
-
-            void UnityApplyDitherCrossFadeGPUI(float2 vpos)
-            {
-                if (LODLevel >= 0)
-                {
-                    uint4 lodData = gpuiInstanceLODData[gpui_InstanceID];
-
-                    if (lodData.w > 0)
-                    {
-                        float fadeLevel = floor(lodData.w * fadeLevelMultiplier);
-
-                        if (lodData.z == uint(LODLevel))
-                            fadeLevel = 15 - fadeLevel;
-
-                        if (fadeLevel > 0)
-                        {
-                            vpos /= 4; // the dither mask texture is 4x4
-                            vpos.y = (frac(vpos.y) + fadeLevel) * 0.0625 /* 1/16 */; // quantized lod fade by 16 levels
-                            clip(tex2D(_DitherMaskLOD2D, vpos).a - 0.5);
-                        }
-                    }
-                }
-            }
-
-            #ifdef UNITY_RANDOM_INCLUDED
-                #ifdef LODDitheringTransition
-                    #undef LODDitheringTransition
-                #endif
-
-                #define LODDitheringTransition(fadeMaskSeed, ditherFactor) LODDitheringTransitionGPUI(fadeMaskSeed, ditherFactor)
-
-                void LODDitheringTransitionGPUI(uint2 fadeMaskSeed, float ditherFactor)
-                {
-                    if (LODLevel >= 0)
-                    {
-                        uint4 lodData = gpuiInstanceLODData[gpui_InstanceID];
-
-                        if (lodData.w > 0)
-                        {
-                            float fadeLevel = floor(lodData.w * fadeLevelMultiplier);
-
-                            if (lodData.z == uint(LODLevel))
-                                fadeLevel = 15 - fadeLevel;
-
-                            if (fadeLevel > 0)
-                            {
-                                ditherFactor = (frac(fadeMaskSeed.y) + fadeLevel) * 0.0625;
-                                // Generate a spatially varying pattern.
-                                // Unfortunately, varying the pattern with time confuses the TAA, increasing the amount of noise.
-                                float p = GenerateHashedRandomFloat(fadeMaskSeed);
-
-                                // This preserves the symmetry s.t. if LOD 0 has f = x, LOD 1 has f = -x.
-                                float f = ditherFactor - CopySign(p, ditherFactor);
-                                clip(f);
-                            }
-                        }
-                    }
-                }
-            #endif // UNITY_RANDOM_INCLUDED
-
-        #endif // UNITY_VERSION
-
-    #endif // SHADER_API
-
-    #ifdef unity_ObjectToWorld
-        #undef unity_ObjectToWorld
-    #endif
-
-    #ifdef unity_WorldToObject
-        #undef unity_WorldToObject
-    #endif
 
 #endif // UNITY_PROCEDURAL_INSTANCING_ENABLED
 
 void setupGPUI()
 {
     #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-        #if GPUI_MHT_COPY_TEXTURE
-            uint textureWidth = min(bufferSize, maxTextureSize);
-
-            float indexX = ((unity_InstanceID % maxTextureSize) + 0.5f) / textureWidth;
-            float rowCount = ceil(bufferSize / maxTextureSize) * 4.0f;
-            float rowIndex = floor(unity_InstanceID / maxTextureSize) * 4.0f + 0.5f;
-
-            float4x4 transformData = float4x4(
-                tex2Dlod(gpuiTransformationMatrixTexture, float4(indexX, (0.0f + rowIndex) / rowCount, 0.0f, 0.0f)), // row0
-                tex2Dlod(gpuiTransformationMatrixTexture, float4(indexX, (1.0f + rowIndex) / rowCount, 0.0f, 0.0f)), // row1
-                tex2Dlod(gpuiTransformationMatrixTexture, float4(indexX, (2.0f + rowIndex) / rowCount, 0.0f, 0.0f)), // row2
-                tex2Dlod(gpuiTransformationMatrixTexture, float4(indexX, (3.0f + rowIndex) / rowCount, 0.0f, 0.0f))  // row3
-            );
-            gpui_InstanceID = uint(transformData._44);
-            transformData._44 = 1.0f;
-            unity_ObjectToWorld = mul(transformData, gpuiTransformOffset);
-        #elif GPUI_MHT_MATRIX_APPEND
-            unity_ObjectToWorld = mul(gpuiTransformationMatrix[unity_InstanceID], gpuiTransformOffset);
-        #else
-            gpui_InstanceID = gpuiTransformationMatrix[unity_InstanceID];
-            unity_ObjectToWorld = mul(gpuiInstanceData[gpui_InstanceID], gpuiTransformOffset);
-        #endif // SHADER_API
+        
+        unity_ObjectToWorld = mul(gpuiTransformationMatrix[unity_InstanceID], gpuiTransformOffset);
+        
+        
 
         // inverse transform matrix
         // taken from richardkettlewell's post on
@@ -170,4 +45,4 @@ void setupGPUI()
 
 }
 
-#endif // GPU_INSTANCER_INCLUDE
+#endif //
