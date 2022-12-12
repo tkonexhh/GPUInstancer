@@ -39,7 +39,6 @@ namespace GPUInstancer
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
 
 
-
         private static string _defaultPath;
         public static string GetDefaultPath()
         {

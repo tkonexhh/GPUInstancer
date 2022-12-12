@@ -260,7 +260,6 @@ namespace GPUInstancer
                             EditorGUILayout.EndHorizontal();
                             EditorGUILayout.BeginHorizontal();
                         }
-                        DrawGPUInstancerPrototypeAddMultiButtonTextMode();
                     }
                     else
                         DrawGPUInstancerPrototypeAddButton();
@@ -338,19 +337,6 @@ namespace GPUInstancer
                     AddPickerObject(o);
                 });
 
-            iconRect.y += iconRect.height;
-            iconRect.height = 22;
-
-            // GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMulti, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
-            //     () =>
-            //     {
-            //         GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
-            //     },
-            //     true, true,
-            //     (o) =>
-            //     {
-            //         AddPickerObject(o);
-            //     });
         }
 
         public void DrawGPUInstancerPrototypeAddButtonTextMode()
@@ -371,31 +357,6 @@ namespace GPUInstancer
                 {
                     AddPickerObject(o);
                 });
-        }
-
-        public void DrawGPUInstancerPrototypeAddMultiButtonTextMode()
-        {
-            Rect prototypeRect = GUILayoutUtility.GetRect(PROTOTYPE_TEXT_RECT_SIZE_X, PROTOTYPE_TEXT_RECT_SIZE_Y, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-
-            Rect iconRect = new Rect(prototypeRect.position + PROTOTYPE_RECT_PADDING_VECTOR, PROTOTYPE_TEXT_RECT_SIZE_VECTOR);
-
-            // GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.addMultiTextMode, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, iconRect,
-            //     () =>
-            //     {
-            //         GPUInstancerMultiAddWindow.ShowWindow(GUIUtility.GUIToScreenPoint(iconRect.position), this);
-            //     },
-            //     true, true,
-            //     (o) =>
-            //     {
-            //         AddPickerObject(o);
-            //     });
-        }
-
-
-
-        public GPUInstancerManager GetManager()
-        {
-            return _manager;
         }
     }
 }

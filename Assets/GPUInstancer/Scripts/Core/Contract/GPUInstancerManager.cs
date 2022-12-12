@@ -50,13 +50,10 @@ namespace GPUInstancer
         [NonSerialized]
         public Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData> runtimeDataDictionary;
 
-        public LayerMask layerMask = ~0;
-
         #region MonoBehaviour Methods
 
         public virtual void Awake()
         {
-            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -100,7 +97,6 @@ namespace GPUInstancer
 
         public virtual void Reset()
         {
-            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 #if UNITY_EDITOR
             CheckPrototypeChanges();
 #endif
@@ -138,13 +134,11 @@ namespace GPUInstancer
             else
                 prototypeList.RemoveAll(p => p == null);
 
-            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
         }
 
 #if UNITY_EDITOR
         public virtual void CheckPrototypeChanges()
         {
-            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
             if (prototypeList == null)
                 GeneratePrototypes();

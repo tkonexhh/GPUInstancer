@@ -21,28 +21,10 @@ namespace GPUInstancer
         public static readonly string TEXT_prototypeSO = "Prototype SO";
         public static readonly string TEXT_prefabInstancingNone = "Instancing has not been initialized";
 
-
-        public static readonly string TEXT_settingMaxPrefabDist = "Max Prefab Distance";
-        public static readonly string TEXT_settingInstancingBoundsSize = "Instancing Bounds Size";
-
-        public static readonly string TEXT_settingHasCustomRenderingSettings = "Use Custom Rendering Settings";
-        public static readonly string TEXT_settingComputeThread = "Max. Compute Thread Count";
-        public static readonly string TEXT_settingMatrixHandlingType = "Max. Compute Buffers";
-
         // Editor HelpText
         public static readonly string HELPTEXT_prototypes = "\"Prototypes\" show the list of objects that will be used in GPU Instancer. To modify a prototype, click on its icon or text. Use the \"Text Mode\" or \"Icon Mode\" button to switch between preview modes.";
         public static readonly string HELPTEXT_addprototypeprefab = "Click on \"Add\" button and select a prefab to add a prefab prototype to the manager. Note that prefab manager only accepts user created prefabs. It will not accept prefabs that are generated when importing your 3D model assets.";
         public static readonly string HELPTEXT_registerPrefabsInScene = "The \"Register Prefabs In Scene\" button can be used to register the prefab instances that are currently in the scene, so that they can be used by GPU Instancer. For adding new instances at runtime check API documentation.";
-
-        public static readonly string HELPTEXT_maxDistance = "\"Min-Max Distance\" defines the minimum and maximum distance from the selected camera within which this prototype will be rendered.";
-
-
-
-        public static readonly string HELPTEXT_settingInstancingBoundsSize = "Defines the bounds parameter's size for the instanced rendering draw call.";
-
-        public static readonly string HELPTEXT_settingHasCustomRenderingSettings = "Use Custom Rendering Settings";
-        public static readonly string HELPTEXT_settingComputeThread = "Max. Compute Thread Count";
-        public static readonly string HELPTEXT_settingMatrixHandlingType = "Max. Compute Buffers";
 
         public static readonly string HELP_ICON = "help_gpui";
         public static readonly string HELP_ICON_ACTIVE = "help_gpui_active";
@@ -56,17 +38,6 @@ namespace GPUInstancer
             public static GUIContent add = new GUIContent(TEXT_add);
             public static GUIContent addTextMode = new GUIContent(TEXT_addTextMode);
             public static GUIContent enableMeshRenderers = new GUIContent("Enable Mesh Renderers");
-
-
-            public static GUIContent settingMaxPrefabDist = new GUIContent(TEXT_settingMaxPrefabDist, HELPTEXT_maxDistance);
-
-            public static GUIContent settingInstancingBoundsSize = new GUIContent(TEXT_settingInstancingBoundsSize, HELPTEXT_settingInstancingBoundsSize);
-            public static GUIContent settingHasCustomRenderingSettings = new GUIContent(TEXT_settingHasCustomRenderingSettings, HELPTEXT_settingHasCustomRenderingSettings);
-            public static GUIContent settingComputeThread = new GUIContent(TEXT_settingComputeThread, HELPTEXT_settingComputeThread);
-            public static GUIContent[] settingComputeThreadOptions = new GUIContent[] { new GUIContent("64"), new GUIContent("128"), new GUIContent("256"), new GUIContent("512"), new GUIContent("1024") };
-            public static GUIContent settingMatrixHandlingType = new GUIContent(TEXT_settingMatrixHandlingType, HELPTEXT_settingMatrixHandlingType);
-            public static GUIContent[] settingMatrixHandlingTypeOptions = new GUIContent[] { new GUIContent("Unlimited"), new GUIContent("1 Compute Buffer"), new GUIContent("None") };
-
 
         }
 
@@ -208,57 +179,5 @@ namespace GPUInstancer
         }
 
 
-        private static bool _hasCustomRenderingSettings;
-        private static int _threadCountSelection;
-        private static int _matrixHandlingTypeSelection;
-        private static bool _customRenderingSettingsChanged;
-
-        public static void DrawGPUISettings()
-        {
-
-            float previousLabelWight = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = previousLabelWight + 75f;
-            EditorGUI.BeginChangeCheck();
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            DrawCustomLabel("Constants", Styles.boldLabel);
-            GUILayout.Space(5);
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            DrawCustomLabel("Rendering Settings [ADVANCED]", Styles.boldLabel);
-
-            EditorGUI.BeginChangeCheck();
-            _hasCustomRenderingSettings = EditorGUILayout.Toggle(Contents.settingHasCustomRenderingSettings, _hasCustomRenderingSettings);
-            if (_hasCustomRenderingSettings)
-            {
-                _threadCountSelection = EditorGUILayout.Popup(Contents.settingComputeThread, _threadCountSelection, Contents.settingComputeThreadOptions);
-                _matrixHandlingTypeSelection = EditorGUILayout.Popup(Contents.settingMatrixHandlingType, _matrixHandlingTypeSelection, Contents.settingMatrixHandlingTypeOptions);
-            }
-            if (EditorGUI.EndChangeCheck())
-            {
-                _customRenderingSettingsChanged = true;
-            }
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-
-
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            DrawCustomLabel("Update Jobs", Styles.boldLabel);
-
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-
-            EditorGUIUtility.labelWidth = previousLabelWight;
-        }
     }
 }

@@ -206,8 +206,7 @@ namespace GPUInstancer
             MeshRenderer[] meshRenderers = prefabInstance.GetComponentsInChildren<MeshRenderer>(true);
             if (meshRenderers != null && meshRenderers.Length > 0)
                 for (int mr = 0; mr < meshRenderers.Length; mr++)
-                    if (GPUInstancerUtility.IsInLayer(layerMask, meshRenderers[mr].gameObject.layer))
-                        meshRenderers[mr].enabled = enabled;
+                    meshRenderers[mr].enabled = enabled;
 
         }
 
