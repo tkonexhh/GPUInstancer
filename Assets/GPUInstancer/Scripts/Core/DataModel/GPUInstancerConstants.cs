@@ -35,7 +35,6 @@ namespace GPUInstancer
         #region Paths
         // GPUInstancer Default Paths
         public static readonly string DEFAULT_PATH_GUID = "954b4ec3db4c00f46a67fcb9b4f72411";
-        public static readonly string EDITOR_TEXTURES_PATH = "Textures/Editor/";
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
 
 

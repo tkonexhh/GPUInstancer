@@ -6,6 +6,7 @@ using System;
 using Unity.Collections;
 using UnityEngine.Jobs;
 using Unity.Jobs;
+using Inutan;
 
 namespace GPUInstancer
 {
@@ -132,7 +133,7 @@ namespace GPUInstancer
 
                 for (int m = 0; m < meshRenderer.sharedMaterials.Length; m++)
                 {
-                    instanceMaterials.Add(GPUInstancerShaderBindings.GetInstancedMaterial(meshRenderer.sharedMaterials[m]));
+                    instanceMaterials.Add(Inutan.GPUInstancerShaderBindings.GetInstancedMaterial(meshRenderer.sharedMaterials[m]));
                 }
 
                 Matrix4x4 transformOffset = Matrix4x4.identity;

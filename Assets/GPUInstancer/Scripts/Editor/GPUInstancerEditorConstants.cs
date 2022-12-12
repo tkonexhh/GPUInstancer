@@ -134,18 +134,6 @@ namespace GPUInstancer
             }
         }
 
-        // Toolbar buttons
-        [MenuItem("Tools/GPU Instancer/Add Prefab Manager", validate = false, priority = 1)]
-        public static void ToolbarAddPrefabManager()
-        {
-            GameObject go = new GameObject("GPUI Prefab Manager");
-            go.AddComponent<GPUInstancerPrefabManager>();
-
-            Selection.activeGameObject = go;
-            Undo.RegisterCreatedObjectUndo(go, "Add GPUI Prefab Manager");
-        }
-
-
 
         private static void AddPrefabObjectsToList(GameObject go, List<GameObject> prefabList)
         {

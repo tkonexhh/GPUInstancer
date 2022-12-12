@@ -304,15 +304,6 @@ namespace Inutan
             };
             renderers.Add(renderer);
         }
-
-        public Material GetDrawMaterial(Material originalMaterial)
-        {
-            Material instancedMaterial = new Material(GPUInstancerShaderBindings.GetInstancedShader(originalMaterial.shader.name));
-            instancedMaterial.CopyPropertiesFromMaterial(originalMaterial);
-            instancedMaterial.name = originalMaterial.name + "_GPUInstance";
-            instancedMaterial.enableInstancing = true;
-            return instancedMaterial;
-        }
     }
 
     #endregion

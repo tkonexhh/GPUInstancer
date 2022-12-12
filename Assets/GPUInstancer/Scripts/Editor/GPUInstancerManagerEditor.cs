@@ -245,18 +245,16 @@ namespace GPUInstancer
                 }
                 if (!Application.isPlaying)
                 {
-                    if (_manager.isPrototypeTextMode)
+
+                    DrawGPUInstancerPrototypeAddButtonTextMode();
+                    i++;
+                    if (i != 0 && i % prototypeRowCount == 0)
                     {
-                        DrawGPUInstancerPrototypeAddButtonTextMode();
-                        i++;
-                        if (i != 0 && i % prototypeRowCount == 0)
-                        {
-                            EditorGUILayout.EndHorizontal();
-                            EditorGUILayout.BeginHorizontal();
-                        }
+                        EditorGUILayout.EndHorizontal();
+                        EditorGUILayout.BeginHorizontal();
                     }
-                    // else
-                    //     DrawGPUInstancerPrototypeAddButton();
+
+
                 }
 
                 EditorGUILayout.EndHorizontal();
