@@ -145,14 +145,14 @@ namespace GPUInstancer
                 int totalInsanceCount = 0;
                 int totalDrawCallCount = 0;
                 int totalShadowDrawCall = 0;
-                foreach (GPUInstancerRuntimeData runtimeData in _manager.runtimeDataList)
+                foreach (GPUInstanceRenderer runtimeData in _manager.runtimeDataList)
                 {
-                    if (runtimeData == null)
+                    if (runtimeData == null || runtimeData.renderTarget == null)
                         continue;
 
                     int drawCallCount = 0;
                     int shadowDrawCallCount = 0;
-                    if (runtimeData.transformationMatrixVisibilityBuffer != null && runtimeData.bufferSize > 0 && runtimeData.instanceCount > 0)
+                    if (runtimeData.instanceCount > 0)
                     {
 
                         for (int j = 0; j < runtimeData.renderers.Count; j++)
@@ -164,7 +164,7 @@ namespace GPUInstancer
                         }
 
                     }
-                    string prototypeName = runtimeData.prototype.ToString();
+                    string prototypeName = runtimeData.renderTarget.ToString();
                     GUILayout.Label(prototypeName + " Instance Count: " + String.Format("{0:n0}", runtimeData.instanceCount) +
                         //"\n" + prototypeName + " Buffer Size: " + String.Format("{0:n0}", runtimeData.bufferSize) +
                         "\n" + prototypeName + " Geometry Draw Call Count: " + drawCallCount +

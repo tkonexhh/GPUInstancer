@@ -17,123 +17,15 @@ namespace GPUInstancer
     {
         #region GPU Instancing
 
-        /// <summary>
-        /// Initializes GPU buffer related data for the instance prototypes. Instance transformation matrices must be generated before this.
-        /// </summary>
-        public static void InitializeGPUBuffers<T>(List<T> runtimeDataList) where T : GPUInstancerRuntimeData
-        {
-            if (runtimeDataList == null || runtimeDataList.Count == 0)
-                return;
 
-            for (int i = 0; i < runtimeDataList.Count; i++)
-            {
-                InitializeGPUBuffer(runtimeDataList[i]);
-            }
-        }
-
-        public static void InitializeGPUBuffer<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
-            if (runtimeData == null || runtimeData.bufferSize == 0)
-                return;
-
-            #region Set Visibility Buffer
-            // Setup the visibility compute buffer
-            if (runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.transformationMatrixVisibilityBuffer.count != runtimeData.bufferSize)
-            {
-                if (runtimeData.transformationMatrixVisibilityBuffer != null)
-                    runtimeData.transformationMatrixVisibilityBuffer.Release();
-                runtimeData.transformationMatrixVisibilityBuffer = new ComputeBuffer(runtimeData.bufferSize, Inutan.GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4);
-                if (runtimeData.instanceDataNativeArray.IsCreated)
-                    runtimeData.transformationMatrixVisibilityBuffer.SetData(runtimeData.instanceDataNativeArray);
-            }
-
-            #endregion Set Visibility Buffer
-
-            #region Set Args Buffer
-            if (runtimeData.argsBuffer == null)
-            {
-                // Initialize indirect renderer buffer
-                int totalSubMeshCount = 0;
-
-                for (int j = 0; j < runtimeData.renderers.Count; j++)
-                {
-                    totalSubMeshCount += runtimeData.renderers[j].mesh.subMeshCount;
-                }
-
-                // Initialize indirect renderer buffer. First LOD's each renderer's all submeshes will be followed by second LOD's each renderer's submeshes and so on.
-                runtimeData.args = new uint[5 * totalSubMeshCount];
-                int argsLastIndex = 0;
-
-                for (int r = 0; r < runtimeData.renderers.Count; r++)
-                {
-                    runtimeData.renderers[r].argsBufferOffset = argsLastIndex;
-                    // Setup the indirect renderer buffer:
-                    for (int j = 0; j < runtimeData.renderers[r].mesh.subMeshCount; j++)
-                    {
-                        runtimeData.args[argsLastIndex++] = runtimeData.renderers[r].mesh.GetIndexCount(j); // index count per instance
-                        runtimeData.args[argsLastIndex++] = 0;// (uint)runtimeData.bufferSize;
-                        runtimeData.args[argsLastIndex++] = runtimeData.renderers[r].mesh.GetIndexStart(j); // start index location
-                        runtimeData.args[argsLastIndex++] = 0; // base vertex location
-                        runtimeData.args[argsLastIndex++] = 0; // start instance location
-                    }
-                }
-
-                if (runtimeData.args.Length > 0)
-                {
-                    runtimeData.argsBuffer = new ComputeBuffer(runtimeData.args.Length, sizeof(uint), ComputeBufferType.IndirectArguments);
-                    runtimeData.argsBuffer.SetData(runtimeData.args);
-                }
-            }
-            #endregion Set Args Buffer
-
-            foreach (GPUInstancerRenderer renderer in runtimeData.renderers)
-            {
-                // Setup instance LOD renderer material property block shader buffers with the append buffer
-                renderer.mpb.SetBuffer(InstanceStrategy_Indirect.ShaderIDs.TRANSFORMATION_MATRIX_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                renderer.mpb.SetMatrix(InstanceStrategy_Indirect.ShaderIDs.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
-            }
-        }
-
-        public static void UpdateGPUBuffers<T>(List<T> runtimeDataList) where T : GPUInstancerRuntimeData
-        {
-            if (runtimeDataList == null)
-                return;
-
-            for (int i = 0; i < runtimeDataList.Count; i++)
-            {
-                UpdateGPUBuffer(runtimeDataList[i]);
-            }
-        }
-
-        public static void UpdateGPUBuffer<T>(T runtimeData) where T : GPUInstancerRuntimeData
-        {
-            if (runtimeData == null)
-                return;
-
-            if (runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0 || runtimeData.instanceCount == 0)
-            {
-                if (runtimeData.args != null)
-                {
-                    runtimeData.args[1] = 0;
-                }
-                return;
-            }
-            runtimeData.args[1] = (uint)runtimeData.instanceCount;
-            runtimeData.argsBuffer.SetData(runtimeData.args);
-        }
-
-        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds) where T : GPUInstancerRuntimeData
+        public static void GPUIDrawMeshInstancedIndirect<T>(List<T> runtimeDataList, Bounds instancingBounds) where T : GPUInstanceRenderer
         {
             if (runtimeDataList == null)
                 return;
 
             foreach (T runtimeData in runtimeDataList)
             {
-                if (runtimeData == null || runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0 || runtimeData.instanceCount == 0)
-                    continue;
-
-                Inutan.GPUInstanceUtility.DrawMeshInstancedIndirect(runtimeData.renderers, instancingBounds, runtimeData.argsBuffer);
-
+                runtimeData.Render();
             }
         }
 
@@ -141,7 +33,7 @@ namespace GPUInstancer
 
         #region Prototype Release
 
-        public static void ReleaseInstanceBuffers<T>(List<T> runtimeDataList) where T : GPUInstancerRuntimeData
+        public static void ReleaseInstanceBuffers<T>(List<T> runtimeDataList) where T : GPUInstanceRenderer
         {
             if (runtimeDataList == null)
                 return;
@@ -152,20 +44,12 @@ namespace GPUInstancer
             }
         }
 
-        public static void ReleaseInstanceBuffers<T>(T runtimeData) where T : GPUInstancerRuntimeData
+        public static void ReleaseInstanceBuffers<T>(T runtimeData) where T : GPUInstanceRenderer
         {
             if (runtimeData == null)
                 return;
 
-            if (runtimeData.transformationMatrixVisibilityBuffer != null)
-                runtimeData.transformationMatrixVisibilityBuffer.Release();
-            runtimeData.transformationMatrixVisibilityBuffer = null;
-
-            if (runtimeData.argsBuffer != null)
-                runtimeData.argsBuffer.Release();
-            runtimeData.argsBuffer = null;
-
-            runtimeData.ReleaseBuffers();
+            runtimeData.Release();
         }
 
 

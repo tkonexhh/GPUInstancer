@@ -8,6 +8,7 @@ using UnityEngine.Jobs;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using Inutan;
 
 namespace GPUInstancer
 {
@@ -124,16 +125,16 @@ namespace GPUInstancer
 #endif
 
             InitializeRuntimeDataRegisteredPrefabs();
-            GPUInstancerUtility.InitializeGPUBuffers(runtimeDataList);
+            // GPUInstancerUtility.InitializeGPUBuffers(runtimeDataList);
             isInitialized = true;
         }
 
         public virtual void InitializeRuntimeDataRegisteredPrefabs(int additionalBufferSize = 0)
         {
             if (runtimeDataList == null)
-                runtimeDataList = new List<GPUInstancerRuntimeData>();
+                runtimeDataList = new List<GPUInstanceRenderer>();
             if (runtimeDataDictionary == null)
-                runtimeDataDictionary = new Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData>();
+                runtimeDataDictionary = new Dictionary<GPUInstancerPrototype, GPUInstanceRenderer>();
 
             foreach (GPUInstancerPrefabPrototype p in prototypeList)
             {
@@ -145,55 +146,33 @@ namespace GPUInstancer
             }
         }
 
-        public virtual GPUInstancerRuntimeData InitializeRuntimeDataForPrefabPrototype(GPUInstancerPrefabPrototype p, int additionalBufferSize = 0)
+        public virtual GPUInstanceRenderer InitializeRuntimeDataForPrefabPrototype(GPUInstancerPrefabPrototype p, int additionalBufferSize = 0)
         {
-            GPUInstancerRuntimeData runtimeData = GetRuntimeData(p);
+            GPUInstanceRenderer runtimeData = GetRuntimeData(p);
             if (runtimeData == null)
             {
-                runtimeData = new GPUInstancerRuntimeData(p.prefabObject);
+                runtimeData = new GPUInstanceRenderer();
+                runtimeData.ClearInstanceProxy();
                 if (!runtimeData.CreateRenderersFromGameObject(p.prefabObject))
                     return null;
                 runtimeDataList.Add(runtimeData);
                 runtimeDataDictionary.Add(p, runtimeData);
 
             }
-            int instanceCount = 0;
+            // int instanceCount = 0;
             List<GPUInstancerPrefab> registeredPrefabsList = null;
 
             if (_registeredPrefabsRuntimeData.TryGetValue(p, out registeredPrefabsList))
             {
-                runtimeData.ReleaseBuffers();
-                runtimeData.bufferSize = registeredPrefabsList.Count + additionalBufferSize;
-                if (runtimeData.bufferSize > 0)
+
+                foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsList)
                 {
-                    runtimeData.instanceDataNativeArray = new NativeArray<Matrix4x4>(runtimeData.bufferSize, Allocator.Persistent);
-
-                    Matrix4x4 instanceData;
-
-
-                    foreach (GPUInstancerPrefab prefabInstance in registeredPrefabsList)
-                    {
-                        if (!prefabInstance)
-                            continue;
-
-                        Transform instanceTransform = prefabInstance.GetInstanceTransform();
-                        instanceData = instanceTransform.localToWorldMatrix;
-
-                        bool disableRenderers = true;
-
-                        if (disableRenderers && !p.meshRenderersDisabled)
-                            SetRenderersEnabled(prefabInstance, false);
-
-
-                        runtimeData.instanceDataNativeArray[instanceCount] = instanceData;
-                        instanceCount++;
-                        prefabInstance.gpuInstancerID = instanceCount;
-                    }
+                    if (prefabInstance != null)
+                        runtimeData.RegisterInstanceProxy(prefabInstance.gameObject);
                 }
             }
 
-            // set instanceCount
-            runtimeData.instanceCount = instanceCount;
+            runtimeData.Init(p.prefabObject);
 
             return runtimeData;
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using System.Threading;
+using Inutan;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -14,7 +15,7 @@ namespace GPUInstancer
         public List<GPUInstancerPrototype> prototypeList;
 
         [NonSerialized]
-        public List<GPUInstancerRuntimeData> runtimeDataList;
+        public List<GPUInstanceRenderer> runtimeDataList;
         [NonSerialized]
         public Bounds instancingBounds;
 
@@ -44,7 +45,7 @@ namespace GPUInstancer
         public PlayModeStateChange playModeState;
 #endif
         [NonSerialized]
-        public Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData> runtimeDataDictionary;
+        public Dictionary<GPUInstancerPrototype, GPUInstanceRenderer> runtimeDataDictionary;
 
         #region MonoBehaviour Methods
 
@@ -81,7 +82,6 @@ namespace GPUInstancer
         {
             instancingBounds.center = Camera.main.transform.position;
 
-            GPUInstancerUtility.UpdateGPUBuffers(runtimeDataList);
             GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds);
         }
 
@@ -147,12 +147,12 @@ namespace GPUInstancer
                 if (runtimeDataList != null)
                     runtimeDataList.Clear();
                 else
-                    runtimeDataList = new List<GPUInstancerRuntimeData>();
+                    runtimeDataList = new List<GPUInstanceRenderer>();
 
                 if (runtimeDataDictionary != null)
                     runtimeDataDictionary.Clear();
                 else
-                    runtimeDataDictionary = new Dictionary<GPUInstancerPrototype, GPUInstancerRuntimeData>();
+                    runtimeDataDictionary = new Dictionary<GPUInstancerPrototype, GPUInstanceRenderer>();
 
                 if (prototypeList == null)
                     prototypeList = new List<GPUInstancerPrototype>();
@@ -164,9 +164,9 @@ namespace GPUInstancer
 
         #region Public Methods
 
-        public GPUInstancerRuntimeData GetRuntimeData(GPUInstancerPrototype prototype, bool logError = false)
+        public GPUInstanceRenderer GetRuntimeData(GPUInstancerPrototype prototype, bool logError = false)
         {
-            GPUInstancerRuntimeData runtimeData = null;
+            GPUInstanceRenderer runtimeData = null;
             if (runtimeDataDictionary != null && !runtimeDataDictionary.TryGetValue(prototype, out runtimeData) && logError)
                 Debug.LogError("Can not find runtime data for prototype: " + prototype + ". Please check if the prototype was added to the Manager and the initialize method was called.");
             return runtimeData;

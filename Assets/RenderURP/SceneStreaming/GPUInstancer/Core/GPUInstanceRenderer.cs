@@ -15,14 +15,14 @@ namespace Inutan
 
     public class GPUInstanceRenderer
     {
-        public bool enableFrustumCulling = true;//开启视锥剔除
+        public bool enableFrustumCulling = false;//开启视锥剔除
         public bool enableOcclusionCulling = false;//开启遮挡剔除 TODO
         public bool useJobs = true;//使用Jobs来代替ComputeShader
 
         public List<GPUInstancerRenderer> renderers = new List<GPUInstancerRenderer>();
         public Mode Mode { get; private set; }
         public GameObject renderTarget { get; private set; }//渲染
-        public int totalCount => m_Locations.Count;
+        public int instanceCount => m_Locations.Count;
         public Vector2 showRange = new Vector2(0, 120);//显示范围 x:min y:max
 
         List<Matrix4x4> m_Locations = new List<Matrix4x4>();//收集到的全部坐标信息
@@ -36,6 +36,8 @@ namespace Inutan
 
         public void RegisterInstanceProxy(GameObject gameObject)
         {
+            if (gameObject == null)
+                return;
             m_SceneGameObjects.Add(gameObject);
             var location = gameObject.transform.localToWorldMatrix;
             m_Locations.Add(location);
@@ -100,15 +102,15 @@ namespace Inutan
 
         void RecreateNativeArray()
         {
-            if (!m_LocationNativeArray.IsCreated || m_LocationNativeArray.Length != totalCount)
+            if (!m_LocationNativeArray.IsCreated || m_LocationNativeArray.Length != instanceCount)
             {
                 if (m_LocationNativeArray.IsCreated)
                     m_LocationNativeArray.Dispose();
 
-                m_LocationNativeArray = new NativeArray<Matrix4x4>(totalCount, Allocator.Persistent);
+                m_LocationNativeArray = new NativeArray<Matrix4x4>(instanceCount, Allocator.Persistent);
             }
 
-            for (int i = 0; i < totalCount; i++)
+            for (int i = 0; i < instanceCount; i++)
             {
                 m_LocationNativeArray[i] = m_Locations[i];
             }
@@ -120,7 +122,7 @@ namespace Inutan
             if (Mode == Mode.GameObject)
                 return;
 
-            if (totalCount <= 0)
+            if (instanceCount <= 0)
                 return;
 
             if (enableFrustumCulling && useJobs)
@@ -146,7 +148,7 @@ namespace Inutan
                     finalVisibleNativeArray = culledLocationNativeQueue.AsParallelWriter(),
                 };
 
-                JobHandle shadowCullHandle = cullJob.Schedule(totalCount, 64);
+                JobHandle shadowCullHandle = cullJob.Schedule(instanceCount, 64);
                 shadowCullHandle.Complete();
 
                 int count = culledLocationNativeQueue.Count;
