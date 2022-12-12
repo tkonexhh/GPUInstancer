@@ -132,7 +132,7 @@ namespace GPUInstancer
 
                 for (int m = 0; m < meshRenderer.sharedMaterials.Length; m++)
                 {
-                    instanceMaterials.Add(GPUInstancerConstants.gpuiSettings.shaderBindings.GetInstancedMaterial(meshRenderer.sharedMaterials[m]));
+                    instanceMaterials.Add(GPUInstancerShaderBindings.GetInstancedMaterial(meshRenderer.sharedMaterials[m]));
                 }
 
                 Matrix4x4 transformOffset = Matrix4x4.identity;

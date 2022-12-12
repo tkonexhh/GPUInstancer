@@ -15,7 +15,6 @@ namespace GPUInstancer
 
         // billboard extensions
         public static GPUInstancerPreviewCache previewCache;
-        public static UnityEditor.PackageManager.Requests.ListRequest _packageListRequest;
 
 
         static GPUInstancerDefines()
@@ -47,45 +46,6 @@ namespace GPUInstancer
 
 
 
-        public static void LoadPackageDefinitions(bool forceNew = false)
-        {
-            if (forceNew || !GPUInstancerConstants.gpuiSettings.packagesLoaded)
-            {
-                _packageListRequest = UnityEditor.PackageManager.Client.List(true);
-                // GPUInstancerConstants.gpuiSettings.isShaderGraphPresent = false;
-                EditorApplication.update -= PackageListRequestHandler;
-                EditorApplication.update += PackageListRequestHandler;
-            }
-        }
-
-        private static void PackageListRequestHandler()
-        {
-            try
-            {
-                if (_packageListRequest != null)
-                {
-                    if (!_packageListRequest.IsCompleted)
-                        return;
-                    if (_packageListRequest.Result != null)
-                    {
-                        foreach (var item in _packageListRequest.Result)
-                        {
-                            if (item.name.Contains("com.unity.render-pipelines.universal"))
-                            {
-
-                                Debug.Log("GPUI detected Universal Render Pipeline.");
-                            }
-                        }
-
-                        EditorUtility.SetDirty(GPUInstancerConstants.gpuiSettings);
-                    }
-                }
-            }
-            catch (Exception) { }
-            _packageListRequest = null;
-            GPUInstancerConstants.gpuiSettings.packagesLoaded = true;
-            EditorApplication.update -= PackageListRequestHandler;
-        }
 
     }
 }

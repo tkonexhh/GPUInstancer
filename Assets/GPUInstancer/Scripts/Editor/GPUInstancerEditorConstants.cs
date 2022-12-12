@@ -215,11 +215,6 @@ namespace GPUInstancer
 
         public static void DrawGPUISettings()
         {
-            GPUInstancerSettings gPUInstancerSettings = GPUInstancerConstants.gpuiSettings;
-
-            if (!gPUInstancerSettings)
-                return;
-
 
             float previousLabelWight = EditorGUIUtility.labelWidth;
             EditorGUIUtility.labelWidth = previousLabelWight + 75f;
@@ -228,10 +223,6 @@ namespace GPUInstancer
             EditorGUILayout.BeginVertical(Styles.box);
             DrawCustomLabel("Constants", Styles.boldLabel);
             GUILayout.Space(5);
-
-
-            gPUInstancerSettings.MAX_PREFAB_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxPrefabDist, (int)gPUInstancerSettings.MAX_PREFAB_DISTANCE);
-            gPUInstancerSettings.instancingBoundsSize = EditorGUILayout.IntSlider(Contents.settingInstancingBoundsSize, gPUInstancerSettings.instancingBoundsSize, 1, 10000);
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();
@@ -255,41 +246,13 @@ namespace GPUInstancer
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                EditorUtility.SetDirty(gPUInstancerSettings);
-            }
 
-            bool updateExists = false;
+
 
             EditorGUILayout.BeginVertical(Styles.box);
             GUILayout.Space(5);
             DrawCustomLabel("Update Jobs", Styles.boldLabel);
 
-
-
-            if (!updateExists)
-                EditorGUILayout.HelpBox("No actions required for the current version.", MessageType.Info);
-
-            GUILayout.Space(5);
-            EditorGUILayout.EndVertical();
-
-
-            EditorGUILayout.BeginVertical(Styles.box);
-            GUILayout.Space(5);
-            DrawCustomLabel("Package Definitions", Styles.boldLabel);
-
-            // EditorGUI.BeginDisabledGroup(true);
-
-            // EditorGUILayout.Toggle("ShaderGraph Loaded", gPUInstancerSettings.isShaderGraphPresent);
-            // EditorGUI.EndDisabledGroup();
-
-            DrawColoredButton(new GUIContent("Reload Packages"), Colors.green, Color.white, FontStyle.Bold, Rect.zero,
-            () =>
-            {
-                gPUInstancerSettings.packagesLoaded = false;
-                GPUInstancerDefines.LoadPackageDefinitions();
-            });
 
             GUILayout.Space(5);
             EditorGUILayout.EndVertical();

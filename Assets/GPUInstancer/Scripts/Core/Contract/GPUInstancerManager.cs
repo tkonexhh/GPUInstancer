@@ -82,8 +82,7 @@ namespace GPUInstancer
 
             if (SystemInfo.supportsComputeShaders)
             {
-                if (GPUInstancerConstants.gpuiSettings == null)
-                    Debug.LogWarning("No shader bindings file was supplied. Instancing will terminate!");
+
 
                 if (runtimeDataList == null || runtimeDataList.Count == 0)
                     InitializeRuntimeDataAndBuffers();
@@ -158,7 +157,7 @@ namespace GPUInstancer
         {
             if (forceNew || !isInitialized)
             {
-                instancingBounds = new Bounds(Vector3.zero, Vector3.one * GPUInstancerConstants.gpuiSettings.instancingBoundsSize);
+                instancingBounds = new Bounds(Vector3.zero, Vector3.one * 10000);
 
                 GPUInstancerUtility.ReleaseInstanceBuffers(runtimeDataList);
                 if (runtimeDataList != null)

@@ -5,21 +5,6 @@ namespace GPUInstancer
 
     public static class GPUInstancerConstants
     {
-        private static GPUInstancerSettings _gpuiSettings;
-        public static GPUInstancerSettings gpuiSettings
-        {
-            get
-            {
-                if (_gpuiSettings == null)
-                    _gpuiSettings = GPUInstancerSettings.GetDefaultGPUInstancerSettings();
-                return _gpuiSettings;
-            }
-            set
-            {
-                _gpuiSettings = value;
-            }
-        }
-
 
         #region Stride Sizes
         // Compute buffer stride sizes
@@ -50,10 +35,7 @@ namespace GPUInstancer
         #region Paths
         // GPUInstancer Default Paths
         public static readonly string DEFAULT_PATH_GUID = "954b4ec3db4c00f46a67fcb9b4f72411";
-        public static readonly string RESOURCES_PATH = "Resources/";
-        public static readonly string SETTINGS_PATH = "Settings/";
         public static readonly string EDITOR_TEXTURES_PATH = "Textures/Editor/";
-        public static readonly string GPUI_SETTINGS_DEFAULT_NAME = "GPUInstancerSettings";
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
 
 

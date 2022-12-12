@@ -21,7 +21,7 @@ namespace GPUInstancer
         }
 
 
-        public virtual Shader GetInstancedShader(string shaderName, string extensionCode = null)
+        public static Shader GetInstancedShader(string shaderName, string extensionCode = null)
         {
 
             if (string.IsNullOrEmpty(shaderName))
@@ -37,7 +37,7 @@ namespace GPUInstancer
             return Shader.Find(GPUInstancerConstants.SHADER_GPUI_ERROR);
         }
 
-        public virtual Material GetInstancedMaterial(Material originalMaterial, string extensionCode = null)
+        public static Material GetInstancedMaterial(Material originalMaterial, string extensionCode = null)
         {
 
             if (originalMaterial == null || originalMaterial.shader == null)
