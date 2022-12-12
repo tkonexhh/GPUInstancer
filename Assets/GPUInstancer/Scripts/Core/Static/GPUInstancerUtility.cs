@@ -96,13 +96,13 @@ namespace GPUInstancer
             }
 #endif
 
-            foreach (GameObject go in prefabList)
-            {
-                if (!forceNew && prototypeList.Exists(p => p.prefabObject == go))
-                    continue;
+            // foreach (GameObject go in prefabList)
+            // {
+            //     if (!forceNew && prototypeList.Exists(p => p.prefabObject == go))
+            //         continue;
 
-                prototypeList.Add(GeneratePrefabPrototype(go, forceNew));
-            }
+            //     prototypeList.Add(GeneratePrefabPrototype(go, forceNew));
+            // }
 
 #if UNITY_EDITOR
             AssetDatabase.SaveAssets();
@@ -125,55 +125,55 @@ namespace GPUInstancer
 #endif
         }
 
-        public static GPUInstancerPrefabPrototype GeneratePrefabPrototype(GameObject go, bool forceNew, bool attachScript = true)
-        {
-            GPUInstancerPrefab prefabScript = go.GetComponent<GPUInstancerPrefab>();
-            if (attachScript && prefabScript == null)
-#if UNITY_EDITOR
-                prefabScript = AddComponentToPrefab<GPUInstancerPrefab>(go);
-#endif
-            if (attachScript && prefabScript == null)
-                return null;
+        //         public static GPUInstancerPrefabPrototype GeneratePrefabPrototype(GameObject go, bool forceNew, bool attachScript = true)
+        //         {
+        //             GPUInstancerPrefab prefabScript = go.GetComponent<GPUInstancerPrefab>();
+        //             if (attachScript && prefabScript == null)
+        // #if UNITY_EDITOR
+        //                 prefabScript = AddComponentToPrefab<GPUInstancerPrefab>(go);
+        // #endif
+        //             if (attachScript && prefabScript == null)
+        //                 return null;
 
-            GPUInstancerPrefabPrototype prototype = null;
-            if (prefabScript != null)
-                prototype = prefabScript.prefabPrototype;
-            if (prototype == null)
-            {
-                prototype = ScriptableObject.CreateInstance<GPUInstancerPrefabPrototype>();
-                if (prefabScript != null)
-                    prefabScript.prefabPrototype = prototype;
-                prototype.prefabObject = go;
-                prototype.name = go.name + "_" + go.GetInstanceID();
+        //             GPUInstancerPrefabPrototype prototype = null;
+        //             if (prefabScript != null)
+        //                 prototype = prefabScript.prefabPrototype;
+        //             if (prototype == null)
+        //             {
+        //                 prototype = ScriptableObject.CreateInstance<GPUInstancerPrefabPrototype>();
+        //                 if (prefabScript != null)
+        //                     prefabScript.prefabPrototype = prototype;
+        //                 prototype.prefabObject = go;
+        //                 prototype.name = go.name + "_" + go.GetInstanceID();
 
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    EditorUtility.SetDirty(go);
-#endif
-            }
-#if UNITY_EDITOR
-            if (!Application.isPlaying && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(prototype)))
-            {
-                string assetPath = GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH + prototype.name + ".asset";
+        // #if UNITY_EDITOR
+        //                 if (!Application.isPlaying)
+        //                     EditorUtility.SetDirty(go);
+        // #endif
+        //             }
+        // #if UNITY_EDITOR
+        //             if (!Application.isPlaying && string.IsNullOrEmpty(AssetDatabase.GetAssetPath(prototype)))
+        //             {
+        //                 string assetPath = GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH + prototype.name + ".asset";
 
-                if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH))
-                {
-                    System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH);
-                }
+        //                 if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH))
+        //                 {
+        //                     System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.PROTOTYPES_PREFAB_PATH);
+        //                 }
 
-                AssetDatabase.CreateAsset(prototype, assetPath);
-            }
+        //                 AssetDatabase.CreateAsset(prototype, assetPath);
+        //             }
 
-            if (!Application.isPlaying && prefabScript != null && prefabScript.prefabPrototype != prototype)
-            {
-                GameObject prefabContents = LoadPrefabContents(go);
-                prefabContents.GetComponent<GPUInstancerPrefab>().prefabPrototype = prototype;
-                UnloadPrefabContents(go, prefabContents);
-            }
+        //             if (!Application.isPlaying && prefabScript != null && prefabScript.prefabPrototype != prototype)
+        //             {
+        //                 GameObject prefabContents = LoadPrefabContents(go);
+        //                 prefabContents.GetComponent<GPUInstancerPrefab>().prefabPrototype = prototype;
+        //                 UnloadPrefabContents(go, prefabContents);
+        //             }
 
-#endif
-            return prototype;
-        }
+        // #endif
+        //             return prototype;
+        //         }
 
         #endregion
 

@@ -5,13 +5,6 @@ namespace GPUInstancer
 
     public static class GPUInstancerConstants
     {
-        #region Paths
-        // GPUInstancer Default Paths
-        public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
-
-        public static string GetDefaultPath() => "Assets/GPUInstancer/";
-        #endregion Paths
-
         #region Texts
         // Editor Texts
         public static readonly string TEXT_PREFAB_TYPE_WARNING_TITLE = "Prefab Type Warning";

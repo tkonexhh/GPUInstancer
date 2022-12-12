@@ -9,11 +9,9 @@ namespace GPUInstancer
     {
 
         public static readonly string TEXT_prototypes = "Prototypes";
-        public static readonly string TEXT_add = "Add\n<size=8>Click / Drop</size>";
         public static readonly string TEXT_addTextMode = "Add Prototype";
 
 
-        public static readonly string TEXT_registerPrefabsInScene = "Register Instances in Scene";
         public static readonly string TEXT_registeredPrefabs = "Registered Instances";
 
 
@@ -23,19 +21,10 @@ namespace GPUInstancer
 
         // Editor HelpText
         public static readonly string HELPTEXT_prototypes = "\"Prototypes\" show the list of objects that will be used in GPU Instancer. To modify a prototype, click on its icon or text. Use the \"Text Mode\" or \"Icon Mode\" button to switch between preview modes.";
-        public static readonly string HELPTEXT_addprototypeprefab = "Click on \"Add\" button and select a prefab to add a prefab prototype to the manager. Note that prefab manager only accepts user created prefabs. It will not accept prefabs that are generated when importing your 3D model assets.";
-        public static readonly string HELPTEXT_registerPrefabsInScene = "The \"Register Prefabs In Scene\" button can be used to register the prefab instances that are currently in the scene, so that they can be used by GPU Instancer. For adding new instances at runtime check API documentation.";
 
-        public static readonly string HELP_ICON = "help_gpui";
-        public static readonly string HELP_ICON_ACTIVE = "help_gpui_active";
-        public static readonly string PREVIEW_BOX_ICON = "previewBox";
 
         public static class Contents
         {
-
-            public static GUIContent registerPrefabsInScene = new GUIContent(TEXT_registerPrefabsInScene);
-
-            public static GUIContent add = new GUIContent(TEXT_add);
             public static GUIContent addTextMode = new GUIContent(TEXT_addTextMode);
             public static GUIContent enableMeshRenderers = new GUIContent("Enable Mesh Renderers");
 
@@ -53,7 +42,6 @@ namespace GPUInstancer
         public static class Colors
         {
             public static Color lightBlue = new Color(0.5f, 0.6f, 0.8f, 1);
-            public static Color darkBlue = new Color(0.07f, 0.27f, 0.35f, 1);
             public static Color lightGreen = new Color(0.2f, 1f, 0.2f, 1);
             public static Color green = new Color(0, 0.4f, 0, 1);
         }

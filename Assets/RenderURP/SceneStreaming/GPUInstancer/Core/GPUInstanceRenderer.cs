@@ -23,7 +23,7 @@ namespace Inutan
         public Mode Mode { get; private set; }
         public GameObject renderTarget { get; private set; }//渲染
         public int instanceCount => m_Locations.Count;
-        public Vector2 showRange = new Vector2(0, 120);//显示范围 x:min y:max
+        public Vector2 showRange = new Vector2(0, 5000);//显示范围 x:min y:max
 
         List<Matrix4x4> m_Locations = new List<Matrix4x4>();//收集到的全部坐标信息
         List<GameObject> m_SceneGameObjects = new List<GameObject>();
