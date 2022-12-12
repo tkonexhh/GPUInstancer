@@ -9,6 +9,7 @@ using UnityEngine.Jobs;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using Inutan;
 
 namespace GPUInstancer
 {

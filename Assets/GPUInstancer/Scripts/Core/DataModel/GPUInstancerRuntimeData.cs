@@ -178,15 +178,5 @@ namespace GPUInstancer
         #endregion CreateRenderersFromGameObject
     }
 
-    public class GPUInstancerRenderer
-    {
-        public Mesh mesh;
-        public List<Material> materials; // support for multiple submeshes.
-        public Matrix4x4 transformOffset;
-        public int argsBufferOffset;
-        public MaterialPropertyBlock mpb;
-        public int layer;
-        public bool castShadows;
-        public bool receiveShadows;
-    }
+
 }
