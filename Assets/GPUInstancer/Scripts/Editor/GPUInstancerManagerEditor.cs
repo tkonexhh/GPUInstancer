@@ -11,9 +11,6 @@ namespace GPUInstancer
         private GPUInstancerManager _manager;
         protected GPUInstancerPrototype _pickerOverride;
 
-
-        // protected SerializedProperty prop_layerMask;
-
         protected int pickerControlID = -1;
         protected bool editorDataChanged = false;
 
@@ -27,7 +24,6 @@ namespace GPUInstancer
             _manager = (target as GPUInstancerManager);
             FillPrototypeList();
 
-            // prop_layerMask = serializedObject.FindProperty("layerMask");
 
             showSceneSettingsBox = _manager.showSceneSettingsBox;
             showPrototypeBox = _manager.showPrototypeBox;
@@ -97,10 +93,6 @@ namespace GPUInstancer
             editorDataChanged = true;
         }
 
-        public virtual void ApplyEditorDataChanges()
-        {
-
-        }
 
         public bool HandlePickerObjectSelection()
         {
@@ -129,7 +121,6 @@ namespace GPUInstancer
 
             if (showRegisteredPrefabsBox)
             {
-                DrawRegisteredPrefabsBoxButtons();
 
                 DrawRegisteredPrefabsBoxList();
 
@@ -145,10 +136,7 @@ namespace GPUInstancer
             EditorGUI.EndDisabledGroup();
         }
 
-        public virtual void DrawRegisteredPrefabsBoxButtons()
-        {
 
-        }
 
         public virtual void DrawRegisteredPrefabsBoxList()
         {
@@ -217,7 +205,6 @@ namespace GPUInstancer
                 int prototypeRowCount = Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - 30f) / (PROTOTYPE_TEXT_RECT_SIZE_X));
                 DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_prototypes);
 
-                DrawPrototypeBoxButtons();
 
                 if (prototypeContents == null || prototypeContents.Length != _manager.prototypeList.Count)
                     GeneratePrototypeContents();
@@ -259,7 +246,6 @@ namespace GPUInstancer
                 }
 
                 EditorGUILayout.EndHorizontal();
-                DrawAddPrototypeHelpText();
 
                 GPUInstancerEditorConstants.DrawCustomLabel("<size=10><i>*Ctrl+Clict to select multiple, Shift+Click to select adjacent items.</i></size>",
                     GPUInstancerEditorConstants.Styles.richLabel, false);
@@ -269,14 +255,7 @@ namespace GPUInstancer
             EditorGUILayout.EndVertical();
         }
 
-        public virtual void DrawPrototypeBoxButtons()
-        {
-        }
 
-        public virtual void DrawAddPrototypeHelpText()
-        {
-
-        }
 
         public void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent)
         {

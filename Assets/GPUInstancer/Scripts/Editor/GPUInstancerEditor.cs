@@ -37,37 +37,17 @@ namespace GPUInstancer
         protected List<GPUInstancerPrototype> prototypeList;
         protected Dictionary<GPUInstancerPrototype, bool> prototypeSelection;
 
-        // protected bool useCustomPreviewBackgroundColor = false;
-        // protected Color previewBackgroundColor;
-
-        // protected bool isTextMode = true;
-
         private GameObject _redirectObject;
-
-        // Previews
-        // private GPUInstancerPreviewDrawer _previewDrawer;
 
         protected virtual void OnEnable()
         {
-            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
             prototypeContents = null;
-
-            // helpIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON);
-            // helpIconActive = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON_ACTIVE);
-            // previewBoxIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.PREVIEW_BOX_ICON);
-
-
-            // GPUInstancerDefines.previewCache.ClearEmptyPreviews();
         }
 
         protected virtual void OnDisable()
         {
             prototypeContents = null;
-
-            // if (_previewDrawer != null)
-            //     _previewDrawer.Cleanup();
-            // _previewDrawer = null;
         }
 
         public override void OnInspectorGUI()
@@ -100,11 +80,7 @@ namespace GPUInstancer
             {
                 prototypeContents[i] = new GUIContent("", prototypeList[i].ToString());
             }
-
         }
-
-
-
 
         public virtual void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent, bool isSelected, UnityAction handleSelect)
         {

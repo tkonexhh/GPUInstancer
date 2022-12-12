@@ -42,7 +42,7 @@ namespace GPUInstancer
             {
                 if (runtimeData.transformationMatrixVisibilityBuffer != null)
                     runtimeData.transformationMatrixVisibilityBuffer.Release();
-                runtimeData.transformationMatrixVisibilityBuffer = new ComputeBuffer(runtimeData.bufferSize, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4);
+                runtimeData.transformationMatrixVisibilityBuffer = new ComputeBuffer(runtimeData.bufferSize, Inutan.GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4);
                 if (runtimeData.instanceDataNativeArray.IsCreated)
                     runtimeData.transformationMatrixVisibilityBuffer.SetData(runtimeData.instanceDataNativeArray);
             }
@@ -89,8 +89,8 @@ namespace GPUInstancer
             foreach (GPUInstancerRenderer renderer in runtimeData.renderers)
             {
                 // Setup instance LOD renderer material property block shader buffers with the append buffer
-                renderer.mpb.SetBuffer(GPUInstancerConstants.VisibilityKernelPoperties.TRANSFORMATION_MATRIX_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
-                renderer.mpb.SetMatrix(GPUInstancerConstants.VisibilityKernelPoperties.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
+                renderer.mpb.SetBuffer(InstanceStrategy_Indirect.ShaderIDs.TRANSFORMATION_MATRIX_BUFFER, runtimeData.transformationMatrixVisibilityBuffer);
+                renderer.mpb.SetMatrix(InstanceStrategy_Indirect.ShaderIDs.RENDERER_TRANSFORM_OFFSET, renderer.transformOffset);
             }
         }
 
@@ -132,41 +132,11 @@ namespace GPUInstancer
                 if (runtimeData == null || runtimeData.transformationMatrixVisibilityBuffer == null || runtimeData.bufferSize == 0 || runtimeData.instanceCount == 0)
                     continue;
 
-                // Everything is ready; execute the instanced indirect rendering. We execute a drawcall for each submesh of each LOD.
-                GPUInstancerRenderer rdRenderer;
-                Material rdMaterial;
-                int offset = 0;
-                int submeshIndex = 0;
+                Inutan.GPUInstanceUtility.DrawMeshInstancedIndirect(runtimeData.renderers, instancingBounds, runtimeData.argsBuffer);
 
-                for (int r = 0; r < runtimeData.renderers.Count; r++)
-                {
-                    rdRenderer = runtimeData.renderers[r];
-                    for (int m = 0; m < rdRenderer.materials.Count; m++)
-                    {
-                        rdMaterial = rdRenderer.materials[m];
-                        submeshIndex = Math.Min(m, rdRenderer.mesh.subMeshCount - 1);
-                        offset = (rdRenderer.argsBufferOffset + 5 * submeshIndex) * GPUInstancerConstants.STRIDE_SIZE_INT;
-
-                        Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex,
-                            rdMaterial,
-                            instancingBounds,
-                            runtimeData.argsBuffer,
-                            offset,
-                            rdRenderer.mpb,
-                            ShadowCastingMode.Off,
-                            rdRenderer.receiveShadows,
-                            rdRenderer.layer
-                            );
-                    }
-
-                }
             }
         }
 
-        public static bool IsInLayer(int layerMask, int layer)
-        {
-            return layerMask == (layerMask | (1 << layer));
-        }
         #endregion GPU Instancing
 
         #region Prototype Release

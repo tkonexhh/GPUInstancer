@@ -214,9 +214,7 @@ namespace GPUInstancer
 
         public virtual void RegisterPrefabsInScene()
         {
-#if UNITY_EDITOR
-            Undo.RecordObject(this, "Registered prefabs changed");
-#endif
+
             registeredPrefabs.Clear();
             foreach (GPUInstancerPrefabPrototype pp in prototypeList)
                 registeredPrefabs.Add(new RegisteredPrefabsData(pp));

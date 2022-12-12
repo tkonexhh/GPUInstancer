@@ -202,27 +202,6 @@ namespace GPUInstancer
             EditorUtility.SetDirty(prefabPrototype);
         }
 
-
-
-        public override void DrawAddPrototypeHelpText()
-        {
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_addprototypeprefab);
-        }
-
-        public override void DrawRegisteredPrefabsBoxButtons()
-        {
-            GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.registerPrefabsInScene, GPUInstancerEditorConstants.Colors.darkBlue, Color.white, FontStyle.Bold, Rect.zero,
-                    () =>
-                    {
-                        Undo.RecordObject(_prefabManager, "Register prefabs in scene");
-                        _prefabManager.RegisterPrefabsInScene();
-
-
-
-                    });
-            DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_registerPrefabsInScene);
-        }
-
         public override void DrawRegisteredPrefabsBoxList()
         {
             if (!Application.isPlaying && _prefabManager.registeredPrefabs.Count > 0)

@@ -57,12 +57,6 @@ namespace GPUInstancer
 #endif
             if (Application.isPlaying && activeManagerList == null)
                 activeManagerList = new List<GPUInstancerManager>();
-
-
-#if UNITY_EDITOR
-            EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
-            EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
-#endif
         }
 
         public virtual void OnEnable()
@@ -169,13 +163,6 @@ namespace GPUInstancer
         #endregion Virtual Methods
 
         #region Public Methods
-
-#if UNITY_EDITOR
-        public void HandlePlayModeStateChanged(PlayModeStateChange state)
-        {
-            playModeState = state;
-        }
-#endif
 
         public GPUInstancerRuntimeData GetRuntimeData(GPUInstancerPrototype prototype, bool logError = false)
         {
