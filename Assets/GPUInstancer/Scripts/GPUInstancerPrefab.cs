@@ -11,22 +11,8 @@ namespace GPUInstancer
     {
         [HideInInspector]
         public GPUInstancerPrefabPrototype prefabPrototype;
-        [NonSerialized]
-        public int gpuInstancerID;
-
-        protected bool _isTransformSet;
-        protected Transform _instanceTransform;
 
 
-        public virtual Transform GetInstanceTransform(bool forceNew = false)
-        {
-            if (!_isTransformSet || forceNew)
-            {
-                _instanceTransform = transform;
-                _isTransformSet = true;
-            }
-            return _instanceTransform;
-        }
 
     }
 }

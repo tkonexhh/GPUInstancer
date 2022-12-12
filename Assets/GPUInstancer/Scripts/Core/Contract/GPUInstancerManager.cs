@@ -70,19 +70,21 @@ namespace GPUInstancer
 
             if (SystemInfo.supportsComputeShaders)
             {
-
-
                 if (runtimeDataList == null || runtimeDataList.Count == 0)
                     InitializeRuntimeDataAndBuffers();
-
             }
         }
 
         public virtual void LateUpdate()
         {
             instancingBounds.center = Camera.main.transform.position;
+            if (runtimeDataList == null)
+                return;
 
-            GPUInstancerUtility.GPUIDrawMeshInstancedIndirect(runtimeDataList, instancingBounds);
+            foreach (var runtimeData in runtimeDataList)
+            {
+                runtimeData.Render();
+            }
         }
 
         public virtual void Reset()

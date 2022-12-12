@@ -195,9 +195,6 @@ namespace GPUInstancer
             showPrototypesBox = EditorGUI.Foldout(foldoutRect, showPrototypesBox, GPUInstancerEditorConstants.TEXT_prototypes, true, GPUInstancerEditorConstants.Styles.foldout);
 
 
-            // Rect switchRect = GUILayoutUtility.GetRect(80, 20, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-            // GPUInstancerEditorConstants.DrawColoredButton(new GUIContent(_manager.isPrototypeTextMode ? "Icon Mode" : "Text Mode"), GPUInstancerEditorConstants.Colors.green, Color.white,
-            //     FontStyle.Bold, switchRect, () => _manager.isPrototypeTextMode = !_manager.isPrototypeTextMode);
             EditorGUILayout.EndHorizontal();
 
             if (showPrototypesBox)
