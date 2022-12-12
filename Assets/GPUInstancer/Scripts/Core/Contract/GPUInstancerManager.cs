@@ -56,7 +56,7 @@ namespace GPUInstancer
 
         public virtual void Awake()
         {
-            GPUInstancerConstants.gpuiSettings.SetDefultBindings();
+            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
 #if UNITY_EDITOR
             if (!Application.isPlaying)
@@ -82,7 +82,7 @@ namespace GPUInstancer
 
             if (SystemInfo.supportsComputeShaders)
             {
-                if (GPUInstancerConstants.gpuiSettings == null || GPUInstancerConstants.gpuiSettings.shaderBindings == null)
+                if (GPUInstancerConstants.gpuiSettings == null)
                     Debug.LogWarning("No shader bindings file was supplied. Instancing will terminate!");
 
                 if (runtimeDataList == null || runtimeDataList.Count == 0)
@@ -101,7 +101,7 @@ namespace GPUInstancer
 
         public virtual void Reset()
         {
-            GPUInstancerConstants.gpuiSettings.SetDefultBindings();
+            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 #if UNITY_EDITOR
             CheckPrototypeChanges();
 #endif
@@ -139,13 +139,13 @@ namespace GPUInstancer
             else
                 prototypeList.RemoveAll(p => p == null);
 
-            GPUInstancerConstants.gpuiSettings.SetDefultBindings();
+            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
         }
 
 #if UNITY_EDITOR
         public virtual void CheckPrototypeChanges()
         {
-            GPUInstancerConstants.gpuiSettings.SetDefultBindings();
+            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
             if (prototypeList == null)
                 GeneratePrototypes();

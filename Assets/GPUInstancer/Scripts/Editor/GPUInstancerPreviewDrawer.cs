@@ -42,16 +42,6 @@ namespace GPUInstancer
                     _previewCache.Remove(prototype);
             }
         }
-
-        public void ClearPreviews()
-        {
-            foreach (GPUInstancerPrototype prototype in _previewCache.Keys)
-            {
-                if (_previewCache[prototype])
-                    Object.DestroyImmediate(_previewCache[prototype]);
-            }
-            _previewCache.Clear();
-        }
     }
 
     public class GPUInstancerPreviewDrawer
@@ -133,10 +123,6 @@ namespace GPUInstancer
             _gameObjects.Add(go);
         }
 
-        public void SetAdditionalTexture(Texture2D additionalTexture)
-        {
-            _additionalTexture = additionalTexture;
-        }
 
         public void Cleanup()
         {

@@ -40,5 +40,21 @@ namespace Inutan
             Debug.LogError("目标Shader 未提供Indirect版本: " + shaderName);
             return Shader.Find(SHADER_GPUI_ERROR);
         }
+
+        public static Material GetInstancedMaterial(Material originalMaterial)
+        {
+
+            if (originalMaterial == null || originalMaterial.shader == null)
+            {
+                Debug.LogWarning("One of the GPU Instancer prototypes is missing material reference! Check the Material references in MeshRenderer.");
+                return new Material(Shader.Find(SHADER_GPUI_ERROR));
+            }
+
+            Material instancedMaterial = new Material(GetInstancedShader(originalMaterial.shader.name));
+            instancedMaterial.CopyPropertiesFromMaterial(originalMaterial);
+            instancedMaterial.name = originalMaterial.name + "_GPUI";
+
+            return instancedMaterial;
+        }
     }
 }

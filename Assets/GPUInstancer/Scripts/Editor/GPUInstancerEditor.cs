@@ -49,7 +49,7 @@ namespace GPUInstancer
 
         protected virtual void OnEnable()
         {
-            GPUInstancerConstants.gpuiSettings.SetDefultBindings();
+            // GPUInstancerConstants.gpuiSettings.SetDefultBindings();
 
             prototypeContents = null;
 

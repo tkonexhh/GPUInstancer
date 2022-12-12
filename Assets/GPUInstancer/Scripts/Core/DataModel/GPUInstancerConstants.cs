@@ -41,39 +41,7 @@ namespace GPUInstancer
 
         #region Shaders
         // Unity Shader Names
-        public static readonly string SHADER_UNITY_STANDARD = "Standard";
-        public static readonly string SHADER_UNITY_STANDARD_SPECULAR = "Standard (Specular setup)";
-        public static readonly string SHADER_UNITY_STANDARD_ROUGHNESS = "Standard (Roughness setup)";
-        public static readonly string SHADER_UNITY_VERTEXLIT = "VertexLit";
-        public static readonly string SHADER_UNITY_SPEED_TREE = "Nature/SpeedTree";
-        public static readonly string SHADER_UNITY_SPEED_TREE_8 = "Nature/SpeedTree8";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_BARK = "Nature/Tree Creator Bark";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_BARK_OPTIMIZED = "Hidden/Nature/Tree Creator Bark Optimized";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_LEAVES = "Nature/Tree Creator Leaves";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_LEAVES_OPTIMIZED = "Hidden/Nature/Tree Creator Leaves Optimized";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_LEAVES_FAST = "Nature/Tree Creator Leaves Fast";
-        public static readonly string SHADER_UNITY_TREE_CREATOR_LEAVES_FAST_OPTIMIZED = "Hidden/Nature/Tree Creator Leaves Fast Optimized";
-        public static readonly string SHADER_UNITY_TREE_SOFT_OCCLUSION_BARK = "Nature/Tree Soft Occlusion Bark";
-        public static readonly string SHADER_UNITY_TREE_SOFT_OCCLUSION_LEAVES = "Nature/Tree Soft Occlusion Leaves";
 
-        public static readonly string SHADER_UNITY_INTERNAL_ERROR = "Hidden/InternalErrorShader";
-
-        // Default GPU Instanced Shader Names
-        public static readonly string SHADER_GPUI_STANDARD = "GPUInstancer/Standard";
-        public static readonly string SHADER_GPUI_STANDARD_SPECULAR = "GPUInstancer/Standard (Specular setup)";
-        public static readonly string SHADER_GPUI_STANDARD_ROUGHNESS = "GPUInstancer/Standard (Roughness setup)";
-        public static readonly string SHADER_GPUI_VERTEXLIT = "GPUInstancer/VertexLit";
-
-        public static readonly string SHADER_GPUI_SPEED_TREE = "GPUInstancer/Nature/SPDTree";
-        public static readonly string SHADER_GPUI_SPEED_TREE_8 = "GPUInstancer/Nature/SPDTree8";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_BARK = "GPUInstancer/Nature/Tree Creator Bark";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_BARK_OPTIMIZED = "GPUInstancer/Nature/Tree Creator Bark Optimized";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES = "GPUInstancer/Nature/Tree Creator Leaves";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES_OPTIMIZED = "GPUInstancer/Nature/Tree Creator Leaves Optimized";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES_FAST = "GPUInstancer/Nature/Tree Creator Leaves Fast";
-        public static readonly string SHADER_GPUI_TREE_CREATOR_LEAVES_FAST_OPTIMIZED = "GPUInstancer/Nature/Tree Creator Leaves Fast Optimized";
-        public static readonly string SHADER_GPUI_TREE_SOFT_OCCLUSION_BARK = "GPUInstancer/Nature/Tree Soft Occlusion Bark";
-        public static readonly string SHADER_GPUI_TREE_SOFT_OCCLUSION_LEAVES = "GPUInstancer/Nature/Tree Soft Occlusion Leaves";
 
         public static readonly string SHADER_GPUI_ERROR = "Hidden/GPUInstancer/InternalErrorShader";
 
@@ -86,10 +54,7 @@ namespace GPUInstancer
         public static readonly string SETTINGS_PATH = "Settings/";
         public static readonly string EDITOR_TEXTURES_PATH = "Textures/Editor/";
         public static readonly string GPUI_SETTINGS_DEFAULT_NAME = "GPUInstancerSettings";
-        public static readonly string SHADER_BINDINGS_DEFAULT_NAME = "GPUInstancerShaderBindings";
-        public static readonly string SHADER_VARIANT_COLLECTION_DEFAULT_NAME = "GPUIShaderVariantCollection";
         public static readonly string PROTOTYPES_PREFAB_PATH = "PrototypeData/Prefab/";
-        public static readonly string PROTOTYPES_SHADERS_PATH = "PrototypeData/Shaders/";
 
 
 
@@ -117,9 +82,6 @@ namespace GPUInstancer
 
         public static readonly string TEXT_PREFAB_TYPE_WARNING_3D = "GPU Instancer Prefab Manager only accepts user created prefabs. Please create a prefab from this imported 3D model asset.";
         public static readonly string TEXT_OK = "OK";
-
-        public static readonly string ERRORTEXT_cameraNotFound = "Main Camera cannot be found. GPU Instancer needs either an existing camera with the \"Main Camera\" tag on the scene to autoselect it, or a manually specified camera. If you add your camera at runtime, please use the \"GPUInstancerAPI.SetCamera\" API function.";
-        public static readonly string ERRORTEXT_shaderGraph = "ShaderGraph shader does not contain GPU Instacer Setup: {0}. Please add GPUInstacer Setup from the ShaderGraph window.";
 
         #endregion Texts
     }

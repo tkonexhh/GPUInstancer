@@ -754,7 +754,7 @@ PlayerSettings:
     Android: 1
   incrementalIl2cppBuild: {}
   suppressCommonWarnings: 1
-  allowUnsafeCode: 1
+  allowUnsafeCode: 0
   useDeterministicCompilation: 1
   enableRoslynAnalyzers: 0
   selectedPlatform: 2

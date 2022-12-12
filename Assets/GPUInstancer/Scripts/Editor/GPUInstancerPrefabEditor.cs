@@ -63,76 +63,13 @@ namespace GPUInstancer
                                 });
                             //_prefabScripts[0].prefabPrototype.meshRenderersDisabledSimulation = EditorGUILayout.Toggle(GPUInstancerEditorConstants.TEXT_disableMeshRenderersSimulation, _prefabScripts[0].prefabPrototype.meshRenderersDisabledSimulation);
                         }
-                        //if (!_prefabScripts[0].prefabPrototype.meshRenderersDisabled)
-                        //{
-                        //    GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.disableMeshRenderers, Color.red, Color.white, FontStyle.Bold, Rect.zero,
-                        //    () =>
-                        //    {
-                        //        if (EditorUtility.DisplayDialog(GPUInstancerEditorConstants.TEXT_disableMeshRenderers, GPUInstancerEditorConstants.TEXT_disableMeshRenderersAreYouSure, "Yes", "No"))
-                        //        {
-                        //            foreach (GPUInstancerPrefab prefabScript in _prefabScripts)
-                        //            {
-                        //                if (prefabScript != null && prefabScript.prefabPrototype != null)
-                        //                {
-                        //                    GPUInstancerPrefabManagerEditor.SetRenderersEnabled(prefabScript.prefabPrototype, false);
-                        //                }
-                        //            }
-                        //        }
-                        //    });
-                        //}
+
                         EditorGUILayout.EndHorizontal();
                     }
                 }
             }
         }
 
-        //[DrawGizmo(GizmoType.NotInSelectionHierarchy | GizmoType.InSelectionHierarchy)]
-        //private static void DrawGizmo(GPUInstancerPrefab instance, GizmoType gizmoType)
-        //{
-        //    if (EditorApplication.isPlaying || !instance.enabled || instance.prefabPrototype == null || !instance.prefabPrototype.meshRenderersDisabled)
-        //        return;
 
-        //    if (instance.prefabPrototype.meshRenderersDisabledSimulation)
-        //    {
-        //        if (instance.GetComponent<LODGroup>())
-        //        {
-        //            foreach (Renderer r in instance.GetComponent<LODGroup>().GetLODs()[0].renderers)
-        //            {
-        //                if(r is MeshRenderer)
-        //                {
-        //                    DrawMesh((MeshRenderer)r);
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            MeshRenderer[] renderers = instance.GetComponentsInChildren<MeshRenderer>();
-        //            for (int i = 0; i != renderers.Length; ++i)
-        //            {
-        //                DrawMesh(renderers[i]);
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private static void DrawMesh(MeshRenderer renderer)
-        //{
-        //    Matrix4x4 matrix = renderer.transform.localToWorldMatrix;
-        //    MeshFilter meshFilter = renderer.GetComponent<MeshFilter>();
-        //    Material mat;
-        //    for (int m = 0; m < renderer.sharedMaterials.Length; m++)
-        //    {
-        //        mat = renderer.sharedMaterials[m];
-        //        //Graphics.DrawMesh(meshFilter.sharedMesh, matrix, renderer.sharedMaterials[m], renderer.gameObject.layer, null, m);
-        //        for (int p = 0; p < mat.passCount; p++)
-        //        {
-        //            if(mat.GetShaderPassEnabled(mat.GetPassName(p)))
-        //            {
-        //                renderer.sharedMaterials[m].SetPass(p);
-        //                Graphics.DrawMeshNow(meshFilter.sharedMesh, matrix, m);
-        //            }
-        //        }
-        //    }
-        //}
     }
 }

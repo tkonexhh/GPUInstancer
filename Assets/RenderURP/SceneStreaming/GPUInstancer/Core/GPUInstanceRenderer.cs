@@ -250,7 +250,7 @@ namespace Inutan
                 List<Material> instanceMaterials = new List<Material>();
                 for (int m = 0; m < meshRenderer.sharedMaterials.Length; m++)
                 {
-                    instanceMaterials.Add(GetDrawMaterial(meshRenderer.sharedMaterials[m]));
+                    instanceMaterials.Add(GPUInstancerShaderBindings.GetInstancedMaterial(meshRenderer.sharedMaterials[m]));
                 }
 
                 MaterialPropertyBlock mpb = new MaterialPropertyBlock();

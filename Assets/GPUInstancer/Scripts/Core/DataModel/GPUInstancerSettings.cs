@@ -9,12 +9,10 @@ namespace GPUInstancer
 {
     public class GPUInstancerSettings : ScriptableObject
     {
-
         public GPUInstancerShaderBindings shaderBindings;
         public bool packagesLoaded;
 
         public int instancingBoundsSize = 10000;
-
 
 
         #region Editor Constants
@@ -42,54 +40,9 @@ namespace GPUInstancer
                 }
 #endif
             }
-            gpuiSettings.SetDefultBindings();
+            gpuiSettings.shaderBindings = new GPUInstancerShaderBindings();
             return gpuiSettings;
         }
-
-        public virtual void SetDefultBindings()
-        {
-            SetDefaultGPUInstancerShaderBindings();
-        }
-
-        #region Shader Bindings
-        public virtual void SetDefaultGPUInstancerShaderBindings()
-        {
-            if (shaderBindings == null)
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                    Undo.RecordObject(this, "GPUInstancerShaderBindings instance generated");
-#endif
-                shaderBindings = GetDefaultGPUInstancerShaderBindings();
-            }
-        }
-
-        public static GPUInstancerShaderBindings GetDefaultGPUInstancerShaderBindings()
-        {
-            GPUInstancerShaderBindings shaderBindings = Resources.Load<GPUInstancerShaderBindings>(GPUInstancerConstants.SETTINGS_PATH + GPUInstancerConstants.SHADER_BINDINGS_DEFAULT_NAME);
-
-            if (shaderBindings == null)
-            {
-                shaderBindings = ScriptableObject.CreateInstance<GPUInstancerShaderBindings>();
-                shaderBindings.ResetShaderInstances();
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    if (!System.IO.Directory.Exists(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH))
-                    {
-                        System.IO.Directory.CreateDirectory(GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH);
-                    }
-
-                    AssetDatabase.CreateAsset(shaderBindings, GPUInstancerConstants.GetDefaultPath() + GPUInstancerConstants.RESOURCES_PATH + GPUInstancerConstants.SETTINGS_PATH + GPUInstancerConstants.SHADER_BINDINGS_DEFAULT_NAME + ".asset");
-                    AssetDatabase.SaveAssets();
-                    AssetDatabase.Refresh();
-                }
-#endif
-            }
-
-            return shaderBindings;
-        }
-        #endregion Shader Bindings
 
     }
 

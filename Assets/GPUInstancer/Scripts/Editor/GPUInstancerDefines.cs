@@ -12,7 +12,6 @@ namespace GPUInstancer
     public class GPUInstancerDefines
     {
         private static readonly string DEFINE_GPU_INSTANCER = "GPU_INSTANCER";
-        private static readonly string[] AUTO_PACKAGE_IMPORTER_GUIDS = { "e134ae9cb2828d147a6ec91b020fcb63", "87dd7798fac1eed45bd360e61b272470" };
 
         // billboard extensions
         public static GPUInstancerPreviewCache previewCache;
@@ -44,11 +43,6 @@ namespace GPUInstancer
                 return;
 
             EditorApplication.update -= GenerateSettings;
-        }
-
-        public static void ImportPackages(bool forceReimport)
-        {
-            GPUIPackageImporter.ImportPackages(AUTO_PACKAGE_IMPORTER_GUIDS, forceReimport);
         }
 
 
@@ -93,12 +87,5 @@ namespace GPUInstancer
             EditorApplication.update -= PackageListRequestHandler;
         }
 
-
-        public static GPUInstancerShaderBindings GetGPUInstancerShaderBindings()
-        {
-            if (GPUInstancerConstants.gpuiSettings.shaderBindings == null)
-                GPUInstancerConstants.gpuiSettings.shaderBindings = GPUInstancerSettings.GetDefaultGPUInstancerShaderBindings();
-            return GPUInstancerConstants.gpuiSettings.shaderBindings;
-        }
     }
 }
