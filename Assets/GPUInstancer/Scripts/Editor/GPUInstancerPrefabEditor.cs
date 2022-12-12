@@ -37,12 +37,8 @@ namespace GPUInstancer
                         {
                             if (Application.isPlaying)
                             {
-                                if (_prefabScripts[0].state == PrefabInstancingState.Instanced)
-                                    GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabInstancingActive + _prefabScripts[0].gpuInstancerID, GPUInstancerEditorConstants.Styles.boldLabel);
-                                else if (_prefabScripts[0].state == PrefabInstancingState.Disabled)
-                                    GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabInstancingDisabled + _prefabScripts[0].gpuInstancerID, GPUInstancerEditorConstants.Styles.boldLabel);
-                                else
-                                    GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabInstancingNone, GPUInstancerEditorConstants.Styles.boldLabel);
+
+                                GPUInstancerEditorConstants.DrawCustomLabel(GPUInstancerEditorConstants.TEXT_prefabInstancingNone, GPUInstancerEditorConstants.Styles.boldLabel);
                             }
                         }
                     }

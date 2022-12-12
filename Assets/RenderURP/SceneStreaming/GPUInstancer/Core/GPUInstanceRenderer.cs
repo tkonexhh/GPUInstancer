@@ -19,7 +19,7 @@ namespace Inutan
         public bool enableOcclusionCulling = false;//开启遮挡剔除 TODO
         public bool useJobs = true;//使用Jobs来代替ComputeShader
 
-
+        public List<GPUInstancerRenderer> renderers = new List<GPUInstancerRenderer>();
         public Mode Mode { get; private set; }
         public GameObject renderTarget { get; private set; }//渲染
         public int totalCount => m_Locations.Count;
@@ -36,7 +36,6 @@ namespace Inutan
 
         public void RegisterInstanceProxy(GameObject gameObject)
         {
-            gameObject.SetActive(false);
             m_SceneGameObjects.Add(gameObject);
             var location = gameObject.transform.localToWorldMatrix;
             m_Locations.Add(location);
@@ -51,23 +50,27 @@ namespace Inutan
             m_Locations.RemoveAt(index);
             m_SceneGameObjects.RemoveAt(index);
             RecreateNativeArray();
-            gameObject.SetActive(true);
         }
 
         public void ClearInstanceProxy()
         {
-            for (int i = 0; i < m_SceneGameObjects.Count; i++)
-            {
-                m_SceneGameObjects[i].SetActive(true);
-            }
+            ShowGameObject();
             m_SceneGameObjects.Clear();
             m_Locations.Clear();
         }
 
         public void Init(GameObject renderTarget)
         {
+            if (renderTarget == null)
+            {
+                Debug.LogError("当前批量渲染的物体为null");
+                return;
+            }
+
             this.renderTarget = renderTarget;
+            CreateRenderersFromGameObject(renderTarget);
             SetMode(Mode.Indirect);
+            RecreateNativeArray();
         }
 
         public void SetMode(Mode mode)
@@ -92,9 +95,6 @@ namespace Inutan
                     m_InstanceStrategy = new InstanceStrategy_Indirect();
                 else
                     m_InstanceStrategy = new InstanceStrategy_Instanced();
-
-                m_InstanceStrategy.CreateRenderersFromGameObject(renderTarget);
-                RecreateNativeArray();
             }
         }
 
@@ -113,8 +113,6 @@ namespace Inutan
                 m_LocationNativeArray[i] = m_Locations[i];
             }
 
-            if (m_InstanceStrategy != null)
-                m_InstanceStrategy.maxCount = totalCount;
         }
 
         public void Render()
@@ -168,17 +166,15 @@ namespace Inutan
                 }
                 culledLocationNativeQueue.Dispose();
 
-                m_InstanceStrategy.localToWorldMatrixListNativeArray = m_CulledLocationNativeArray;
+                if (m_CulledLocationNativeArray.Length > 0)
+                    m_InstanceStrategy.Render(renderers, m_CulledLocationNativeArray);
 
             }
             else
             {
-                if (m_InstanceStrategy.localToWorldMatrixListNativeArray.Length != m_LocationNativeArray.Length)
-                    m_InstanceStrategy.localToWorldMatrixListNativeArray = m_LocationNativeArray;//不用剔除 直接等于原始坐标信息
+                if (m_LocationNativeArray.Length > 0)
+                    m_InstanceStrategy.Render(renderers, m_LocationNativeArray);
             }
-
-            m_InstanceStrategy.Render();
-
         }
 
         public void Release()
@@ -194,20 +190,131 @@ namespace Inutan
 
         void ShowGameObject()
         {
-            for (int i = 0; i < m_SceneGameObjects.Count; i++)
-            {
-                m_SceneGameObjects[i].SetActive(true);
-            }
+            SetRenderersEnabled(true);
             m_ShowGameObject = true;
         }
 
         void HideGameObject()
         {
-            for (int i = 0; i < m_SceneGameObjects.Count; i++)
-            {
-                m_SceneGameObjects[i].SetActive(false);
-            }
+            SetRenderersEnabled(false);
             m_ShowGameObject = false;
         }
+
+        void SetRenderersEnabled(bool enable)
+        {
+            for (int i = 0; i < m_SceneGameObjects.Count; i++)
+            {
+                var meshRenderers = m_SceneGameObjects[i].GetComponentsInChildren<MeshRenderer>();
+                if (meshRenderers != null && meshRenderers.Length > 0)
+                {
+                    for (int mr = 0; mr < meshRenderers.Length; mr++)
+                    {
+                        meshRenderers[mr].enabled = enable;
+                    }
+                }
+            }
+        }
+
+        #region CreateRenderersFromGameObject
+
+        public bool CreateRenderersFromGameObject(GameObject target)
+        {
+            renderers.Clear();
+
+            List<MeshRenderer> meshRenderers = new List<MeshRenderer>();
+            GetMeshRenderersOfTransform(target.transform, meshRenderers);
+
+            if (meshRenderers == null || meshRenderers.Count == 0)
+            {
+                Debug.LogError("Can't create renderer(s): no MeshRenderers found in the reference GameObject <" + target.name + "> or any of its children");
+                return false;
+            }
+
+            foreach (MeshRenderer meshRenderer in meshRenderers)
+            {
+                var meshFilter = meshRenderer.GetComponent<MeshFilter>();
+                if (meshFilter == null)
+                {
+                    Debug.LogWarning("MeshRenderer with no MeshFilter found on GameObject <" + target.name + "> (Child: <" + meshRenderer.gameObject + ">). Are you missing a component?");
+                    continue;
+                }
+
+                Matrix4x4 transformOffset = Matrix4x4.identity;
+                Transform currentTransform = meshRenderer.gameObject.transform;
+                while (currentTransform != target.transform)
+                {
+                    transformOffset = Matrix4x4.TRS(currentTransform.localPosition, currentTransform.localRotation, currentTransform.localScale) * transformOffset;
+                    currentTransform = currentTransform.parent;
+                }
+
+                List<Material> instanceMaterials = new List<Material>();
+                for (int m = 0; m < meshRenderer.sharedMaterials.Length; m++)
+                {
+                    instanceMaterials.Add(GetDrawMaterial(meshRenderer.sharedMaterials[m]));
+                }
+
+                MaterialPropertyBlock mpb = new MaterialPropertyBlock();
+                meshRenderer.GetPropertyBlock(mpb);
+
+                bool castShadow = meshRenderer.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off;
+                int layer = meshRenderer.gameObject.layer;
+                AddRenderer(meshFilter.sharedMesh, instanceMaterials, transformOffset, mpb, castShadow, layer, meshRenderer.receiveShadows);
+            }
+
+            return true;
+        }
+
+        void GetMeshRenderersOfTransform(Transform objectTransform, List<MeshRenderer> meshRenderers)
+        {
+            MeshRenderer meshRenderer = objectTransform.GetComponent<MeshRenderer>();
+            if (meshRenderer != null)
+                meshRenderers.Add(meshRenderer);
+
+            Transform childTransform;
+            for (int i = 0; i < objectTransform.childCount; i++)
+            {
+                childTransform = objectTransform.GetChild(i);
+                GetMeshRenderersOfTransform(childTransform, meshRenderers);
+            }
+        }
+
+        public void AddRenderer(Mesh mesh, List<Material> materials, Matrix4x4 transformOffset, MaterialPropertyBlock mpb, bool castShadows, int layer = 0, bool receiveShadows = true)
+        {
+            if (mesh == null)
+            {
+                Debug.LogError("Can't add renderer: mesh is null. Make sure that all the MeshFilters on the objects has a mesh assigned.");
+                return;
+            }
+
+            if (materials == null || materials.Count == 0)
+            {
+                Debug.LogError("Can't add renderer: no materials. Make sure that all the MeshRenderers have their materials assigned.");
+                return;
+            }
+
+            GPUInstancerRenderer renderer = new GPUInstancerRenderer
+            {
+                mesh = mesh,
+                materials = materials,
+                transformOffset = transformOffset,
+                mpb = mpb,
+                layer = layer,
+                castShadows = castShadows,
+                receiveShadows = receiveShadows,
+            };
+            renderers.Add(renderer);
+        }
+
+        public Material GetDrawMaterial(Material originalMaterial)
+        {
+            Material instancedMaterial = new Material(GPUInstancerShaderBindings.GetInstancedShader(originalMaterial.shader.name));
+            instancedMaterial.CopyPropertiesFromMaterial(originalMaterial);
+            instancedMaterial.name = originalMaterial.name + "_GPUInstance";
+            instancedMaterial.enableInstancing = true;
+            return instancedMaterial;
+        }
     }
+
+    #endregion
+
 }

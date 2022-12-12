@@ -178,7 +178,6 @@ namespace GPUInstancer
 
                         Transform instanceTransform = prefabInstance.GetInstanceTransform();
                         instanceData = instanceTransform.localToWorldMatrix;
-                        prefabInstance.state = PrefabInstancingState.Instanced;
 
                         bool disableRenderers = true;
 
@@ -210,9 +209,6 @@ namespace GPUInstancer
                     if (GPUInstancerUtility.IsInLayer(layerMask, meshRenderers[mr].gameObject.layer))
                         meshRenderers[mr].enabled = enabled;
 
-            LODGroup lodGroup = prefabInstance.GetComponent<LODGroup>();
-            if (lodGroup != null)
-                lodGroup.enabled = enabled;
         }
 
         #region API Methods

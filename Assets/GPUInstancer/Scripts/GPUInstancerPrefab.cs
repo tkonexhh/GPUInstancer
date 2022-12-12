@@ -13,8 +13,6 @@ namespace GPUInstancer
         public GPUInstancerPrefabPrototype prefabPrototype;
         [NonSerialized]
         public int gpuInstancerID;
-        [NonSerialized]
-        public PrefabInstancingState state = PrefabInstancingState.None;
 
         protected bool _isTransformSet;
         protected Transform _instanceTransform;
@@ -30,12 +28,5 @@ namespace GPUInstancer
             return _instanceTransform;
         }
 
-    }
-
-    public enum PrefabInstancingState
-    {
-        None,
-        Disabled,
-        Instanced
     }
 }

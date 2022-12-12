@@ -424,7 +424,6 @@ namespace GPUInstancer
 
 
             gPUInstancerSettings.MAX_PREFAB_DISTANCE = EditorGUILayout.IntField(Contents.settingMaxPrefabDist, (int)gPUInstancerSettings.MAX_PREFAB_DISTANCE);
-            // gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE = EditorGUILayout.IntField(Contents.settingMaxPrefabBuff, gPUInstancerSettings.MAX_PREFAB_EXTRA_BUFFER_SIZE);
             gPUInstancerSettings.instancingBoundsSize = EditorGUILayout.IntSlider(Contents.settingInstancingBoundsSize, gPUInstancerSettings.instancingBoundsSize, 1, 10000);
 
             GUILayout.Space(5);

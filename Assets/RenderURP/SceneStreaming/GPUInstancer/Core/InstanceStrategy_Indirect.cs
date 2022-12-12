@@ -23,7 +23,7 @@ namespace Inutan
             public static readonly int RENDERER_TRANSFORM_OFFSET = Shader.PropertyToID("gpuiTransformOffset");
         }
 
-        void InitBuffer()
+        void InitBuffer(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
         {
             //Set Args Buffer
             if (m_ArgsBuffer == null)
@@ -58,11 +58,12 @@ namespace Inutan
             }
 
             //Set Visibility Buffer
-            if (m_LocationBuffer == null || m_LocationBuffer.count != maxCount)
+            int count = localToWorldMatrixListNativeArray.Length;
+            if (m_LocationBuffer == null || m_LocationBuffer.count != count)
             {
                 if (m_LocationBuffer != null)
                     m_LocationBuffer.Release();
-                m_LocationBuffer = new ComputeBuffer(maxCount, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4, ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
+                m_LocationBuffer = new ComputeBuffer(count, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4, ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
 
                 if (localToWorldMatrixListNativeArray.IsCreated)
                 {
@@ -71,7 +72,7 @@ namespace Inutan
                     for (int r = 0; r < renderers.Count; r++)
                     {
                         //TODO 先直接等于当前数量
-                        m_Args[1 + r * 5] = (uint)localToWorldMatrixListNativeArray.Length;
+                        m_Args[1 + r * 5] = (uint)count;
                         m_ArgsBuffer.SetData(m_Args);
                     }
                 }
@@ -85,38 +86,10 @@ namespace Inutan
             }
         }
 
-        public override void Render()
+        public override void Render(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
         {
-            if (renderCount <= 0)
-                return;
-
-            InitBuffer();
-
-            GPUInstancerRenderer rdRenderer;
-            Material rdMaterial;
-            int offset = 0;
-            int submeshIndex;
-
-            for (int r = 0; r < renderers.Count; r++)
-            {
-                rdRenderer = renderers[r];
-                for (int m = 0; m < rdRenderer.materials.Count; m++)
-                {
-                    submeshIndex = Math.Min(m, rdRenderer.mesh.subMeshCount - 1);
-                    rdMaterial = rdRenderer.materials[m];
-                    offset = (rdRenderer.argsBufferOffset + 5 * submeshIndex) * GPUInstancerConstants.STRIDE_SIZE_INT;
-
-                    Graphics.DrawMeshInstancedIndirect(rdRenderer.mesh, submeshIndex,
-                        rdMaterial,
-                        instancingBounds,
-                        m_ArgsBuffer,
-                        offset,
-                        rdRenderer.mpb,
-                        ShadowCastingMode.Off,
-                        rdRenderer.receiveShadows,
-                        rdRenderer.layer);
-                }
-            }
+            InitBuffer(renderers, localToWorldMatrixListNativeArray);
+            GPUInstanceUtility.DrawMeshInstancedIndirect(renderers, instancingBounds, m_ArgsBuffer);
         }
 
         public override void Release()
@@ -129,14 +102,6 @@ namespace Inutan
             if (m_LocationBuffer != null)
                 m_LocationBuffer.Release();
             m_LocationBuffer = null;
-        }
-
-        public override Material GetDrawMaterial(Material originalMaterial)
-        {
-            Material instancedMaterial = new Material(GPUInstancerShaderBindings.GetInstancedShader(originalMaterial.shader.name));
-            instancedMaterial.CopyPropertiesFromMaterial(originalMaterial);
-            instancedMaterial.name = originalMaterial.name + "_GPUInstance";
-            return instancedMaterial;
         }
     }
 }

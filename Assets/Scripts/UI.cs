@@ -42,11 +42,15 @@ public class UI : MonoBehaviour
         grassRenderer.InitGameobject(targets[index], (int)slider.value);
         grassRenderer.SetMode(Mode.GameObject);
 
-        gpuInstancerPrefabManager.gameObject.SetActive(true);
-        gpuInstancerPrefabManager.ClearRegisteredPrefabInstances();
-        gpuInstancerPrefabManager.RegisterPrefabsInScene();
-        gpuInstancerPrefabManager.InitializeRuntimeDataAndBuffers(true);
-        gpuInstancerPrefabManager.gameObject.SetActive(false);
+        if (gpuInstancerPrefabManager != null)
+        {
+            gpuInstancerPrefabManager.gameObject.SetActive(true);
+            gpuInstancerPrefabManager.ClearRegisteredPrefabInstances();
+            gpuInstancerPrefabManager.RegisterPrefabsInScene();
+            gpuInstancerPrefabManager.InitializeRuntimeDataAndBuffers(true);
+            gpuInstancerPrefabManager.gameObject.SetActive(false);
+        }
+
     }
 
     void OnClickLeft()
@@ -77,7 +81,7 @@ public class UI : MonoBehaviour
     public void ToGameObject()
     {
         grassRenderer.gameObject.SetActive(true);
-        gpuInstancerPrefabManager.gameObject.SetActive(false);
+        gpuInstancerPrefabManager?.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.GameObject);
         modeText.text = Mode.GameObject.ToString();
@@ -86,7 +90,7 @@ public class UI : MonoBehaviour
     public void ToInstance()
     {
         grassRenderer.gameObject.SetActive(true);
-        gpuInstancerPrefabManager.gameObject.SetActive(false);
+        gpuInstancerPrefabManager?.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.Instance);
         modeText.text = Mode.Instance.ToString();
@@ -95,7 +99,7 @@ public class UI : MonoBehaviour
     public void ToIndirect()
     {
         grassRenderer.gameObject.SetActive(true);
-        gpuInstancerPrefabManager.gameObject.SetActive(false);
+        gpuInstancerPrefabManager?.gameObject.SetActive(false);
 
         grassRenderer.SetMode(Mode.Indirect);
         modeText.text = Mode.Indirect.ToString();
@@ -105,7 +109,7 @@ public class UI : MonoBehaviour
     {
         grassRenderer.SetMode(Mode.GameObject);
         grassRenderer.gameObject.SetActive(false);
-        gpuInstancerPrefabManager.gameObject.SetActive(true);
+        gpuInstancerPrefabManager?.gameObject.SetActive(true);
         modeText.text = "GPUI";
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Collections;
 
 namespace Inutan
 {
@@ -11,15 +12,16 @@ namespace Inutan
 
         int m_LastCount = -1;
 
-        public override void Render()
+        public override void Render(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
         {
             if (renderers == null || localToWorldMatrixListNativeArray == null)
                 return;
 
-            if (m_LastCount == -1 || m_LastCount != maxCount)
+            int count = localToWorldMatrixListNativeArray.Length;
+            if (m_LastCount == -1 || m_LastCount != count)
             {
                 //根据现在
-                int pageCount = Mathf.CeilToInt((float) maxCount / (float) InstancedPage.MAXCOUNT);
+                int pageCount = Mathf.CeilToInt((float)count / (float)InstancedPage.MAXCOUNT);
                 int needToCreate = pageCount - m_Pages.Count;
                 for (int i = 0; i < needToCreate; i++)
                 {
@@ -27,20 +29,20 @@ namespace Inutan
                 }
             }
 
-            if (m_LastCount != renderCount)
+            if (m_LastCount != count)
             {
                 for (int i = 0; i < m_Pages.Count; i++)
                 {
                     m_Pages[i].Clear();
                 }
 
-                for (int i = 0; i < localToWorldMatrixListNativeArray.Length; i++)
+                for (int i = 0; i < count; i++)
                 {
                     int pageIndex = i / InstancedPage.MAXCOUNT;
                     m_Pages[pageIndex].AddInstance(localToWorldMatrixListNativeArray[i]);
                 }
 
-                m_LastCount = renderCount;
+                m_LastCount = count;
             }
 
             for (int i = 0; i < m_Pages.Count; i++)
@@ -53,16 +55,6 @@ namespace Inutan
         {
             base.Release();
             m_Pages.Clear();
-        }
-
-        public override Material GetDrawMaterial(Material material)
-        {
-            if (material.enableInstancing)
-                return material;
-
-            var instancedMaterial = Material.Instantiate(material);
-            instancedMaterial.enableInstancing = true;
-            return instancedMaterial;
         }
     }
 
