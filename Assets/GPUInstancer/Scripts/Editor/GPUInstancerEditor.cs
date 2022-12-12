@@ -12,7 +12,7 @@ namespace GPUInstancer
         public static readonly float PROTOTYPE_RECT_SIZE = 80;
         public static readonly float PROTOTYPE_RECT_PADDING = 5;
         public static readonly Vector2 PROTOTYPE_RECT_PADDING_VECTOR = new Vector2(PROTOTYPE_RECT_PADDING, PROTOTYPE_RECT_PADDING);
-        public static readonly Vector2 PROTOTYPE_RECT_SIZE_VECTOR = new Vector2(PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2, PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2);
+        // public static readonly Vector2 PROTOTYPE_RECT_SIZE_VECTOR = new Vector2(PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2, PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2);
 
         public static readonly float PROTOTYPE_TEXT_RECT_SIZE_X = 200;
         public static readonly float PROTOTYPE_TEXT_RECT_SIZE_Y = 30;
@@ -28,24 +28,24 @@ namespace GPUInstancer
         protected bool showRegisteredPrefabsBox = true;
         protected bool showPrototypesBox = true;
 
-        protected Texture2D helpIcon;
-        protected Texture2D helpIconActive;
-        protected Texture2D previewBoxIcon;
+        // protected Texture2D helpIcon;
+        // protected Texture2D helpIconActive;
+        // protected Texture2D previewBoxIcon;
 
         protected GUIContent[] prototypeContents = null;
 
         protected List<GPUInstancerPrototype> prototypeList;
         protected Dictionary<GPUInstancerPrototype, bool> prototypeSelection;
 
-        protected bool useCustomPreviewBackgroundColor = false;
-        protected Color previewBackgroundColor;
+        // protected bool useCustomPreviewBackgroundColor = false;
+        // protected Color previewBackgroundColor;
 
-        protected bool isTextMode = false;
+        // protected bool isTextMode = true;
 
         private GameObject _redirectObject;
 
         // Previews
-        private GPUInstancerPreviewDrawer _previewDrawer;
+        // private GPUInstancerPreviewDrawer _previewDrawer;
 
         protected virtual void OnEnable()
         {
@@ -53,22 +53,21 @@ namespace GPUInstancer
 
             prototypeContents = null;
 
-            helpIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON);
-            helpIconActive = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON_ACTIVE);
-            previewBoxIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.PREVIEW_BOX_ICON);
+            // helpIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON);
+            // helpIconActive = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.HELP_ICON_ACTIVE);
+            // previewBoxIcon = Resources.Load<Texture2D>(GPUInstancerConstants.EDITOR_TEXTURES_PATH + GPUInstancerEditorConstants.PREVIEW_BOX_ICON);
 
 
-            GPUInstancerDefines.previewCache.ClearEmptyPreviews();
+            // GPUInstancerDefines.previewCache.ClearEmptyPreviews();
         }
 
         protected virtual void OnDisable()
         {
-            EditorApplication.update -= GeneratePrototypeContentTextures;
             prototypeContents = null;
 
-            if (_previewDrawer != null)
-                _previewDrawer.Cleanup();
-            _previewDrawer = null;
+            // if (_previewDrawer != null)
+            //     _previewDrawer.Cleanup();
+            // _previewDrawer = null;
         }
 
         public override void OnInspectorGUI()
@@ -99,115 +98,17 @@ namespace GPUInstancer
                 return;
             for (int i = 0; i < prototypeList.Count; i++)
             {
-                prototypeContents[i] = new GUIContent(GPUInstancerDefines.previewCache.GetPreview(prototypeList[i]), prototypeList[i].ToString());
+                prototypeContents[i] = new GUIContent("", prototypeList[i].ToString());
             }
 
-            EditorApplication.update -= GeneratePrototypeContentTextures;
-            EditorApplication.update += GeneratePrototypeContentTextures;
         }
 
-        public void GeneratePrototypeContentTextures()
+
+
+
+        public virtual void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent, bool isSelected, UnityAction handleSelect)
         {
-            if (isTextMode)
-                return;
-
-            if (prototypeContents == null || prototypeContents.Length == 0 || prototypeList == null)
-                return;
-
-            for (int i = 0; i < prototypeContents.Length && i < prototypeList.Count; i++)
-            {
-                if (prototypeContents[i].image == null)
-                {
-                    if (_previewDrawer == null)
-                        _previewDrawer = new GPUInstancerPreviewDrawer(previewBoxIcon);
-
-                    prototypeContents[i].image = GPUInstancerDefines.previewCache.GetPreview(prototypeList[i]);
-
-                    if (prototypeContents[i].image == null)
-                    {
-                        Texture2D texture = GetPreviewTexture(prototypeList[i]);
-                        prototypeContents[i].image = texture;
-                        GPUInstancerDefines.previewCache.AddPreview(prototypeList[i], texture);
-
-                        return;
-                    }
-                }
-            }
-
-            if (_previewDrawer != null)
-                _previewDrawer.Cleanup();
-            _previewDrawer = null;
-            EditorApplication.update -= GeneratePrototypeContentTextures;
-        }
-
-        public Texture2D GetPreviewTexture(GPUInstancerPrototype prototype)
-        {
-            try
-            {
-
-                if (prototype.prefabObject != null)
-                {
-                    if (prototype.prefabObject.GetComponentInChildren<MeshFilter>() == null && prototype.prefabObject.GetComponentInChildren<SkinnedMeshRenderer>() == null)
-                        return null;
-
-                    return _previewDrawer.GetPreviewForGameObject(prototype.prefabObject, new Rect(0, 0, PROTOTYPE_RECT_SIZE - 10, PROTOTYPE_RECT_SIZE - 10),
-                        useCustomPreviewBackgroundColor ? previewBackgroundColor : Color.clear);
-                }
-
-                if (Application.isPlaying && GPUInstancerManager.activeManagerList != null)
-                {
-                    for (int i = 0; i < GPUInstancerManager.activeManagerList.Count; i++)
-                    {
-                        GPUInstancerManager manager = GPUInstancerManager.activeManagerList[i];
-                        if (manager != null && manager.isInitialized)
-                        {
-                            GPUInstancerRuntimeData runtimeData = manager.GetRuntimeData(prototype);
-                            if (runtimeData != null)
-                            {
-                                return _previewDrawer.GetPreviewForGameObject(null, new Rect(0, 0, PROTOTYPE_RECT_SIZE - 10, PROTOTYPE_RECT_SIZE - 10),
-                       useCustomPreviewBackgroundColor ? previewBackgroundColor : Color.clear, runtimeData);
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-            }
-            return null;
-        }
-
-        public virtual void DrawGPUInstancerPrototypeButton(GPUInstancerPrototype prototype, GUIContent prototypeContent, bool isSelected, UnityAction handleSelect, bool isTextMode = false)
-        {
-            if (isTextMode)
-            {
-                DrawGPUInstancerPrototypeButtonTextMode(prototype, prototypeContent, isSelected, handleSelect);
-                return;
-            }
-
-            if (prototypeContent.image == null)
-            {
-                prototypeContent = new GUIContent(prototypeContent.text, prototypeContent.tooltip);
-            }
-
-            Rect prototypeRect = GUILayoutUtility.GetRect(PROTOTYPE_RECT_SIZE, PROTOTYPE_RECT_SIZE, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-
-            Rect iconRect = new Rect(prototypeRect.position + PROTOTYPE_RECT_PADDING_VECTOR, PROTOTYPE_RECT_SIZE_VECTOR);
-
-            GUI.SetNextControlName(prototypeContent.tooltip);
-            Color prototypeColor;
-            if (isSelected)
-                prototypeColor = GPUInstancerEditorConstants.Colors.lightGreen;
-            else
-                prototypeColor = GUI.backgroundColor;
-
-            GPUInstancerEditorConstants.DrawColoredButton(prototypeContent, prototypeColor, GPUInstancerEditorConstants.Styles.label.normal.textColor, FontStyle.Normal, iconRect,
-                    () =>
-                    {
-                        if (handleSelect != null)
-                            handleSelect();
-                    });
+            DrawGPUInstancerPrototypeButtonTextMode(prototype, prototypeContent, isSelected, handleSelect);
         }
 
         public virtual void DrawGPUInstancerPrototypeButtonTextMode(GPUInstancerPrototype prototype, GUIContent prototypeContent, bool isSelected, UnityAction handleSelect)

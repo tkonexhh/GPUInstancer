@@ -11,7 +11,7 @@ namespace GPUInstancer
         protected GPUInstancerPrototype _pickerOverride;
 
 
-        protected SerializedProperty prop_layerMask;
+        // protected SerializedProperty prop_layerMask;
 
         protected int pickerControlID = -1;
         protected bool editorDataChanged = false;
@@ -26,7 +26,7 @@ namespace GPUInstancer
             _manager = (target as GPUInstancerManager);
             FillPrototypeList();
 
-            prop_layerMask = serializedObject.FindProperty("layerMask");
+            // prop_layerMask = serializedObject.FindProperty("layerMask");
 
             showSceneSettingsBox = _manager.showSceneSettingsBox;
             showPrototypeBox = _manager.showPrototypeBox;
@@ -62,13 +62,7 @@ namespace GPUInstancer
 
         public override void OnInspectorGUI()
         {
-
-
-            isTextMode = _manager.isPrototypeTextMode;
-
             base.OnInspectorGUI();
-
-
         }
 
         public override void InspectorGUIEnd()
@@ -91,10 +85,10 @@ namespace GPUInstancer
 
         public virtual void AddPickerObject(UnityEngine.Object pickerObject, GPUInstancerPrototype overridePrototype = null)
         {
-            if (overridePrototype != null && GPUInstancerDefines.previewCache != null)
-            {
-                GPUInstancerDefines.previewCache.RemovePreview(overridePrototype);
-            }
+            // if (overridePrototype != null && GPUInstancerDefines.previewCache != null)
+            // {
+            //     GPUInstancerDefines.previewCache.RemovePreview(overridePrototype);
+            // }
         }
 
         public virtual void OnEditorDataChanged()
@@ -175,8 +169,8 @@ namespace GPUInstancer
                         for (int j = 0; j < runtimeData.renderers.Count; j++)
                         {
                             GPUInstancerRenderer gpuiRenderer = runtimeData.renderers[j];
-                            if (!GPUInstancerUtility.IsInLayer(prop_layerMask.intValue, gpuiRenderer.layer))
-                                continue;
+                            // if (!GPUInstancerUtility.IsInLayer(prop_layerMask.intValue, gpuiRenderer.layer))
+                            //     continue;
                             drawCallCount += gpuiRenderer.materials.Count;
                         }
 
@@ -212,14 +206,14 @@ namespace GPUInstancer
             showPrototypesBox = EditorGUI.Foldout(foldoutRect, showPrototypesBox, GPUInstancerEditorConstants.TEXT_prototypes, true, GPUInstancerEditorConstants.Styles.foldout);
 
 
-            Rect switchRect = GUILayoutUtility.GetRect(80, 20, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-            GPUInstancerEditorConstants.DrawColoredButton(new GUIContent(_manager.isPrototypeTextMode ? "Icon Mode" : "Text Mode"), GPUInstancerEditorConstants.Colors.green, Color.white,
-                FontStyle.Bold, switchRect, () => _manager.isPrototypeTextMode = !_manager.isPrototypeTextMode);
+            // Rect switchRect = GUILayoutUtility.GetRect(80, 20, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
+            // GPUInstancerEditorConstants.DrawColoredButton(new GUIContent(_manager.isPrototypeTextMode ? "Icon Mode" : "Text Mode"), GPUInstancerEditorConstants.Colors.green, Color.white,
+            //     FontStyle.Bold, switchRect, () => _manager.isPrototypeTextMode = !_manager.isPrototypeTextMode);
             EditorGUILayout.EndHorizontal();
 
             if (showPrototypesBox)
             {
-                int prototypeRowCount = Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - 30f) / (_manager.isPrototypeTextMode ? PROTOTYPE_TEXT_RECT_SIZE_X : PROTOTYPE_RECT_SIZE));
+                int prototypeRowCount = Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - 30f) / (PROTOTYPE_TEXT_RECT_SIZE_X));
                 DrawHelpText(GPUInstancerEditorConstants.HELPTEXT_prototypes);
 
                 DrawPrototypeBoxButtons();
@@ -261,8 +255,8 @@ namespace GPUInstancer
                             EditorGUILayout.BeginHorizontal();
                         }
                     }
-                    else
-                        DrawGPUInstancerPrototypeAddButton();
+                    // else
+                    //     DrawGPUInstancerPrototypeAddButton();
                 }
 
                 EditorGUILayout.EndHorizontal();
@@ -314,30 +308,9 @@ namespace GPUInstancer
 
                 UpdatePrototypeSelection();
                 GUI.FocusControl(prototypeContent.tooltip);
-            }, _manager.isPrototypeTextMode);
+            });
         }
 
-        public void DrawGPUInstancerPrototypeAddButton()
-        {
-            Rect prototypeRect = GUILayoutUtility.GetRect(PROTOTYPE_RECT_SIZE, PROTOTYPE_RECT_SIZE, GUILayout.ExpandWidth(false), GUILayout.ExpandHeight(false));
-
-            Rect iconRect = new Rect(prototypeRect.position + PROTOTYPE_RECT_PADDING_VECTOR, PROTOTYPE_RECT_SIZE_VECTOR);
-            iconRect.height -= 22;
-
-            GPUInstancerEditorConstants.DrawColoredButton(GPUInstancerEditorConstants.Contents.add, GPUInstancerEditorConstants.Colors.lightBlue, Color.white, FontStyle.Bold, iconRect,
-                () =>
-                {
-                    _pickerOverride = null;
-                    pickerControlID = EditorGUIUtility.GetControlID(FocusType.Passive) + 100;
-                    ShowObjectPicker();
-                },
-                true, true,
-                (o) =>
-                {
-                    AddPickerObject(o);
-                });
-
-        }
 
         public void DrawGPUInstancerPrototypeAddButtonTextMode()
         {

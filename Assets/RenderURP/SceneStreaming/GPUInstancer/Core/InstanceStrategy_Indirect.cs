@@ -16,6 +16,7 @@ namespace Inutan
         // Buffers Data
         ComputeBuffer m_ArgsBuffer;
         ComputeBuffer m_LocationBuffer;
+        int bufferSize;
 
         public static class ShaderIDs
         {
@@ -59,11 +60,12 @@ namespace Inutan
 
             //Set Visibility Buffer
             int count = localToWorldMatrixListNativeArray.Length;
-            if (m_LocationBuffer == null || m_LocationBuffer.count != count)
+            if (m_LocationBuffer == null || bufferSize != count)
             {
                 if (m_LocationBuffer != null)
                     m_LocationBuffer.Release();
                 m_LocationBuffer = new ComputeBuffer(count, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4, ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
+                bufferSize = count;
 
                 if (localToWorldMatrixListNativeArray.IsCreated)
                 {

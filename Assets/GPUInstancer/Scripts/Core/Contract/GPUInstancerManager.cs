@@ -13,9 +13,6 @@ namespace GPUInstancer
     {
         public List<GPUInstancerPrototype> prototypeList;
 
-        public bool autoSelectCamera = true;
-
-
         [NonSerialized]
         public List<GPUInstancerRuntimeData> runtimeDataList;
         [NonSerialized]
@@ -27,7 +24,7 @@ namespace GPUInstancer
 
 #if UNITY_EDITOR
         public List<GPUInstancerPrototype> selectedPrototypeList;
-        public bool isPrototypeTextMode = false;
+        public bool isPrototypeTextMode = true;
 
         public bool showSceneSettingsBox = true;
         public bool showPrototypeBox = true;

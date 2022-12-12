@@ -10,7 +10,7 @@ namespace GPUInstancer
         private static List<string> _standardUnityShaders = new List<string> { };
         private static List<string> _standardShadersGPUI = new List<string> { };
 
-        static readonly string SHADER_URP_LIT = "Universal Render Pipeline/Lit"; static readonly string GPUI_SHADER_URP_LIT = "GPUInstancer/Universal Render Pipeline/Lit";
+        static readonly string SHADER_URP_LIT = "Universal Render Pipeline/Lit"; static readonly string GPUI_SHADER_URP_LIT = "Hidden/Universal Render Pipeline/Lit GPUInstance";
         static readonly string SHADER_URP_HIDDEN_LIT = "Hidden/Universal Render Pipeline/Lit";
 
         static GPUInstancerShaderBindings()

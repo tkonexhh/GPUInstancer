@@ -9,8 +9,6 @@ namespace Inutan
     public static class GPUInstanceUtility
     {
 
-
-
         public static void DrawMeshInstancedIndirect(List<GPUInstancerRenderer> renderers, Bounds instancingBounds, ComputeBuffer argsBuffer)
         {
             GPUInstancerRenderer rdRenderer;
