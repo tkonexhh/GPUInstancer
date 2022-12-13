@@ -16,11 +16,6 @@ namespace GPUInstancer
 
         [NonSerialized]
         public List<GPUInstanceRenderer> runtimeDataList;
-        [NonSerialized]
-        public Bounds instancingBounds;
-
-        public static List<GPUInstancerManager> activeManagerList;
-
 
 
 #if UNITY_EDITOR
@@ -56,17 +51,12 @@ namespace GPUInstancer
             if (!Application.isPlaying)
                 CheckPrototypeChanges();
 #endif
-            if (Application.isPlaying && activeManagerList == null)
-                activeManagerList = new List<GPUInstancerManager>();
         }
 
         public virtual void OnEnable()
         {
             if (!Application.isPlaying)
                 return;
-
-            if (activeManagerList != null && !activeManagerList.Contains(this))
-                activeManagerList.Add(this);
 
             if (SystemInfo.supportsComputeShaders)
             {
@@ -77,7 +67,6 @@ namespace GPUInstancer
 
         public virtual void LateUpdate()
         {
-            instancingBounds.center = Camera.main.transform.position;
             if (runtimeDataList == null)
                 return;
 
@@ -96,9 +85,6 @@ namespace GPUInstancer
 
         public virtual void OnDisable() // could also be OnDestroy, but OnDestroy seems to be too late to prevent buffer leaks.
         {
-            if (activeManagerList != null)
-                activeManagerList.Remove(this);
-
             ClearInstancingData();
         }
 
@@ -143,7 +129,6 @@ namespace GPUInstancer
         {
             if (forceNew || !isInitialized)
             {
-                instancingBounds = new Bounds(Vector3.zero, Vector3.one * 10000);
 
                 GPUInstancerUtility.ReleaseInstanceBuffers(runtimeDataList);
                 if (runtimeDataList != null)

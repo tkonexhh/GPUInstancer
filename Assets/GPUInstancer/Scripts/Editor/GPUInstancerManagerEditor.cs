@@ -12,7 +12,6 @@ namespace GPUInstancer
         protected GPUInstancerPrototype _pickerOverride;
 
         protected int pickerControlID = -1;
-        protected bool editorDataChanged = false;
 
         protected override void OnEnable()
         {
@@ -75,23 +74,9 @@ namespace GPUInstancer
             base.InspectorGUIEnd();
         }
 
-        public virtual void ShowObjectPicker()
-        {
+        public virtual void ShowObjectPicker() { }
 
-        }
-
-        public virtual void AddPickerObject(UnityEngine.Object pickerObject, GPUInstancerPrototype overridePrototype = null)
-        {
-            // if (overridePrototype != null && GPUInstancerDefines.previewCache != null)
-            // {
-            //     GPUInstancerDefines.previewCache.RemovePreview(overridePrototype);
-            // }
-        }
-
-        public virtual void OnEditorDataChanged()
-        {
-            editorDataChanged = true;
-        }
+        public virtual void AddPickerObject(UnityEngine.Object pickerObject, GPUInstancerPrototype overridePrototype = null) { }
 
 
         public bool HandlePickerObjectSelection()
@@ -108,7 +93,6 @@ namespace GPUInstancer
             }
             return false;
         }
-
 
         public virtual void DrawRegisteredPrefabsBox()
         {
@@ -136,8 +120,6 @@ namespace GPUInstancer
             EditorGUI.EndDisabledGroup();
         }
 
-
-
         public virtual void DrawRegisteredPrefabsBoxList()
         {
             if ((Application.isPlaying || _manager.isInitialized) && _manager.runtimeDataList != null && _manager.runtimeDataList.Count > 0)
@@ -158,8 +140,6 @@ namespace GPUInstancer
                         for (int j = 0; j < runtimeData.renderers.Count; j++)
                         {
                             GPUInstancerRenderer gpuiRenderer = runtimeData.renderers[j];
-                            // if (!GPUInstancerUtility.IsInLayer(prop_layerMask.intValue, gpuiRenderer.layer))
-                            //     continue;
                             drawCallCount += gpuiRenderer.materials.Count;
                         }
 
@@ -172,7 +152,6 @@ namespace GPUInstancer
 
                     totalInsanceCount += runtimeData.instanceCount;
                     totalDrawCallCount += drawCallCount;
-                    // totalShadowDrawCall += shadowDrawCallCount;
                 }
 
                 GUILayout.Label("\nTotal Instance Count: " + String.Format("{0:n0}", totalInsanceCount) +
@@ -223,29 +202,13 @@ namespace GPUInstancer
                     i++;
                 }
 
-                if (i != 0 && i % prototypeRowCount == 0)
-                {
-                    EditorGUILayout.EndHorizontal();
-                    EditorGUILayout.BeginHorizontal();
-                }
                 if (!Application.isPlaying)
                 {
-
                     DrawGPUInstancerPrototypeAddButtonTextMode();
-                    i++;
-                    if (i != 0 && i % prototypeRowCount == 0)
-                    {
-                        EditorGUILayout.EndHorizontal();
-                        EditorGUILayout.BeginHorizontal();
-                    }
-
-
                 }
 
                 EditorGUILayout.EndHorizontal();
 
-                GPUInstancerEditorConstants.DrawCustomLabel("<size=10><i>*Ctrl+Clict to select multiple, Shift+Click to select adjacent items.</i></size>",
-                    GPUInstancerEditorConstants.Styles.richLabel, false);
 
                 DrawGPUInstancerPrototypeBox(_manager.selectedPrototypeList);
             }

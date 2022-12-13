@@ -6,6 +6,5 @@ namespace GPUInstancer
     [Serializable]
     public class GPUInstancerPrefabPrototype : GPUInstancerPrototype
     {
-        public bool meshRenderersDisabled;
     }
 }

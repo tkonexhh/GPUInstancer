@@ -40,8 +40,6 @@ namespace GPUInstancer
             {
                 foreach (GPUInstancerPrefabPrototype p in _registeredPrefabsRuntimeData.Keys)
                 {
-                    if (p.meshRenderersDisabled)
-                        continue;
                     foreach (GPUInstancerPrefab prefabInstance in _registeredPrefabsRuntimeData[p])
                     {
                         if (!prefabInstance)
@@ -139,7 +137,7 @@ namespace GPUInstancer
             foreach (GPUInstancerPrefabPrototype p in prototypeList)
             {
 #if UNITY_EDITOR
-                if (!Application.isPlaying && !p.meshRenderersDisabled)
+                if (!Application.isPlaying)
                     continue;
 #endif
                 InitializeRuntimeDataForPrefabPrototype(p, additionalBufferSize);

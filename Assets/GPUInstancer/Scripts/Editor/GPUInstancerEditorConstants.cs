@@ -10,14 +10,9 @@ namespace GPUInstancer
 
         public static readonly string TEXT_prototypes = "Prototypes";
         public static readonly string TEXT_addTextMode = "Add Prototype";
-
-
         public static readonly string TEXT_registeredPrefabs = "Registered Instances";
-
-
         public static readonly string TEXT_prefabObject = "Prefab Object";
         public static readonly string TEXT_prototypeSO = "Prototype SO";
-        public static readonly string TEXT_prefabInstancingNone = "Instancing has not been initialized";
 
         // Editor HelpText
         public static readonly string HELPTEXT_prototypes = "\"Prototypes\" show the list of objects that will be used in GPU Instancer. To modify a prototype, click on its icon or text. Use the \"Text Mode\" or \"Icon Mode\" button to switch between preview modes.";

@@ -9,11 +9,8 @@ namespace GPUInstancer
 {
     public abstract class GPUInstancerEditor : Editor
     {
-        public static readonly float PROTOTYPE_RECT_SIZE = 80;
         public static readonly float PROTOTYPE_RECT_PADDING = 5;
         public static readonly Vector2 PROTOTYPE_RECT_PADDING_VECTOR = new Vector2(PROTOTYPE_RECT_PADDING, PROTOTYPE_RECT_PADDING);
-        // public static readonly Vector2 PROTOTYPE_RECT_SIZE_VECTOR = new Vector2(PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2, PROTOTYPE_RECT_SIZE - PROTOTYPE_RECT_PADDING * 2);
-
         public static readonly float PROTOTYPE_TEXT_RECT_SIZE_X = 200;
         public static readonly float PROTOTYPE_TEXT_RECT_SIZE_Y = 30;
         public static readonly Vector2 PROTOTYPE_TEXT_RECT_SIZE_VECTOR = new Vector2(PROTOTYPE_TEXT_RECT_SIZE_X - PROTOTYPE_RECT_PADDING * 2, PROTOTYPE_TEXT_RECT_SIZE_Y - PROTOTYPE_RECT_PADDING * 2);
@@ -27,10 +24,6 @@ namespace GPUInstancer
         protected bool showGlobalValuesBox = true;
         protected bool showRegisteredPrefabsBox = true;
         protected bool showPrototypesBox = true;
-
-        // protected Texture2D helpIcon;
-        // protected Texture2D helpIconActive;
-        // protected Texture2D previewBoxIcon;
 
         protected GUIContent[] prototypeContents = null;
 
@@ -131,7 +124,7 @@ namespace GPUInstancer
                 hasChanged |= DrawGPUInstancerPrototypeBeginningInfo(selectedPrototypeList);
 
                 EditorGUI.BeginDisabledGroup(Application.isPlaying);
-                hasChanged |= DrawGPUInstancerPrototypeInfo(selectedPrototypeList);
+                // hasChanged |= DrawGPUInstancerPrototypeInfo(selectedPrototypeList);
                 DrawGPUInstancerPrototypeActions();
                 DrawGPUInstancerPrototypeAdvancedActions();
                 EditorGUI.EndDisabledGroup();
@@ -165,7 +158,6 @@ namespace GPUInstancer
                 return;
             }
 
-
             DrawPrefabField(selectedPrototype);
             EditorGUI.BeginDisabledGroup(true);
             EditorGUILayout.ObjectField(GPUInstancerEditorConstants.TEXT_prototypeSO, selectedPrototype, typeof(GPUInstancerPrototype), false);
@@ -174,8 +166,6 @@ namespace GPUInstancer
             EditorGUI.BeginChangeCheck();
 
             DrawGPUInstancerPrototypeBeginningInfo(selectedPrototype);
-
-
 
             EditorGUI.BeginDisabledGroup(Application.isPlaying);
             DrawGPUInstancerPrototypeInfo(selectedPrototype);
@@ -202,7 +192,6 @@ namespace GPUInstancer
             }
         }
 
-        public abstract bool DrawGPUInstancerPrototypeInfo(List<GPUInstancerPrototype> selectedPrototypeList);
         public abstract void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype);
         public virtual bool DrawGPUInstancerPrototypeBeginningInfo(List<GPUInstancerPrototype> selectedPrototypeList) { return false; }
         public virtual void DrawGPUInstancerPrototypeBeginningInfo(GPUInstancerPrototype selectedPrototype) { }

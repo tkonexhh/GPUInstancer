@@ -172,36 +172,6 @@ namespace GPUInstancer
         }
 
 
-
-
-        public static void SetRenderersEnabled(GPUInstancerPrefabPrototype prefabPrototype, bool enabled)
-        {
-            GameObject prefabContents = GPUInstancerUtility.LoadPrefabContents(prefabPrototype.prefabObject);
-
-            MeshRenderer[] meshRenderers = prefabContents.GetComponentsInChildren<MeshRenderer>(true);
-            if (meshRenderers != null && meshRenderers.Length > 0)
-                for (int mr = 0; mr < meshRenderers.Length; mr++)
-                    meshRenderers[mr].enabled = enabled;
-
-            BillboardRenderer[] billboardRenderers = prefabContents.GetComponentsInChildren<BillboardRenderer>(true);
-            if (billboardRenderers != null && billboardRenderers.Length > 0)
-                for (int mr = 0; mr < billboardRenderers.Length; mr++)
-                    billboardRenderers[mr].enabled = enabled;
-
-            LODGroup lodGroup = prefabContents.GetComponent<LODGroup>();
-            if (lodGroup != null)
-                lodGroup.enabled = enabled;
-
-
-
-
-            GPUInstancerUtility.UnloadPrefabContents(prefabPrototype.prefabObject, prefabContents, true);
-
-            EditorUtility.SetDirty(prefabPrototype.prefabObject);
-            prefabPrototype.meshRenderersDisabled = !enabled;
-            EditorUtility.SetDirty(prefabPrototype);
-        }
-
         public override void DrawRegisteredPrefabsBoxList()
         {
             if (!Application.isPlaying && _prefabManager.registeredPrefabs.Count > 0)
@@ -227,32 +197,7 @@ namespace GPUInstancer
             }
         }
 
-        public override bool DrawGPUInstancerPrototypeInfo(List<GPUInstancerPrototype> selectedPrototypeList)
-        {
-            return DrawGPUInstancerPrototypeInfo(selectedPrototypeList, (string t) => { DrawHelpText(t); });
-        }
 
-        public static bool DrawGPUInstancerPrototypeInfo(List<GPUInstancerPrototype> selectedPrototypeList, UnityAction<string> DrawHelpText)
-        {
-            GPUInstancerPrefabPrototype prototype0 = (GPUInstancerPrefabPrototype)selectedPrototypeList[0];
-            #region Determine Multiple Values
-            bool hasChanged = false;
-
-            bool meshRenderersDisabledMixed = false;
-            bool meshRenderersDisabled = prototype0.meshRenderersDisabled;
-            for (int i = 1; i < selectedPrototypeList.Count; i++)
-            {
-                GPUInstancerPrefabPrototype prototypeI = (GPUInstancerPrefabPrototype)selectedPrototypeList[i];
-
-                if (!meshRenderersDisabledMixed && meshRenderersDisabled != prototypeI.meshRenderersDisabled)
-                    meshRenderersDisabledMixed = true;
-            }
-            #endregion Determine Multiple Values
-
-
-
-            return hasChanged;
-        }
 
         public override void DrawGPUInstancerPrototypeInfo(GPUInstancerPrototype selectedPrototype) { }
         public override void DrawGPUInstancerPrototypeActions() { }
