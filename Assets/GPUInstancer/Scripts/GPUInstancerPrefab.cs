@@ -9,10 +9,6 @@ namespace GPUInstancer
     /// </summary>
     public class GPUInstancerPrefab : MonoBehaviour
     {
-        [HideInInspector]
-        public GPUInstancerPrefabPrototype prefabPrototype;
-
-
 
     }
 }

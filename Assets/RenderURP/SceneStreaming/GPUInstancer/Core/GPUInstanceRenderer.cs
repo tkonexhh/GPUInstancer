@@ -186,7 +186,7 @@ namespace Inutan
 
         #region CreateRenderersFromGameObject
 
-        public bool CreateRenderersFromGameObject(GameObject target)
+        bool CreateRenderersFromGameObject(GameObject target)
         {
             renderers.Clear();
 

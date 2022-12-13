@@ -27,7 +27,7 @@ namespace Inutan
         {
             for (int i = grasseGOs.Count - 1; i >= 0; i--)
             {
-                GameObject.Destroy(grasseGOs[i]);
+                GameObject.DestroyImmediate(grasseGOs[i]);
             }
             grasseGOs.Clear();
 
@@ -54,8 +54,6 @@ namespace Inutan
             m_InstanceRenderer.Init(target);
             m_InstanceRenderer.showRange = showRange;
             m_InstanceRenderer.enableFrustumCulling = enableFrustumCulling;
-            // m_InstanceRenderer.SetMode(mode);
-            // mode = m_InstanceRenderer.Mode;
         }
 
         private void LateUpdate()
@@ -65,22 +63,17 @@ namespace Inutan
 
         private void OnEnable()
         {
-            m_InstanceRenderer?.SetRenderersEnabled(false);
+            m_InstanceRenderer.SetRenderersEnabled(false);
         }
 
         private void OnDisable()
         {
-            m_InstanceRenderer?.SetRenderersEnabled(true);
+            m_InstanceRenderer.SetRenderersEnabled(true);
         }
 
         private void OnDestroy()
         {
-            m_InstanceRenderer?.Release();
-        }
-
-        void OnModeChanged()
-        {
-            // SetMode(mode);
+            m_InstanceRenderer.Release();
         }
 
         void OnEnableFrustumCulling()
