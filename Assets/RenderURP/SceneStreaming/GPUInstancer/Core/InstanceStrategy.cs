@@ -7,6 +7,7 @@ namespace Inutan
 {
     public abstract class InstanceStrategy
     {
+        public abstract void Init(List<GPUInstancerRenderer> renderers);
         public abstract void Render(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray);
         public virtual void Release() { }
     }

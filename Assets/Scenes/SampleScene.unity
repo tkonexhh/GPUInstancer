@@ -436,7 +436,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f899496beba0104d88d852a1eaf13ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mode: 2
   enableFrustumCulling: 0
   showRange: {x: 0, y: 200}
   grasseGOs: []

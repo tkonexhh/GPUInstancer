@@ -13,8 +13,8 @@ namespace Inutan
     //临时使用的植被批量渲染
     public class GrassRenderer : MonoBehaviour
     {
-        [OnValueChanged("OnModeChanged")]
-        public Mode mode;
+        // [OnValueChanged("OnModeChanged")]
+        // public Mode mode;
         [OnValueChanged("OnEnableFrustumCulling")]
         public bool enableFrustumCulling = true;
         [MinMaxSlider(0, 5000)]
@@ -55,13 +55,23 @@ namespace Inutan
             m_InstanceRenderer.Init(target);
             m_InstanceRenderer.showRange = showRange;
             m_InstanceRenderer.enableFrustumCulling = enableFrustumCulling;
-            m_InstanceRenderer.SetMode(mode);
-            mode = m_InstanceRenderer.Mode;
+            // m_InstanceRenderer.SetMode(mode);
+            // mode = m_InstanceRenderer.Mode;
         }
 
         private void LateUpdate()
         {
             m_InstanceRenderer?.Render();
+        }
+
+        private void OnEnable()
+        {
+            m_InstanceRenderer?.SetRenderersEnabled(false);
+        }
+
+        private void OnDisable()
+        {
+            m_InstanceRenderer?.SetRenderersEnabled(true);
         }
 
         private void OnDestroy()
@@ -71,13 +81,7 @@ namespace Inutan
 
         void OnModeChanged()
         {
-            SetMode(mode);
-        }
-
-        public void SetMode(Mode mode)
-        {
-            this.mode = mode;
-            m_InstanceRenderer.SetMode(mode);
+            // SetMode(mode);
         }
 
         void OnEnableFrustumCulling()

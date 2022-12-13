@@ -7,7 +7,7 @@ public class ToggleInstance : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        Screen.SetResolution(1280, 720, Screen.fullScreenMode);
+        // Screen.SetResolution(1280, 720, Screen.fullScreenMode);
         Application.targetFrameRate = 60;
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }

@@ -9,7 +9,7 @@ namespace Inutan
     public enum Mode
     {
         GameObject,
-        Instance,
+        // Instance,
         Indirect,
     }
 
@@ -20,7 +20,6 @@ namespace Inutan
         public bool useJobs = true;//使用Jobs来代替ComputeShader
 
         public List<GPUInstancerRenderer> renderers = new List<GPUInstancerRenderer>();
-        public Mode Mode { get; private set; }
         public GameObject renderTarget { get; private set; }//渲染
         public int instanceCount => m_Locations.Count;
         public Vector2 showRange = new Vector2(0, 5000);//显示范围 x:min y:max
@@ -31,8 +30,8 @@ namespace Inutan
         NativeArray<Matrix4x4> m_LocationNativeArray;//全部的坐标
         NativeArray<Matrix4x4> m_CulledLocationNativeArray;//job剔除后的剩余坐标
 
-        InstanceStrategy m_InstanceStrategy;
-        bool m_ShowGameObject;
+        InstanceStrategy m_InstanceStrategy = new InstanceStrategy_Indirect();
+
 
         public void RegisterInstanceProxy(GameObject gameObject)
         {
@@ -56,7 +55,6 @@ namespace Inutan
 
         public void ClearInstanceProxy()
         {
-            ShowGameObject();
             m_SceneGameObjects.Clear();
             m_Locations.Clear();
         }
@@ -71,34 +69,12 @@ namespace Inutan
 
             this.renderTarget = renderTarget;
             CreateRenderersFromGameObject(renderTarget);
-            SetMode(Mode.Indirect);
+
             RecreateNativeArray();
+            SetRenderersEnabled(false);
+            m_InstanceStrategy.Init(renderers);
         }
 
-        public void SetMode(Mode mode)
-        {
-            if (Mode == mode)
-                return;
-
-            Mode = mode;
-            if (Mode == Mode.GameObject)
-            {
-                if (!m_ShowGameObject)
-                    ShowGameObject();
-            }
-            else
-            {
-                if (m_ShowGameObject)
-                    HideGameObject();
-
-                m_InstanceStrategy?.Release();
-
-                if (Mode == Mode.Indirect)
-                    m_InstanceStrategy = new InstanceStrategy_Indirect();
-                else
-                    m_InstanceStrategy = new InstanceStrategy_Instanced();
-            }
-        }
 
         void RecreateNativeArray()
         {
@@ -119,8 +95,6 @@ namespace Inutan
 
         public void Render()
         {
-            if (Mode == Mode.GameObject)
-                return;
 
             if (instanceCount <= 0)
                 return;
@@ -181,32 +155,25 @@ namespace Inutan
 
         public void Release()
         {
+            SetRenderersEnabled(true);
             m_InstanceStrategy?.Release();
 
             if (m_LocationNativeArray.IsCreated)
                 m_LocationNativeArray.Dispose();
 
+
             if (m_CulledLocationNativeArray.IsCreated)
                 m_CulledLocationNativeArray.Dispose();
         }
 
-        void ShowGameObject()
-        {
-            SetRenderersEnabled(true);
-            m_ShowGameObject = true;
-        }
 
-        void HideGameObject()
-        {
-            SetRenderersEnabled(false);
-            m_ShowGameObject = false;
-        }
-
-        void SetRenderersEnabled(bool enable)
+        public void SetRenderersEnabled(bool enable)
         {
             for (int i = 0; i < m_SceneGameObjects.Count; i++)
             {
-                var meshRenderers = m_SceneGameObjects[i].GetComponentsInChildren<MeshRenderer>();
+                if (m_SceneGameObjects[i] == null)
+                    continue;
+                var meshRenderers = m_SceneGameObjects[i].GetComponentsInChildren<MeshRenderer>(true);
                 if (meshRenderers != null && meshRenderers.Length > 0)
                 {
                     for (int mr = 0; mr < meshRenderers.Length; mr++)

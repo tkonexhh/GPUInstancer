@@ -24,10 +24,15 @@ namespace Inutan
             public static readonly int RENDERER_TRANSFORM_OFFSET = Shader.PropertyToID("gpuiTransformOffset");
         }
 
-        void InitBuffer(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
+        public override void Init(List<GPUInstancerRenderer> renderers)
+        {
+            InitArgsBuffer(renderers, true);
+        }
+
+        void InitArgsBuffer(List<GPUInstancerRenderer> renderers, bool forceNew)
         {
             //Set Args Buffer
-            if (m_ArgsBuffer == null)
+            if (forceNew || m_ArgsBuffer == null)
             {
                 int totalSubMeshCount = 0;
                 for (int r = 0; r < renderers.Count; r++)
@@ -57,7 +62,11 @@ namespace Inutan
                     m_ArgsBuffer = new ComputeBuffer(m_Args.Length, sizeof(uint), ComputeBufferType.IndirectArguments);
                 }
             }
+        }
 
+        void InitBuffer(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
+        {
+            InitArgsBuffer(renderers, false);
             //Set Visibility Buffer
             int count = localToWorldMatrixListNativeArray.Length;
             if (m_LocationBuffer == null || bufferSize != count)
@@ -66,25 +75,24 @@ namespace Inutan
                     m_LocationBuffer.Release();
                 m_LocationBuffer = new ComputeBuffer(count, GPUInstancerConstants.STRIDE_SIZE_MATRIX4X4, ComputeBufferType.Structured, ComputeBufferMode.SubUpdates);
                 bufferSize = count;
+            }
 
-                if (localToWorldMatrixListNativeArray.IsCreated)
-                {
-                    m_LocationBuffer.SetData(localToWorldMatrixListNativeArray);
-
-                    for (int r = 0; r < renderers.Count; r++)
-                    {
-                        //TODO 先直接等于当前数量
-                        m_Args[1 + r * 5] = (uint)count;
-                        m_ArgsBuffer.SetData(m_Args);
-                    }
-                }
-
+            if (localToWorldMatrixListNativeArray.IsCreated)
+            {
+                m_LocationBuffer.SetData(localToWorldMatrixListNativeArray);
                 for (int r = 0; r < renderers.Count; r++)
                 {
-                    GPUInstancerRenderer rdRenderer = renderers[r];
-                    rdRenderer.mpb.SetBuffer(ShaderIDs.TRANSFORMATION_MATRIX_BUFFER, m_LocationBuffer);
-                    rdRenderer.mpb.SetMatrix(ShaderIDs.RENDERER_TRANSFORM_OFFSET, rdRenderer.transformOffset);
+                    //TODO 先直接等于当前数量
+                    m_Args[1 + r * 5] = (uint)count;
+                    m_ArgsBuffer.SetData(m_Args);
                 }
+            }
+
+            for (int r = 0; r < renderers.Count; r++)
+            {
+                GPUInstancerRenderer rdRenderer = renderers[r];
+                rdRenderer.mpb.SetBuffer(ShaderIDs.TRANSFORMATION_MATRIX_BUFFER, m_LocationBuffer);
+                rdRenderer.mpb.SetMatrix(ShaderIDs.RENDERER_TRANSFORM_OFFSET, rdRenderer.transformOffset);
             }
         }
 

@@ -12,6 +12,11 @@ namespace Inutan
 
         int m_LastCount = -1;
 
+        public override void Init(List<GPUInstancerRenderer> renderers)
+        {
+
+        }
+
         public override void Render(List<GPUInstancerRenderer> renderers, NativeArray<Matrix4x4> localToWorldMatrixListNativeArray)
         {
             if (renderers == null || localToWorldMatrixListNativeArray == null)

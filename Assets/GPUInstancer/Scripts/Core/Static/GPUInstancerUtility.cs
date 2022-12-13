@@ -24,16 +24,11 @@ namespace GPUInstancer
 
             for (int i = 0; i < runtimeDataList.Count; i++)
             {
-                ReleaseInstanceBuffers(runtimeDataList[i]);
+                if (runtimeDataList[i] != null)
+                {
+                    runtimeDataList[i].Release();
+                }
             }
-        }
-
-        public static void ReleaseInstanceBuffers<T>(T runtimeData) where T : GPUInstanceRenderer
-        {
-            if (runtimeData == null)
-                return;
-
-            runtimeData.Release();
         }
 
 
