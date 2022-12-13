@@ -47,10 +47,11 @@ namespace Inutan
             }
 
             m_InstanceRenderer.ClearInstanceProxy();
-            for (int i = 0; i < grasseGOs.Count; i++)
+            for (int i = grasseGOs.Count - 1; i >= 0; i--)
             {
                 m_InstanceRenderer.RegisterInstanceProxy(grasseGOs[i]);
             }
+
             m_InstanceRenderer.Init(target);
             m_InstanceRenderer.showRange = showRange;
             m_InstanceRenderer.enableFrustumCulling = enableFrustumCulling;
