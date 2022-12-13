@@ -48,7 +48,7 @@ public class UI : MonoBehaviour
             gpuInstancerPrefabManager.gameObject.SetActive(false);
             gpuInstancerPrefabManager.ShowGameObject();
         }
-        modeText.text = Mode.GameObject.ToString();
+        modeText.text = "GameObject";
     }
 
     void OnClickLeft()
@@ -82,7 +82,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager?.gameObject.SetActive(false);
         gpuInstancerPrefabManager.ShowGameObject();
 
-        modeText.text = Mode.GameObject.ToString();
+        modeText.text = "GameObject";
     }
 
     public void ToIndirect()
@@ -90,7 +90,7 @@ public class UI : MonoBehaviour
         gpuInstancerPrefabManager?.gameObject.SetActive(false);
         grassRenderer.gameObject.SetActive(true);
 
-        modeText.text = Mode.Indirect.ToString();
+        modeText.text = "Indirect";
     }
 
     public void ToGPUI()

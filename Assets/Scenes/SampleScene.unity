@@ -436,8 +436,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f899496beba0104d88d852a1eaf13ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enableFrustumCulling: 0
-  showRange: {x: 0, y: 200}
+  enableFrustumCulling: 1
+  showRange: {x: 0, y: 5000}
   grasseGOs: []
 --- !u!1 &1186852669
 GameObject:

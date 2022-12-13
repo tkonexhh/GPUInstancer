@@ -6,12 +6,6 @@ using UnityEngine.Jobs;
 
 namespace Inutan
 {
-    public enum Mode
-    {
-        GameObject,
-        // Instance,
-        Indirect,
-    }
 
     public class GPUInstanceRenderer
     {
@@ -32,6 +26,7 @@ namespace Inutan
 
         InstanceStrategy m_InstanceStrategy = new InstanceStrategy_Indirect();
 
+        static CameraDistanceSort _CameraDistanceSort = new CameraDistanceSort();
 
         public void RegisterInstanceProxy(GameObject gameObject)
         {
@@ -90,7 +85,6 @@ namespace Inutan
             {
                 m_LocationNativeArray[i] = m_Locations[i];
             }
-
         }
 
         public void Render()
@@ -109,7 +103,7 @@ namespace Inutan
                 var camera = Camera.main;
                 cameraData.position = camera.transform.position;
                 cameraData.forward = camera.transform.forward;
-                float fovCos = Mathf.Cos(camera.fieldOfView * camera.aspect * Mathf.Deg2Rad);
+                float fovCos = Mathf.Cos(camera.fieldOfView * 0.5f * camera.aspect * Mathf.Deg2Rad);
                 cameraData.sqrFovCos = fovCos * fovCos - 0.05f;
 
                 var culledLocationNativeQueue = new NativeQueue<Matrix4x4>(Allocator.TempJob);
@@ -143,7 +137,16 @@ namespace Inutan
                 culledLocationNativeQueue.Dispose();
 
                 if (m_CulledLocationNativeArray.Length > 0)
+                {
+                    //排序
+                    //如果是不透明物体  从后往前
+                    //如果是透明物体    从前往后
+                    _CameraDistanceSort.cameraPosition = camera.transform.position;
+                    var sortJob = m_CulledLocationNativeArray.SortJob(_CameraDistanceSort);
+                    JobHandle sortJobHandle = sortJob.Schedule();
+                    sortJobHandle.Complete();
                     m_InstanceStrategy.Render(renderers, m_CulledLocationNativeArray);
+                }
 
             }
             else
@@ -160,7 +163,6 @@ namespace Inutan
 
             if (m_LocationNativeArray.IsCreated)
                 m_LocationNativeArray.Dispose();
-
 
             if (m_CulledLocationNativeArray.IsCreated)
                 m_CulledLocationNativeArray.Dispose();
