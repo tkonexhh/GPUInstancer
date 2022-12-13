@@ -44,15 +44,6 @@ namespace GPUInstancer
 
         #region MonoBehaviour Methods
 
-        public virtual void Awake()
-        {
-
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-                CheckPrototypeChanges();
-#endif
-        }
-
         public virtual void OnEnable()
         {
             if (!Application.isPlaying)
@@ -74,13 +65,6 @@ namespace GPUInstancer
             {
                 runtimeData.Render();
             }
-        }
-
-        public virtual void Reset()
-        {
-#if UNITY_EDITOR
-            CheckPrototypeChanges();
-#endif
         }
 
         public virtual void OnDisable() // could also be OnDestroy, but OnDestroy seems to be too late to prevent buffer leaks.
@@ -111,20 +95,8 @@ namespace GPUInstancer
                 prototypeList = new List<GPUInstancerPrototype>();
             else
                 prototypeList.RemoveAll(p => p == null);
-
         }
 
-#if UNITY_EDITOR
-        public virtual void CheckPrototypeChanges()
-        {
-
-            if (prototypeList == null)
-                GeneratePrototypes();
-            else
-                prototypeList.RemoveAll(p => p == null);
-
-        }
-#endif
         public virtual void InitializeRuntimeDataAndBuffers(bool forceNew = true)
         {
             if (forceNew || !isInitialized)
@@ -148,17 +120,6 @@ namespace GPUInstancer
 
 
         #endregion Virtual Methods
-
-        #region Public Methods
-
-        public GPUInstanceRenderer GetRuntimeData(GPUInstancerPrototype prototype, bool logError = false)
-        {
-            GPUInstanceRenderer runtimeData = null;
-            if (runtimeDataDictionary != null && !runtimeDataDictionary.TryGetValue(prototype, out runtimeData) && logError)
-                Debug.LogError("Can not find runtime data for prototype: " + prototype + ". Please check if the prototype was added to the Manager and the initialize method was called.");
-            return runtimeData;
-        }
-        #endregion Public Methods
     }
 
 }

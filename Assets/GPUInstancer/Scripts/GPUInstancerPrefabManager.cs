@@ -20,17 +20,8 @@ namespace GPUInstancer
         [SerializeField]
         public List<GameObject> prefabList = new List<GameObject>();
         public bool enableMROnManagerDisable = true;
-        protected Dictionary<GPUInstancerPrototype, List<GPUInstancerPrefab>> _registeredPrefabsRuntimeData;
+        protected Dictionary<GPUInstancerPrototype, List<GPUInstancerPrefab>> _registeredPrefabsRuntimeData = new Dictionary<GPUInstancerPrototype, List<GPUInstancerPrefab>>();
 
-        #region MonoBehavior Methods
-
-        public override void Reset()
-        {
-            base.Reset();
-            RegisterPrefabsInScene();
-        }
-
-        #endregion MonoBehavior Methods
 
         public override void ClearInstancingData()
         {
@@ -44,10 +35,8 @@ namespace GPUInstancer
                     {
                         if (!prefabInstance)
                             continue;
-#if UNITY_EDITOR 
-                        if (playModeState != PlayModeStateChange.EnteredEditMode && playModeState != PlayModeStateChange.ExitingPlayMode)
-#endif
-                            SetRenderersEnabled(prefabInstance, true);
+
+                        SetRenderersEnabled(prefabInstance, true);
                     }
                 }
             }
@@ -60,39 +49,12 @@ namespace GPUInstancer
             GPUInstancerUtility.SetPrefabInstancePrototypes(gameObject, prototypeList, prefabList, forceNew);
         }
 
-#if UNITY_EDITOR
-        public override void CheckPrototypeChanges()
-        {
-            base.CheckPrototypeChanges();
-
-            if (prefabList == null)
-                prefabList = new List<GameObject>();
-
-            prefabList.RemoveAll(p => p == null);
-            prefabList.RemoveAll(p => p.GetComponent<GPUInstancerPrefab>() == null);
-            prototypeList.RemoveAll(p => p == null);
-            prototypeList.RemoveAll(p => !prefabList.Contains(p.prefabObject));
-
-            if (prefabList.Count != prototypeList.Count)
-                GeneratePrototypes();
-
-            registeredPrefabs.RemoveAll(rpd => !prototypeList.Contains(rpd.prefabPrototype));
-            foreach (GPUInstancerPrefabPrototype prototype in prototypeList)
-            {
-                if (!registeredPrefabs.Exists(rpd => rpd.prefabPrototype == prototype))
-                    registeredPrefabs.Add(new RegisteredPrefabsData(prototype));
-            }
-        }
-#endif
         public override void InitializeRuntimeDataAndBuffers(bool forceNew = true)
         {
             base.InitializeRuntimeDataAndBuffers(forceNew);
 
             if (!forceNew && isInitialized)
                 return;
-
-            if (_registeredPrefabsRuntimeData == null)
-                _registeredPrefabsRuntimeData = new Dictionary<GPUInstancerPrototype, List<GPUInstancerPrefab>>();
 
 #if UNITY_EDITOR
             if (Application.isPlaying)
@@ -123,7 +85,7 @@ namespace GPUInstancer
 #endif
 
             InitializeRuntimeDataRegisteredPrefabs();
-            // GPUInstancerUtility.InitializeGPUBuffers(runtimeDataList);
+
             isInitialized = true;
         }
 
@@ -146,7 +108,9 @@ namespace GPUInstancer
 
         public virtual GPUInstanceRenderer InitializeRuntimeDataForPrefabPrototype(GPUInstancerPrefabPrototype p, int additionalBufferSize = 0)
         {
-            GPUInstanceRenderer runtimeData = GetRuntimeData(p);
+            GPUInstanceRenderer runtimeData = null;
+            runtimeDataDictionary.TryGetValue(p, out runtimeData);
+
             if (runtimeData == null)
             {
                 runtimeData = new GPUInstanceRenderer();
@@ -157,7 +121,7 @@ namespace GPUInstancer
                 runtimeDataDictionary.Add(p, runtimeData);
 
             }
-            // int instanceCount = 0;
+
             List<GPUInstancerPrefab> registeredPrefabsList = null;
 
             if (_registeredPrefabsRuntimeData.TryGetValue(p, out registeredPrefabsList))
