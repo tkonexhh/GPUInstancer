@@ -13,8 +13,7 @@ namespace Inutan
     //临时使用的植被批量渲染
     public class GrassRenderer : MonoBehaviour
     {
-        // [OnValueChanged("OnModeChanged")]
-        // public Mode mode;
+
         [OnValueChanged("OnEnableFrustumCulling")]
         public bool enableFrustumCulling = true;
         [MinMaxSlider(0, 5000)]
