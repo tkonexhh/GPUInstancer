@@ -16,7 +16,7 @@ public class UI : MonoBehaviour
     public Toggle cullingToggle;
 
     public GrassRenderer grassRenderer;
-    public GPUInstancerPrefabManager gpuInstancerPrefabManager;
+    public GPUInstancerManager gpuInstancerPrefabManager;
 
     public GameObject[] targets;
     public int index = 0;

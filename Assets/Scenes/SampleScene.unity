@@ -448,7 +448,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1186852671}
-  - component: {fileID: 1186852670}
+  - component: {fileID: 1186852672}
   m_Layer: 0
   m_Name: GPUI Prefab Manager
   m_TagString: Untagged
@@ -456,56 +456,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1186852670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1186852669}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a61b0404ba3e80438650c720ee964b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  prototypeList:
-  - {fileID: 11400000, guid: 1657ee8b8d1d99f45962c69b5b5776e1, type: 2}
-  - {fileID: 11400000, guid: 2492c29b22c4e0b409a92289c033fa0a, type: 2}
-  - {fileID: 11400000, guid: 4fa535a419f04344991d5e63f71a2c58, type: 2}
-  - {fileID: 11400000, guid: 71b19758591510341a9b895df8152508, type: 2}
-  - {fileID: 11400000, guid: aaef6376fdf99484381b65bcce694ac2, type: 2}
-  - {fileID: 11400000, guid: f11fc4d35363c914e925a196a0cec13b, type: 2}
-  selectedPrototypeList:
-  - {fileID: 11400000, guid: 4fa535a419f04344991d5e63f71a2c58, type: 2}
-  showSceneSettingsBox: 1
-  showPrototypeBox: 1
-  showAdvancedBox: 0
-  showHelpText: 0
-  showDebugBox: 1
-  showGlobalValuesBox: 1
-  showRegisteredPrefabsBox: 1
-  showPrototypesBox: 1
-  registeredPrefabs:
-  - prefabPrototype: {fileID: 11400000, guid: 1657ee8b8d1d99f45962c69b5b5776e1, type: 2}
-    registeredPrefabs: []
-  - prefabPrototype: {fileID: 11400000, guid: 2492c29b22c4e0b409a92289c033fa0a, type: 2}
-    registeredPrefabs: []
-  - prefabPrototype: {fileID: 11400000, guid: 4fa535a419f04344991d5e63f71a2c58, type: 2}
-    registeredPrefabs: []
-  - prefabPrototype: {fileID: 11400000, guid: 71b19758591510341a9b895df8152508, type: 2}
-    registeredPrefabs: []
-  - prefabPrototype: {fileID: 11400000, guid: aaef6376fdf99484381b65bcce694ac2, type: 2}
-    registeredPrefabs: []
-  - prefabPrototype: {fileID: 11400000, guid: f11fc4d35363c914e925a196a0cec13b, type: 2}
-    registeredPrefabs: []
-  prefabList:
-  - {fileID: 6083227744913280396, guid: cd97443dd986d32488c625affa9549e7, type: 3}
-  - {fileID: 373435713304927872, guid: 5ad9ccda7633284488d8955ea0e5890b, type: 3}
-  - {fileID: 373435713304927872, guid: cf95a032beaa8cd4d806835780b8b6ef, type: 3}
-  - {fileID: 373435713304927872, guid: 4161417a59115df40861fa30b678c309, type: 3}
-  - {fileID: 373435713304927872, guid: fc952c3f64e391041b3b33fae560a96c, type: 3}
-  - {fileID: 4315140019902799101, guid: 6f80bfc67265dde47ab9ebd56870cf1f, type: 3}
-  enableMROnManagerDisable: 1
 --- !u!4 &1186852671
 Transform:
   m_ObjectHideFlags: 0
@@ -521,6 +471,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1186852672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186852669}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 741c8bb8e6418ca4d88c08107ff0ea2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1687258581
 GameObject:
   m_ObjectHideFlags: 0
@@ -843,7 +805,7 @@ PrefabInstance:
     - target: {fileID: 1774647124, guid: cced3149aa3f2f04494e0b572135ae88, type: 3}
       propertyPath: gpuInstancerPrefabManager
       value: 
-      objectReference: {fileID: 1186852670}
+      objectReference: {fileID: 1186852672}
     - target: {fileID: 8005959598794517176, guid: cced3149aa3f2f04494e0b572135ae88, type: 3}
       propertyPath: m_Name
       value: Canvas

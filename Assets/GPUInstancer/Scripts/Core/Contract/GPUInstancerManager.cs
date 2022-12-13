@@ -10,7 +10,7 @@ using UnityEditor;
 
 namespace GPUInstancer
 {
-    public abstract class GPUInstancerManager : MonoBehaviour
+    public class GPUInstancerManager : MonoBehaviour
     {
         public GPUInstanceRenderer m_InstanceRenderer = new GPUInstanceRenderer();
         protected List<GPUInstancerPrefab> _registeredPrefabsRuntimeData = new List<GPUInstancerPrefab>();
